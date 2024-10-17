@@ -1,7 +1,8 @@
 import styled from 'styled-components'
 
-export const StyledPieceSelector = styled.div`
+export const StyledPieceSelector = styled.button`
     border-radius: 1rem;
+    border: none;
     background-color: #c0c0e0;
     padding: 0.5rem;
 

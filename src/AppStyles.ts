@@ -27,28 +27,3 @@ export const PieceChooser = styled.div`
     background-color: #e0e0e0;
     border-radius: 1rem;
 `
-
-export const ColorContainer = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    width: 25%;
-    position: relative;
-`
-
-const ColorIndicator = css`
-    position: absolute;
-    bottom: -1rem;
-    height: 4px;
-    width: 100%;
-`
-
-export const BlueColorIndicator = styled.div`
-    ${ColorIndicator}
-    background-color: #0000ff;
-`
-
-export const YellowColorIndicator = styled.div`
-    ${ColorIndicator}
-    background-color: #fff000;
-`
