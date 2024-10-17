@@ -21,7 +21,14 @@ export default function PieceSelectors({ color, game, forceRefreshApp }: PieceSe
                         key={index}
                         pieceIconSrc={piece.type === 'robot' ? RobotIcon : PamiIcon}
                         onClick={() => {
-                            game.appendPiece({ color, type: piece.type })
+                            game.appendPiece({
+                                color,
+                                type: piece.type,
+                                x: 0,
+                                y: 0,
+                                orientation: 0,
+                            })
+
                             forceRefreshApp()
                         }}
                     />

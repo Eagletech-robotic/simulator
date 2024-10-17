@@ -1,11 +1,17 @@
-export const pieces: Piece[] = [
+export const pieces: PieceType[] = [
     { color: 'blue', type: 'robot' },
     { color: 'blue', type: 'pami' },
     { color: 'yellow', type: 'robot' },
     { color: 'yellow', type: 'pami' },
 ]
 
-export type Piece = {
-    color: 'blue' | 'yellow'
+interface PieceType {
     type: 'robot' | 'pami'
+    color: 'blue' | 'yellow'
+}
+
+export interface Piece extends PieceType {
+    x: number
+    y: number
+    orientation: number
 }

@@ -1,4 +1,9 @@
-import styled, { createGlobalStyle, css } from 'styled-components'
+import { createGlobalStyle, css } from 'styled-components'
+
+export const colors = {
+    blue: '#2196f3',
+    yellow: '#ffeb3b',
+}
 
 const styles = css`
     body {

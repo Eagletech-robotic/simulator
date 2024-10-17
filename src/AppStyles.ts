@@ -1,10 +1,11 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
 export const Page = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-column-gap: 1rem;
     height: 100vh;
+    overflow: hidden;
 `
 
 export const GameBoard = styled.div`
@@ -13,8 +14,9 @@ export const GameBoard = styled.div`
 `
 
 export const Controls = styled.div`
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 6rem 1fr;
+    overflow: hidden;
     background-color: #f0f0f0;
     margin: 2rem;
     border-radius: 1rem;

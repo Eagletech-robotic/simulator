@@ -1,3 +1,4 @@
+import { colors } from 'src/styles/commonStyles'
 import styled, { css } from 'styled-components'
 
 export const ColorContainer = styled.div`
@@ -8,10 +9,10 @@ export const ColorContainer = styled.div`
     position: relative;
 `
 
-export const ColorIndicator = styled.div<{color: 'blue' | 'yellow'}>`
+export const ColorIndicator = styled.div<{ color: 'blue' | 'yellow' }>`
     position: absolute;
     bottom: -1rem;
     height: 4px;
     width: 100%;
-    background-color: ${(props) => (props.color === 'blue' ? '#0000ff' : '#fff000')};
+    background-color: ${(props) => (props.color === 'blue' ? colors.blue : colors.yellow)};
 `

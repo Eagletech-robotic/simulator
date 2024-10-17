@@ -3,7 +3,7 @@ import { Controls, GameBoard, Page, PieceChooser } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
 import { Game } from './models/Game'
 import PieceSelectors from './components/PieceSelectors'
-import PiecesEditor from './components/PiecesEditor'
+import Editor from './components/Editor'
 
 export default function App() {
     const [game] = useState(new Game())
@@ -23,7 +23,7 @@ export default function App() {
                         <PieceSelectors color="yellow" {...{ game, forceRefreshApp }} />
                     </PieceChooser>
 
-                    <PiecesEditor game={game} />
+                    <Editor game={game} />
                 </Controls>
             </Page>
         </>
