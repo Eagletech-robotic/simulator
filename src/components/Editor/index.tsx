@@ -1,9 +1,9 @@
 import { Game } from 'src/models/Game'
-import { EditPiece, Input, PieceAttribute, PieceType, StyledEditor } from './styles'
-import { Piece } from 'src/models/piece'
+import { EditRobot, Input, RobotAttribute, RobotType, StyledEditor } from './styles'
 import React from 'react'
+import { Robot } from 'src/models/robot'
 
-type PieceAttribute = 'x' | 'y' | 'orientation'
+type RobotAttribute = 'x' | 'y' | 'orientation'
 
 interface EditorProps {
     game: Game
@@ -12,45 +12,45 @@ interface EditorProps {
 const Editor = React.forwardRef<HTMLDivElement, EditorProps>(({ game }, ref) => {
     return (
         <StyledEditor ref={ref}>
-            {game.getPieces().map((piece, index) => (
-                <EditPiece key={index} color={piece.color}>
-                    <PieceType>{pieceName(piece.type)}</PieceType>
-                    <PieceAttribute>
+            {game.getRobots().map((robot, index) => (
+                <EditRobot key={index} color={robot.color}>
+                    <RobotType>{robotName(robot.type)}</RobotType>
+                    <RobotAttribute>
                         x =
-                        <PieceInput {...{ index, piece, attribute: 'x', game }} />
-                    </PieceAttribute>
-                    <PieceAttribute>
+                        <RobotInput {...{ index, robot, attribute: 'x', game }} />
+                    </RobotAttribute>
+                    <RobotAttribute>
                         y =
-                        <PieceInput {...{ index, piece, attribute: 'y', game }} />
-                    </PieceAttribute>
-                    <PieceAttribute>
+                        <RobotInput {...{ index, robot, attribute: 'y', game }} />
+                    </RobotAttribute>
+                    <RobotAttribute>
                         orientation =
-                        <PieceInput {...{ index, piece, attribute: 'orientation', game }} />
-                    </PieceAttribute>
-                </EditPiece>
+                        <RobotInput {...{ index, robot, attribute: 'orientation', game }} />
+                    </RobotAttribute>
+                </EditRobot>
             ))}
         </StyledEditor>
     )
 })
 
-const pieceName = (type: Piece['type']) => {
+const robotName = (type: Robot['type']) => {
     switch (type) {
-        case 'robot':
-            return 'Robot'
+        case 'main':
+            return 'Main Robot'
         case 'pami':
             return 'Pami'
     }
 }
 
-function PieceInput({
+function RobotInput({
     index,
-    piece,
+    robot,
     attribute,
     game,
 }: {
     index: number
-    piece: Piece
-    attribute: PieceAttribute
+    robot: Robot
+    attribute: RobotAttribute
     game: Game
 }): JSX.Element {
     return (
@@ -58,8 +58,8 @@ function PieceInput({
             type="number"
             placeholder="0"
             onChange={(e) => {
-                piece[attribute] = parseInt(e.target.value)
-                game.updatePiece(index, piece)
+                robot[attribute] = parseInt(e.target.value)
+                game.updateRobot(index, robot)
             }}
         />
     )

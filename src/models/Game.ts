@@ -1,10 +1,10 @@
-import { Piece } from './piece'
+import { Robot } from './robot'
 
 export class Game {
-    private pieces: Array<Piece>
+    private robots: Array<Robot>
 
     constructor() {
-        this.pieces = []
+        this.robots = []
         this.draw()
     }
 
@@ -12,17 +12,20 @@ export class Game {
         console.log('Drawing game')
     }
 
-    appendPiece(piece: Piece) {
-        this.pieces.push(piece)
+    appendRobot(robot: Robot) {
+        this.robots.push(robot)
+        this.robots.sort((a, b) => a.y - b.y)
         this.draw()
     }
 
-    updatePiece(index: number, piece: Piece) {
-        this.pieces[index] = piece
+    updateRobot(index: number, robot: Robot) {
+        this.robots[index] = robot
+        this.robots.sort((a, b) => a.y - b.y)
         this.draw()
     }
 
-    getPieces() {
-        return this.pieces
+    getRobots() {
+        console.log(this.robots)
+        return this.robots
     }
 }

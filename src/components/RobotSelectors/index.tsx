@@ -1,9 +1,9 @@
-import { pieces } from 'src/models/piece'
-import PieceSelector from '../PieceSelector'
+import PieceSelector from '../RobotSelector'
 import { ColorContainer, ColorIndicator } from './styles'
 import { Game } from 'src/models/Game'
-import RobotIcon from 'src/assets/robot-icon.svg'
+import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
+import { robots } from 'src/models/robot'
 
 interface PieceSelectorsProps {
     color: 'blue' | 'yellow'
@@ -20,16 +20,16 @@ export default function PieceSelectors({
 }: PieceSelectorsProps) {
     return (
         <ColorContainer>
-            {pieces
-                .filter((piece) => piece.color === color)
-                .map((piece, index) => (
+            {robots
+                .filter((robot) => robot.color === color)
+                .map((robot, index) => (
                     <PieceSelector
                         key={index}
-                        pieceIconSrc={piece.type === 'robot' ? RobotIcon : PamiIcon}
+                        pieceIconSrc={robot.type === 'main' ? MainRobotIcon : PamiIcon}
                         onClick={() => {
-                            game.appendPiece({
+                            game.appendRobot({
                                 color,
-                                type: piece.type,
+                                type: robot.type,
                                 x: 0,
                                 y: 0,
                                 orientation: 0,

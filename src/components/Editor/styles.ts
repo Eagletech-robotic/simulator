@@ -8,7 +8,7 @@ export const StyledEditor = styled.div`
     overflow: auto;
 `
 
-export const EditPiece = styled.div<{ color: 'blue' | 'yellow' }>`
+export const EditRobot = styled.div<{ color: 'blue' | 'yellow' }>`
     background-color: #e0e0e0;
     border-radius: 5px;
     margin: 10px;
@@ -16,12 +16,12 @@ export const EditPiece = styled.div<{ color: 'blue' | 'yellow' }>`
     border-left: 5px solid ${(props) => (props.color === 'blue' ? colors.blue : colors.yellow)};
 `
 
-export const PieceType = styled.div`
+export const RobotType = styled.div`
     font-size: 1rem;
     font-weight: bold;
 `
 
-export const PieceAttribute = styled.div`
+export const RobotAttribute = styled.div`
     font-size: 0.8rem;
     margin-top: 5px;
 `

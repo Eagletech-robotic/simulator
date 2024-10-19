@@ -22,7 +22,7 @@ export const Controls = styled.div`
     border-radius: 1rem;
 `
 
-export const PieceChooser = styled.div`
+export const RobotChooser = styled.div`
     display: flex;
     justify-content: space-evenly;
     padding: 1rem;
