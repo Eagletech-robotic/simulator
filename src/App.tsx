@@ -24,7 +24,7 @@ export default function App() {
                         <RobotSelectors color="yellow" {...{ game, editorRef, forceRefreshApp }} />
                     </RobotChooser>
 
-                    <Editor game={game} ref={editorRef} />
+                    <Editor {...{ game, forceRefreshApp }} ref={editorRef} />
                 </Controls>
             </Page>
         </>

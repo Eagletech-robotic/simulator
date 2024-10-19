@@ -9,11 +9,12 @@ export const StyledEditor = styled.div`
 `
 
 export const EditRobot = styled.div<{ color: 'blue' | 'yellow' }>`
-    background-color: #e0e0e0;
-    border-radius: 5px;
+    background-color: ${colors.darkGrey};
     margin: 10px;
     padding: 1rem;
+    position: relative;
     border-left: 5px solid ${(props) => (props.color === 'blue' ? colors.blue : colors.yellow)};
+    border-radius: 8px;
 `
 
 export const RobotType = styled.div`

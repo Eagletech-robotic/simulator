@@ -2,14 +2,16 @@ import { Game } from 'src/models/Game'
 import { EditRobot, Input, RobotAttribute, RobotType, StyledEditor } from './styles'
 import React from 'react'
 import { Robot } from 'src/models/Robot'
+import DeleteButton from '../DeleteButton'
 
 type RobotAttributeType = 'x' | 'y' | 'orientation'
 
 interface EditorProps {
     game: Game
+    forceRefreshApp: () => void
 }
 
-const Editor = React.forwardRef<HTMLDivElement, EditorProps>(({ game }, ref) => {
+const Editor = React.forwardRef<HTMLDivElement, EditorProps>(({ game, forceRefreshApp }, ref) => {
     return (
         <StyledEditor ref={ref}>
             {game.getRobots().map((robot) => (
@@ -27,6 +29,13 @@ const Editor = React.forwardRef<HTMLDivElement, EditorProps>(({ game }, ref) => 
                         orientation =
                         <RobotInput {...{ robot, attribute: 'orientation', game }} />
                     </RobotAttribute>
+
+                    <DeleteButton
+                        doDeletion={() => {
+                            game.deleteRobot(robot.id)
+                            setTimeout(() => forceRefreshApp(), 0)
+                        }}
+                    />
                 </EditRobot>
             ))}
         </StyledEditor>
@@ -42,9 +51,10 @@ const robotName = (type: Robot['type']) => {
     }
 }
 
-interface RobotInputProps extends EditorProps {
+interface RobotInputProps {
     robot: Robot
     attribute: RobotAttributeType
+    game: Game
 }
 
 function RobotInput({ robot, attribute, game }: RobotInputProps): JSX.Element {
