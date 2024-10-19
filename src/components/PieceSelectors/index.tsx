@@ -8,10 +8,16 @@ import PamiIcon from 'src/assets/pami-icon.svg'
 interface PieceSelectorsProps {
     color: 'blue' | 'yellow'
     game: Game
+    editorRef: React.RefObject<HTMLDivElement>
     forceRefreshApp: () => void
 }
 
-export default function PieceSelectors({ color, game, forceRefreshApp }: PieceSelectorsProps) {
+export default function PieceSelectors({
+    color,
+    game,
+    editorRef,
+    forceRefreshApp,
+}: PieceSelectorsProps) {
     return (
         <ColorContainer>
             {pieces
@@ -30,6 +36,13 @@ export default function PieceSelectors({ color, game, forceRefreshApp }: PieceSe
                             })
 
                             forceRefreshApp()
+
+                            setTimeout(() => {
+                                editorRef.current?.scrollTo({
+                                    top: editorRef.current.scrollHeight,
+                                    behavior: 'smooth',
+                                })
+                            }, 0)
                         }}
                     />
                 ))}
