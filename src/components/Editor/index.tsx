@@ -1,9 +1,9 @@
 import { Game } from 'src/models/Game'
 import { EditRobot, Input, RobotAttribute, RobotType, StyledEditor } from './styles'
 import React from 'react'
-import { Robot } from 'src/models/robot'
+import { Robot } from 'src/models/Robot'
 
-type RobotAttribute = 'x' | 'y' | 'orientation'
+type RobotAttributeType = 'x' | 'y' | 'orientation'
 
 interface EditorProps {
     game: Game
@@ -12,20 +12,20 @@ interface EditorProps {
 const Editor = React.forwardRef<HTMLDivElement, EditorProps>(({ game }, ref) => {
     return (
         <StyledEditor ref={ref}>
-            {game.getRobots().map((robot, index) => (
-                <EditRobot key={index} color={robot.color}>
+            {game.getRobots().map((robot) => (
+                <EditRobot key={robot.id} color={robot.color}>
                     <RobotType>{robotName(robot.type)}</RobotType>
                     <RobotAttribute>
                         x =
-                        <RobotInput {...{ index, robot, attribute: 'x', game }} />
+                        <RobotInput {...{ robot, attribute: 'x', game }} />
                     </RobotAttribute>
                     <RobotAttribute>
                         y =
-                        <RobotInput {...{ index, robot, attribute: 'y', game }} />
+                        <RobotInput {...{ robot, attribute: 'y', game }} />
                     </RobotAttribute>
                     <RobotAttribute>
                         orientation =
-                        <RobotInput {...{ index, robot, attribute: 'orientation', game }} />
+                        <RobotInput {...{ robot, attribute: 'orientation', game }} />
                     </RobotAttribute>
                 </EditRobot>
             ))}
@@ -42,24 +42,19 @@ const robotName = (type: Robot['type']) => {
     }
 }
 
-function RobotInput({
-    index,
-    robot,
-    attribute,
-    game,
-}: {
-    index: number
+interface RobotInputProps extends EditorProps {
     robot: Robot
-    attribute: RobotAttribute
-    game: Game
-}): JSX.Element {
+    attribute: RobotAttributeType
+}
+
+function RobotInput({ robot, attribute, game }: RobotInputProps): JSX.Element {
     return (
         <Input
             type="number"
             placeholder="0"
             onChange={(e) => {
                 robot[attribute] = parseInt(e.target.value)
-                game.updateRobot(index, robot)
+                game.updateRobot(robot.id, robot)
             }}
         />
     )

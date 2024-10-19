@@ -3,7 +3,7 @@ import { ColorContainer, ColorIndicator } from './styles'
 import { Game } from 'src/models/Game'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
-import { robots } from 'src/models/robot'
+import { Robot } from 'src/models/Robot'
 
 interface PieceSelectorsProps {
     color: 'blue' | 'yellow'
@@ -11,6 +11,8 @@ interface PieceSelectorsProps {
     editorRef: React.RefObject<HTMLDivElement>
     forceRefreshApp: () => void
 }
+
+const robotTypes: Array<Robot['type']> = ['main', 'pami']
 
 export default function PieceSelectors({
     color,
@@ -20,32 +22,25 @@ export default function PieceSelectors({
 }: PieceSelectorsProps) {
     return (
         <ColorContainer>
-            {robots
-                .filter((robot) => robot.color === color)
-                .map((robot, index) => (
-                    <PieceSelector
-                        key={index}
-                        pieceIconSrc={robot.type === 'main' ? MainRobotIcon : PamiIcon}
-                        onClick={() => {
-                            game.appendRobot({
-                                color,
-                                type: robot.type,
-                                x: 0,
-                                y: 0,
-                                orientation: 0,
+            {robotTypes.map((type, index) => (
+                <PieceSelector
+                    key={index}
+                    pieceIconSrc={type === 'main' ? MainRobotIcon : PamiIcon}
+                    onClick={() => {
+                        const robot = new Robot(type, color)
+                        game.appendRobot(robot)
+
+                        forceRefreshApp()
+
+                        setTimeout(() => {
+                            editorRef.current?.scrollTo({
+                                top: editorRef.current.scrollHeight,
+                                behavior: 'smooth',
                             })
-
-                            forceRefreshApp()
-
-                            setTimeout(() => {
-                                editorRef.current?.scrollTo({
-                                    top: editorRef.current.scrollHeight,
-                                    behavior: 'smooth',
-                                })
-                            }, 0)
-                        }}
-                    />
-                ))}
+                        }, 0)
+                    }}
+                />
+            ))}
             <ColorIndicator color={color} />
         </ColorContainer>
     )
