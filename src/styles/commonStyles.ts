@@ -10,6 +10,10 @@ export const colors = {
 const styles = css`
     body {
         font-family: 'Roboto', sans-serif;
+
+        * {
+            transition: 0.2s cubic-bezier(0.12, 0.64, 0.58, 1);
+        }
     }
 
     h1 {
