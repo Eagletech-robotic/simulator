@@ -1,8 +1,8 @@
 import { Game } from 'src/models/Game'
 import { EditRobot, Input, RobotAttribute, RobotType, StyledEditor } from './styles'
 import React from 'react'
-import { Robot } from 'src/models/Robot'
 import DeleteButton from '../DeleteButton'
+import { GenericRobot } from 'src/models/Robot'
 
 type RobotAttributeType = 'x' | 'y' | 'orientation'
 
@@ -42,17 +42,17 @@ const Editor = React.forwardRef<HTMLDivElement, EditorProps>(({ game, forceRefre
     )
 })
 
-const robotName = (type: Robot['type']) => {
+const robotName = (type: GenericRobot['type']) => {
     switch (type) {
-        case 'main':
+        case 'controlled':
             return 'Main Robot'
-        case 'pami':
+        case 'sequential':
             return 'Pami'
     }
 }
 
 interface RobotInputProps {
-    robot: Robot
+    robot: GenericRobot
     attribute: RobotAttributeType
     game: Game
 }

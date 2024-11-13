@@ -1,20 +1,24 @@
-abstract class GenericRobot {
+export const CONTROLLED_ROBOT_WHEELS_GAP = 30
+
+export abstract class GenericRobot {
     abstract readonly type: 'controlled' | 'sequential'
 
     color: 'blue' | 'yellow'
     x: number // millimeters, 0 is left
     y: number // millimeters, 0 is bottom
     orientation: number // radians, 0 is right, positive is counterclockwise (unit circle)
+    id: number
 
     constructor(color: 'blue' | 'yellow') {
         this.color = color
         this.x = 0
         this.y = 0
         this.orientation = 0
+        this.id = Math.floor(Math.random() * 1000000)
     }
 }
 
-class ControlledRobot extends GenericRobot {
+export class ControlledRobot extends GenericRobot {
     readonly type = 'controlled'
 
     wheelsGap: number // millimeters
@@ -52,7 +56,7 @@ class ControlledRobot extends GenericRobot {
     }
 }
 
-class SequentialRobot extends GenericRobot {
+export class SequentialRobot extends GenericRobot {
     readonly type = 'sequential'
 
     constructor(color: 'blue' | 'yellow') {

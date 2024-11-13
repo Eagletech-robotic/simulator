@@ -3,7 +3,12 @@ import { ColorContainer, ColorIndicator } from './styles'
 import { Game } from 'src/models/Game'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
-import { Robot } from 'src/models/Robot'
+import {
+    GenericRobot,
+    ControlledRobot,
+    SequentialRobot,
+    CONTROLLED_ROBOT_WHEELS_GAP,
+} from 'src/models/Robot'
 
 interface PieceSelectorsProps {
     color: 'blue' | 'yellow'
@@ -12,7 +17,7 @@ interface PieceSelectorsProps {
     forceRefreshApp: () => void
 }
 
-const robotTypes: Array<Robot['type']> = ['main', 'pami']
+const robotTypes: Array<GenericRobot['type']> = ['controlled', 'sequential']
 
 export default function PieceSelectors({
     color,
@@ -25,9 +30,13 @@ export default function PieceSelectors({
             {robotTypes.map((type, index) => (
                 <PieceSelector
                     key={index}
-                    pieceIconSrc={type === 'main' ? MainRobotIcon : PamiIcon}
+                    pieceIconSrc={type === 'controlled' ? MainRobotIcon : PamiIcon}
                     onClick={() => {
-                        const robot = new Robot(type, color)
+                        let robot: GenericRobot
+                        if (type === 'controlled')
+                            robot = new ControlledRobot(color, CONTROLLED_ROBOT_WHEELS_GAP)
+                        else robot = new SequentialRobot(color)
+
                         game.appendRobot(robot)
 
                         forceRefreshApp()

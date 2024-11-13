@@ -1,17 +1,17 @@
-import { Robot } from './Robot'
+import { GenericRobot } from './Robot'
 
 export class Game {
-    private robots: Array<Robot>
+    private robots: Array<GenericRobot>
 
     constructor() {
         this.robots = []
     }
 
-    appendRobot(robot: Robot) {
+    appendRobot(robot: GenericRobot) {
         this.robots.push(robot)
     }
 
-    updateRobot(id: number, newRobot: Robot) {
+    updateRobot(id: number, newRobot: GenericRobot) {
         const index = this.getRobotIndexFromId(id)
         if (index) {
             this.robots[index] = newRobot
