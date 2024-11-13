@@ -8,11 +8,6 @@ export const Page = styled.div`
     overflow: hidden;
 `
 
-export const GameBoard = styled.div`
-    height: 100%;
-    background-color: #f0f0f0;
-`
-
 export const Controls = styled.div`
     display: grid;
     grid-template-rows: 6rem 1fr;

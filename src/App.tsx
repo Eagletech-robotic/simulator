@@ -1,9 +1,10 @@
 import { useReducer, useRef, useState } from 'react'
-import { Controls, GameBoard, Page, RobotChooser } from './AppStyles'
+import { Controls, Page, RobotChooser } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
 import { Game } from './models/Game'
 import RobotSelectors from './components/Controls/RobotSelectors'
 import Editor from './components/Controls/Editor'
+import GameBoard from './components/GameBoard'
 
 const App = (): JSX.Element => {
     const [game] = useState(new Game())
@@ -16,7 +17,7 @@ const App = (): JSX.Element => {
             <GlobalStyles />
 
             <Page>
-                <GameBoard />
+                <GameBoard game={game} />
 
                 <Controls>
                     <RobotChooser>
