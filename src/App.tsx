@@ -2,10 +2,10 @@ import { useReducer, useRef, useState } from 'react'
 import { Controls, GameBoard, Page, RobotChooser } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
 import { Game } from './models/Game'
-import RobotSelectors from './components/RobotSelectors'
-import Editor from './components/Editor'
+import RobotSelectors from './components/Controls/RobotSelectors'
+import Editor from './components/Controls/Editor'
 
-export default function App() {
+const App = (): JSX.Element => {
     const [game] = useState(new Game())
     const editorRef = useRef<HTMLDivElement>(null)
 
@@ -30,3 +30,5 @@ export default function App() {
         </>
     )
 }
+
+export default App

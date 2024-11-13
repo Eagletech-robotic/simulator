@@ -1,4 +1,3 @@
-import PieceSelector from '../RobotSelector'
 import { ColorContainer, ColorIndicator } from './styles'
 import { Game } from 'src/models/Game'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
@@ -9,8 +8,9 @@ import {
     SequentialRobot,
     CONTROLLED_ROBOT_WHEELS_GAP,
 } from 'src/models/Robot'
+import RobotSelector from '../RobotSelector'
 
-interface PieceSelectorsProps {
+interface RobotSelectorsProps {
     color: 'blue' | 'yellow'
     game: Game
     editorRef: React.RefObject<HTMLDivElement>
@@ -19,18 +19,18 @@ interface PieceSelectorsProps {
 
 const robotTypes: Array<GenericRobot['type']> = ['controlled', 'sequential']
 
-export default function PieceSelectors({
+const RobotSelectors = ({
     color,
     game,
     editorRef,
     forceRefreshApp,
-}: PieceSelectorsProps) {
+}: RobotSelectorsProps): JSX.Element => {
     return (
         <ColorContainer>
             {robotTypes.map((type, index) => (
-                <PieceSelector
+                <RobotSelector
                     key={index}
-                    pieceIconSrc={type === 'controlled' ? MainRobotIcon : PamiIcon}
+                    robotIconSrc={type === 'controlled' ? MainRobotIcon : PamiIcon}
                     onClick={() => {
                         let robot: GenericRobot
                         if (type === 'controlled')
@@ -54,3 +54,5 @@ export default function PieceSelectors({
         </ColorContainer>
     )
 }
+
+export default RobotSelectors

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-export const StyledPieceSelector = styled.button`
+export const StyledRobotSelector = styled.button`
     border-radius: 1rem;
     border: none;
     background-color: #c0c0e0;
@@ -11,12 +11,7 @@ export const StyledPieceSelector = styled.button`
     }
 `
 
-export const PieceIcon = styled.img`
+export const RobotIcon = styled.img`
     width: 3rem;
     height: 3rem;
-`
-
-export const PieceName = styled.div`
-    font-size: 0.75rem;
-    text-align: center;
 `
