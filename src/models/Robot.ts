@@ -28,7 +28,7 @@ export class ControlledRobot extends GenericRobot {
         this.wheelsGap = wheelsGap
     }
 
-    private moveFromWheelRotationDistances(leftWheelDistance: number, rightWheelDistance: number) {
+    moveFromWheelRotationDistances(leftWheelDistance: number, rightWheelDistance: number) {
         // If both wheels have moved the same distance, the robot has moved forward
         if (leftWheelDistance === rightWheelDistance) {
             this.moveForward(leftWheelDistance)
@@ -44,13 +44,17 @@ export class ControlledRobot extends GenericRobot {
         const rotationAngleClockwise = leftWheelDistance / leftCircleRadius // definition of the radian
         const middleCircleRadius = leftCircleRadius - (this.wheelsGap / 2) * multiplier // the circle described by the middle of the robot
 
-        // Adjust the position of the robot
-        this.orientation -= rotationAngleClockwise // this.orientation is counterclockwise, so we subtract
-        this.x += middleCircleRadius - Math.cos(this.orientation) * middleCircleRadius
-        this.y += middleCircleRadius * Math.sin(this.orientation)
+        // Update robot position and orientation
+        this.x +=
+            middleCircleRadius *
+            (Math.cos(this.orientation + rotationAngleClockwise) - Math.cos(this.orientation))
+        this.y +=
+            middleCircleRadius *
+            (Math.sin(this.orientation) - Math.sin(this.orientation + rotationAngleClockwise))
+        this.orientation -= rotationAngleClockwise
     }
 
-    private moveForward(distance: number) {
+    moveForward(distance: number) {
         this.x += Math.cos(this.orientation) * distance // we are on a unit circle of radius: distance
         this.y += Math.sin(this.orientation) * distance // same as above
     }
