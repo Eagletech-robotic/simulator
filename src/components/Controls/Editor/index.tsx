@@ -4,37 +4,37 @@ import React from 'react'
 import DeleteButton from '../DeleteButton'
 import { GenericRobot } from 'src/models/Robot'
 
-type RobotAttributeType = 'x' | 'y' | 'orientation'
-
 interface EditorProps {
     game: Game
-    forceRefreshApp: () => void
+    gameChanged: () => void
 }
 
 const Editor = React.forwardRef<HTMLDivElement, EditorProps>(
-    ({ game, forceRefreshApp }, ref): JSX.Element => {
+    ({ game, gameChanged }, ref): JSX.Element => {
         return (
             <StyledEditor ref={ref}>
-                {game.getRobots().map((robot) => (
+                {game.robots.map((robot) => (
                     <EditRobot key={robot.id} color={robot.color}>
                         <RobotType>{robotName(robot.type)}</RobotType>
                         <RobotAttribute>
                             x =
-                            <RobotInput {...{ robot, attribute: 'x', game }} />
+                            <RobotInput {...{ robot, attribute: 'x', game, gameChanged }} />
                         </RobotAttribute>
                         <RobotAttribute>
                             y =
-                            <RobotInput {...{ robot, attribute: 'y', game }} />
+                            <RobotInput {...{ robot, attribute: 'y', game, gameChanged }} />
                         </RobotAttribute>
                         <RobotAttribute>
-                            orientation =
-                            <RobotInput {...{ robot, attribute: 'orientation', game }} />
+                            orientation (deg) =
+                            <RobotInput
+                                {...{ robot, attribute: 'orientationDeg', game, gameChanged }}
+                            />
                         </RobotAttribute>
 
                         <DeleteButton
                             doDeletion={() => {
                                 game.deleteRobot(robot.id)
-                                setTimeout(() => forceRefreshApp(), 0)
+                                setTimeout(() => gameChanged(), 0)
                             }}
                         />
                     </EditRobot>
@@ -55,18 +55,31 @@ const robotName = (type: GenericRobot['type']) => {
 
 interface RobotInputProps {
     robot: GenericRobot
-    attribute: RobotAttributeType
+    attribute: 'x' | 'y' | 'orientationDeg'
     game: Game
+    gameChanged: () => void
 }
 
-const RobotInput = ({ robot, attribute, game }: RobotInputProps): JSX.Element => {
+const RobotInput = ({ robot, attribute, game, gameChanged }: RobotInputProps): JSX.Element => {
     return (
         <Input
             type="number"
             placeholder="0"
             onChange={(e) => {
-                robot[attribute] = parseInt(e.target.value)
+                const value = parseInt(e.target.value)
+                switch (attribute) {
+                    case 'x':
+                        robot.setX(value)
+                        break
+                    case 'y':
+                        robot.setY(value)
+                        break
+                    case 'orientationDeg':
+                        robot.setOrientationFromDegrees(value)
+                        break
+                }
                 game.updateRobot(robot.id, robot)
+                gameChanged()
             }}
         />
     )

@@ -1,20 +1,31 @@
-export const CONTROLLED_ROBOT_WHEELS_GAP = 30
-
 export abstract class GenericRobot {
     abstract readonly type: 'controlled' | 'sequential'
 
-    color: 'blue' | 'yellow'
+    readonly color: 'blue' | 'yellow'
+    readonly id: number
+
     x: number // millimeters, 0 is left
-    y: number // millimeters, 0 is bottom
-    orientation: number // radians, 0 is right, positive is counterclockwise (unit circle)
-    id: number
+    y: number // millimeters, 0 is top
+    orientation: number // radians, 0 is right, positive is counterclockwise
 
     constructor(color: 'blue' | 'yellow') {
         this.color = color
+        this.id = Math.floor(Math.random() * 1000000)
         this.x = 0
         this.y = 0
         this.orientation = 0
-        this.id = Math.floor(Math.random() * 1000000)
+    }
+
+    setX(x: number) {
+        this.x = x
+    }
+
+    setY(y: number) {
+        this.y = y
+    }
+
+    setOrientationFromDegrees(degrees: number) {
+        this.orientation = (degrees * Math.PI) / 180
     }
 }
 
@@ -48,15 +59,15 @@ export class ControlledRobot extends GenericRobot {
         this.x +=
             middleCircleRadius *
             (Math.cos(this.orientation + rotationAngleClockwise) - Math.cos(this.orientation))
-        this.y +=
+        this.y -=
             middleCircleRadius *
             (Math.sin(this.orientation) - Math.sin(this.orientation + rotationAngleClockwise))
         this.orientation -= rotationAngleClockwise
     }
 
     moveForward(distance: number) {
-        this.x += Math.cos(this.orientation) * distance // we are on a unit circle of radius: distance
-        this.y += Math.sin(this.orientation) * distance // same as above
+        this.x += Math.cos(this.orientation) * distance
+        this.y -= Math.sin(this.orientation) * distance
     }
 }
 
