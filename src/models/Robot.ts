@@ -102,11 +102,6 @@ export class SequentialRobot extends GenericRobot {
             this.orientation,
             canvas.getDrawingColor(this.color)
         )
-        canvas.drawOrientationLine(
-            this.x + this.width / 2,
-            this.y + this.height / 2,
-            this.orientation,
-            this.width / 2
-        )
+        canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
     }
 }

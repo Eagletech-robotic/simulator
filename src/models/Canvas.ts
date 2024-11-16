@@ -31,7 +31,7 @@ export class Canvas {
         this.ctx.save()
 
         // Translate to the rectangle's center
-        this.ctx.translate(x + width / 2, y + height / 2)
+        this.ctx.translate(x, y)
         // Rotate the context
         this.ctx.rotate(-orientation)
         // Draw the rectangle centered at (0, 0)
