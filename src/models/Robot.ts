@@ -1,5 +1,11 @@
+import { Canvas } from './Canvas'
+
 export abstract class GenericRobot {
     abstract readonly type: 'controlled' | 'sequential'
+    abstract readonly width: number
+    abstract readonly height: number
+
+    abstract draw(canvas: Canvas): void
 
     readonly color: 'blue' | 'yellow'
     readonly id: number
@@ -32,11 +38,12 @@ export abstract class GenericRobot {
 export class ControlledRobot extends GenericRobot {
     readonly type = 'controlled'
 
-    wheelsGap: number // millimeters
+    readonly width = 350 // millimeters
+    readonly height = 350 // millimeters
+    readonly wheelsGap = 320 // millimeters
 
-    constructor(color: 'blue' | 'yellow', wheelsGap: number) {
+    constructor(color: 'blue' | 'yellow') {
         super(color)
-        this.wheelsGap = wheelsGap
     }
 
     moveFromWheelRotationDistances(leftWheelDistance: number, rightWheelDistance: number) {
@@ -69,12 +76,37 @@ export class ControlledRobot extends GenericRobot {
         this.x += Math.cos(this.orientation) * distance
         this.y -= Math.sin(this.orientation) * distance
     }
+
+    draw(canvas: Canvas) {
+        canvas.drawCircle(this.x, this.y, this.width / 2, canvas.getDrawingColor(this.color))
+        canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
+    }
 }
 
 export class SequentialRobot extends GenericRobot {
     readonly type = 'sequential'
 
+    readonly width = 150 // millimeters
+    readonly height = 150 // millimeters
+
     constructor(color: 'blue' | 'yellow') {
         super(color)
+    }
+
+    draw(canvas: Canvas) {
+        canvas.drawRectangle(
+            this.x,
+            this.y,
+            this.width,
+            this.height,
+            this.orientation,
+            canvas.getDrawingColor(this.color)
+        )
+        canvas.drawOrientationLine(
+            this.x + this.width / 2,
+            this.y + this.height / 2,
+            this.orientation,
+            this.width / 2
+        )
     }
 }

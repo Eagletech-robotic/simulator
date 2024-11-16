@@ -2,9 +2,8 @@ import { ColorContainer, ColorIndicator } from './styles'
 import { Game } from 'src/models/Game'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
-import { GenericRobot, ControlledRobot, SequentialRobot } from 'src/models/Robot'
+import { ControlledRobot, GenericRobot, SequentialRobot } from 'src/models/Robot'
 import RobotSelector from '../RobotSelector'
-import { MAIN_ROBOT_DIAMETER } from 'src/models/constants'
 
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'
@@ -29,8 +28,7 @@ const RobotSelectors = ({
                     robotIconSrc={type === 'controlled' ? MainRobotIcon : PamiIcon}
                     onClick={() => {
                         let robot: GenericRobot
-                        if (type === 'controlled')
-                            robot = new ControlledRobot(color, MAIN_ROBOT_DIAMETER)
+                        if (type === 'controlled') robot = new ControlledRobot(color)
                         else robot = new SequentialRobot(color)
 
                         game.appendRobot(robot)
