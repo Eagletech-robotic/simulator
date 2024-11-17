@@ -1,8 +1,8 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
-import { Controls, Page, RobotChooser } from './AppStyles'
+import { Page, RobotChooser, StepEditor } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
-import RobotSelectors from './components/Controls/RobotSelectors'
-import Editor from './components/Controls/Editor'
+import RobotSelectors from './components/StepEditor/RobotSelectors'
+import Editor from './components/StepEditor/Editor'
 import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
@@ -38,7 +38,7 @@ const App = (): JSX.Element => {
                 <GameBoard ref={canvasElRef} />
 
                 {game && (
-                    <Controls>
+                    <StepEditor>
                         <RobotChooser>
                             <RobotSelectors color="blue" {...{ step, editorElRef, stepChanged }} />
                             <RobotSelectors
@@ -48,7 +48,7 @@ const App = (): JSX.Element => {
                         </RobotChooser>
 
                         <Editor {...{ step, stepChanged }} ref={editorElRef} />
-                    </Controls>
+                    </StepEditor>
                 )}
             </Page>
         </>

@@ -8,7 +8,7 @@ export const Page = styled.div`
     overflow: hidden;
 `
 
-export const Controls = styled.div`
+export const StepEditor = styled.div`
     display: grid;
     grid-template-rows: 6rem 1fr;
     overflow: hidden;
