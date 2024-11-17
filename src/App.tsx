@@ -1,39 +1,53 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { Controls, Page, RobotChooser } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
-import { Game } from './models/Game'
 import RobotSelectors from './components/Controls/RobotSelectors'
 import Editor from './components/Controls/Editor'
 import GameBoard from './components/GameBoard'
+import { Game } from './models/Game'
+import { Canvas } from './models/Canvas'
 
 const App = (): JSX.Element => {
-    const editorRef = useRef<HTMLDivElement>(null)
-    const canvasElementRef = useRef<HTMLCanvasElement>(null)
+    const editorElRef = useRef<HTMLDivElement>(null)
+    const canvasElRef = useRef<HTMLCanvasElement>(null)
 
-    const [game, setGame] = useState<Game | null>(null)
-    const [, gameChanged] = useReducer((version) => version + 1, 0)
+    const game = useRef(new Game())
+    const [canvas, setCanvas] = useState<Canvas | null>(null)
 
     useEffect(() => {
-        if (canvasElementRef.current) {
-            setGame(new Game(canvasElementRef.current))
+        if (canvasElRef.current) {
+            setCanvas(new Canvas(canvasElRef.current))
         }
-    }, [canvasElementRef])
+    }, [canvasElRef])
 
+    const [, reRender] = useReducer((a) => a + 1, 0)
+
+    const stepChanged = () => {
+        reRender()
+        if (canvas) {
+            game.current.draw(canvas)
+        }
+    }
+
+    const step = game.current.currentStep
     return (
         <>
             <GlobalStyles />
 
             <Page>
-                <GameBoard ref={canvasElementRef} />
+                <GameBoard ref={canvasElRef} />
 
                 {game && (
                     <Controls>
                         <RobotChooser>
-                            <RobotSelectors color="blue" {...{ game, editorRef, gameChanged }} />
-                            <RobotSelectors color="yellow" {...{ game, editorRef, gameChanged }} />
+                            <RobotSelectors color="blue" {...{ step, editorElRef, stepChanged }} />
+                            <RobotSelectors
+                                color="yellow"
+                                {...{ step, editorElRef, stepChanged }}
+                            />
                         </RobotChooser>
 
-                        <Editor {...{ game, gameChanged }} ref={editorRef} />
+                        <Editor {...{ step, stepChanged }} ref={editorElRef} />
                     </Controls>
                 )}
             </Page>

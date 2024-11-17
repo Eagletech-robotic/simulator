@@ -1,19 +1,12 @@
 import { colors } from 'src/styles/commonStyles'
-import { Game } from './Game'
 
 export class Canvas {
     private canvas: HTMLCanvasElement
     private ctx: CanvasRenderingContext2D
-    private game: Game
 
-    constructor(canvas: HTMLCanvasElement, game: Game) {
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
-        this.game = game
         this.ctx = this.canvas.getContext('2d')!
-    }
-
-    updateGame(game: Game): void {
-        this.game = game
     }
 
     clearCanvas(): void {
@@ -57,11 +50,6 @@ export class Canvas {
         this.ctx.moveTo(x, y)
         this.ctx.lineTo(orientationLineX, orientationLineY)
         this.ctx.stroke()
-    }
-
-    draw() {
-        this.clearCanvas()
-        this.game.robots.forEach((robot) => robot.draw(this))
     }
 
     getDrawingColor(robotColor: color): string {

@@ -1,24 +1,24 @@
 import { ColorContainer, ColorIndicator } from './styles'
-import { Game } from 'src/models/Game'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
 import { ControlledRobot, GenericRobot, SequentialRobot } from 'src/models/Robot'
 import RobotSelector from '../RobotSelector'
+import { Step } from 'src/models/Step'
 
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'
-    game: Game
-    editorRef: React.RefObject<HTMLDivElement>
-    gameChanged: () => void
+    step: Step
+    editorElRef: React.RefObject<HTMLDivElement>
+    stepChanged: () => void
 }
 
 const robotTypes: Array<GenericRobot['type']> = ['controlled', 'sequential']
 
 const RobotSelectors = ({
     color,
-    game,
-    editorRef,
-    gameChanged,
+    step,
+    editorElRef,
+    stepChanged,
 }: RobotSelectorsProps): JSX.Element => {
     return (
         <ColorContainer>
@@ -31,13 +31,13 @@ const RobotSelectors = ({
                         if (type === 'controlled') robot = new ControlledRobot(color)
                         else robot = new SequentialRobot(color)
 
-                        game.appendRobot(robot)
+                        step.appendRobot(robot)
 
-                        gameChanged()
+                        stepChanged()
 
                         setTimeout(() => {
-                            editorRef.current?.scrollTo({
-                                top: editorRef.current.scrollHeight,
+                            editorElRef.current?.scrollTo({
+                                top: editorElRef.current.scrollHeight,
                                 behavior: 'smooth',
                             })
                         }, 0)
