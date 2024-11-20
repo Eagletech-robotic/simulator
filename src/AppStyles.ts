@@ -24,3 +24,7 @@ export const RobotChooser = styled.div`
     background-color: #e0e0e0;
     border-radius: 1rem;
 `
+
+export const ControlButtons = styled.div`
+    display: flex;
+`

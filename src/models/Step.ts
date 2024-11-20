@@ -1,10 +1,25 @@
+import { Canvas } from './Canvas'
 import { GenericRobot } from './Robot'
 
 export class Step {
-    private _robots: Array<GenericRobot> = []
+    private _robots: Array<GenericRobot>
+
+    constructor(robots?: Array<GenericRobot>) {
+        this._robots = robots || []
+    }
+
+    draw(canvas: Canvas) {
+        canvas.clearCanvas()
+        this._robots.forEach((robot) => robot.draw(canvas))
+    }
 
     get robots() {
         return this._robots
+    }
+
+    async nextStep(): Promise<Step> {
+        const newRobots = await Promise.all(this._robots.map((r) => r.nextStep()))
+        return new Step(newRobots)
     }
 
     appendRobot(robot: GenericRobot) {

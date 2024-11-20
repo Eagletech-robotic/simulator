@@ -28,8 +28,8 @@ const RobotSelectors = ({
                     robotIconSrc={type === 'controlled' ? MainRobotIcon : PamiIcon}
                     onClick={() => {
                         let robot: GenericRobot
-                        if (type === 'controlled') robot = new ControlledRobot(color)
-                        else robot = new SequentialRobot(color)
+                        if (type === 'controlled') robot = new ControlledRobot(color, 1500, 1500, 0)
+                        else robot = new SequentialRobot(color, 1500, 1500, 0)
 
                         step.appendRobot(robot)
 

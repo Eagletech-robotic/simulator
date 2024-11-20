@@ -61,22 +61,19 @@ interface RobotInputProps {
 }
 
 const RobotInput = ({ robot, attribute, step, stepChanged }: RobotInputProps): JSX.Element => {
+    const value = attribute === 'orientationDeg' ? robot.orientationInDegrees : robot[attribute]
+
     return (
         <Input
             type="number"
             placeholder="0"
+            value={value}
             onChange={(e) => {
                 const value = parseInt(e.target.value)
-                switch (attribute) {
-                    case 'x':
-                        robot.setX(value)
-                        break
-                    case 'y':
-                        robot.setY(value)
-                        break
-                    case 'orientationDeg':
-                        robot.setOrientationFromDegrees(value)
-                        break
+                if (attribute === 'orientationDeg') {
+                    robot.orientationInDegrees = value
+                } else {
+                    robot[attribute] = value
                 }
                 step.updateRobot(robot.id, robot)
                 stepChanged()

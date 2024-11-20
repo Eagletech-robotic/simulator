@@ -1,4 +1,6 @@
 import { Canvas } from './Canvas'
+import { stepDurationMs } from './constants'
+import { serverStep } from './server'
 
 export abstract class GenericRobot {
     abstract readonly type: 'controlled' | 'sequential'
@@ -6,6 +8,7 @@ export abstract class GenericRobot {
     abstract readonly height: number
 
     abstract draw(canvas: Canvas): void
+    abstract nextStep(): Promise<GenericRobot>
 
     readonly color: 'blue' | 'yellow'
     readonly id: number
@@ -14,24 +17,25 @@ export abstract class GenericRobot {
     y: number // millimeters, 0 is top
     orientation: number // radians, 0 is right, positive is counterclockwise
 
-    constructor(color: 'blue' | 'yellow') {
+    constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
         this.color = color
         this.id = Math.floor(Math.random() * 1000000)
-        this.x = 0
-        this.y = 0
-        this.orientation = 0
-    }
-
-    setX(x: number) {
         this.x = x
-    }
-
-    setY(y: number) {
         this.y = y
+        this.orientation = orientation
     }
 
-    setOrientationFromDegrees(degrees: number) {
+    moveForward(distance: number) {
+        this.x += Math.cos(this.orientation) * distance
+        this.y -= Math.sin(this.orientation) * distance
+    }
+
+    set orientationInDegrees(degrees: number) {
         this.orientation = (degrees * Math.PI) / 180
+    }
+
+    get orientationInDegrees() {
+        return (this.orientation * 180) / Math.PI
     }
 }
 
@@ -41,10 +45,6 @@ export class ControlledRobot extends GenericRobot {
     readonly width = 350 // millimeters
     readonly height = 350 // millimeters
     readonly wheelsGap = 320 // millimeters
-
-    constructor(color: 'blue' | 'yellow') {
-        super(color)
-    }
 
     moveFromWheelRotationDistances(leftWheelDistance: number, rightWheelDistance: number) {
         // If both wheels have moved the same distance, the robot has moved forward
@@ -72,14 +72,22 @@ export class ControlledRobot extends GenericRobot {
         this.orientation -= rotationAngleClockwise
     }
 
-    moveForward(distance: number) {
-        this.x += Math.cos(this.orientation) * distance
-        this.y -= Math.sin(this.orientation) * distance
-    }
-
     draw(canvas: Canvas) {
         canvas.drawCircle(this.x, this.y, this.width / 2, canvas.getDrawingColor(this.color))
         canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
+    }
+
+    async nextStep(): Promise<ControlledRobot> {
+        const newRobot = new ControlledRobot(this.color, this.x, this.y, this.orientation)
+        Object.assign(newRobot, this)
+
+        const output = await serverStep({ encoder1: 10, encoder2: 20 })
+        //console.log(output)
+        newRobot.moveFromWheelRotationDistances(
+            output.vitesse1_ratio * stepDurationMs,
+            output.vitesse2_ratio * stepDurationMs
+        )
+        return newRobot
     }
 }
 
@@ -88,10 +96,6 @@ export class SequentialRobot extends GenericRobot {
 
     readonly width = 150 // millimeters
     readonly height = 150 // millimeters
-
-    constructor(color: 'blue' | 'yellow') {
-        super(color)
-    }
 
     draw(canvas: Canvas) {
         canvas.drawRectangle(
@@ -103,5 +107,13 @@ export class SequentialRobot extends GenericRobot {
             canvas.getDrawingColor(this.color)
         )
         canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
+    }
+
+    async nextStep(): Promise<SequentialRobot> {
+        const newRobot = new SequentialRobot(this.color, this.x, this.y, this.orientation)
+        Object.assign(newRobot, this)
+        newRobot.moveForward(10)
+        //console.log(newRobot)
+        return newRobot
     }
 }
