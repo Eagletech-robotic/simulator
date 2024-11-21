@@ -6,7 +6,8 @@
     "scripts": {
         "start": "vite",
         "build": "vite build",
-        "serve": "vite preview"
+        "serve": "vite preview",
+        "test": "vitest"
     },
     "dependencies": {
         "@types/node": "^22.0.2",
