@@ -26,7 +26,7 @@ export class Canvas {
         // Translate to the rectangle's center
         this.ctx.translate(x, y)
         // Rotate the context
-        this.ctx.rotate(-orientation)
+        this.ctx.rotate(orientation)
         // Draw the rectangle centered at (0, 0)
         this.ctx.fillStyle = color
         this.ctx.fillRect(-width / 2, -height / 2, width, height)
@@ -42,8 +42,8 @@ export class Canvas {
     }
 
     drawOrientationLine(x: number, y: number, orientation: number, length: number): void {
-        const orientationLineX = x + length * Math.cos(orientation)
-        const orientationLineY = y - length * Math.sin(orientation)
+        const orientationLineX = x + length * Math.sin(orientation)
+        const orientationLineY = y - length * Math.cos(orientation)
         this.ctx.strokeStyle = '#000000'
         this.ctx.lineWidth = 8
         this.ctx.beginPath()
