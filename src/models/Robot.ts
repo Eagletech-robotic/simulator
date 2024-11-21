@@ -82,7 +82,6 @@ export class ControlledRobot extends GenericRobot {
         Object.assign(newRobot, this)
 
         const output = await serverStep({ encoder1: 10, encoder2: 20 })
-        //console.log(output)
         newRobot.moveFromWheelRotationDistances(
             output.vitesse1_ratio * stepDurationMs,
             output.vitesse2_ratio * stepDurationMs
@@ -113,7 +112,6 @@ export class SequentialRobot extends GenericRobot {
         const newRobot = new SequentialRobot(this.color, this.x, this.y, this.orientation)
         Object.assign(newRobot, this)
         newRobot.moveForward(10)
-        //console.log(newRobot)
         return newRobot
     }
 }
