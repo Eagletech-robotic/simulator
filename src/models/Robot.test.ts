@@ -33,6 +33,26 @@ describe('moveFromWheelRotationDistances', () => {
         expect([robot.x, robot.y, robot.orientation]).toEqual([500 + robot.wheelsGap, 500, Math.PI])
     })
 
+    it('spins around the left wheel', () => {
+        const robot = new ControlledRobot('yellow', 500, 500, 0)
+        robot.moveFromWheelRotationDistances(0, Math.PI * robot.wheelsGap)
+        expect([robot.x, robot.y, robot.orientation]).toEqual([
+            500 - robot.wheelsGap,
+            500,
+            -Math.PI,
+        ])
+    })
+
+    it('spins backwards around the left wheel', () => {
+        const robot = new ControlledRobot('yellow', 500, 500, 0)
+        robot.moveFromWheelRotationDistances(0, (-Math.PI * robot.wheelsGap) / 2)
+        expect([robot.x, robot.y, robot.orientation]).toEqual([
+            500 - robot.wheelsGap / 2,
+            500 + robot.wheelsGap / 2,
+            Math.PI / 2,
+        ])
+    })
+
     it('describes a ratio 2:1 circle anticlockwise', () => {
         const robot = new ControlledRobot('yellow', 500, 500, 0)
         robot.moveFromWheelRotationDistances(
