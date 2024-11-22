@@ -1,1 +1,1 @@
-export const stepDurationMs = 200
+export const stepDurationMs = 20

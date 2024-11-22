@@ -47,20 +47,32 @@ export class ControlledRobot extends GenericRobot {
     readonly height = 350 // millimeters
     readonly wheelsGap = 320 // millimeters
 
+    leftWheelDistance = 0
+    rightWheelDistance = 0
+
     moveFromWheelRotationDistances(leftWheelDistance: number, rightWheelDistance: number) {
+        this.leftWheelDistance += leftWheelDistance
+        this.rightWheelDistance += rightWheelDistance
+
         // If both wheels have moved the same distance, the robot has moved forward
         if (leftWheelDistance === rightWheelDistance) {
             this.moveForward(leftWheelDistance)
             return
         }
 
-        const signMultiplier = leftWheelDistance > rightWheelDistance ? 1 : -1
-        // Calculate the radius of the circle described by the left wheel
-        const leftCircleRadius =
-            this.wheelsGap / Math.abs(1 - rightWheelDistance / leftWheelDistance)
+        const signMultiplier = Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance) ? 1 : -1
+        const smallestDistance =
+            Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
+                ? rightWheelDistance
+                : leftWheelDistance
+        const largestDistance =
+            Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
+                ? leftWheelDistance
+                : rightWheelDistance
+        const bigCircleRadius = this.wheelsGap / (1 - smallestDistance / largestDistance)
 
-        const rotationAngle = (leftWheelDistance / leftCircleRadius) * signMultiplier // definition of the radian
-        const middleCircleRadius = leftCircleRadius - (this.wheelsGap / 2) * signMultiplier // the circle described by the middle of the robot
+        const rotationAngle = (largestDistance / bigCircleRadius) * signMultiplier // definition of the radian
+        const middleCircleRadius = bigCircleRadius - this.wheelsGap / 2 // the circle described by the middle of the robot
 
         // Update robot position and orientation
         const wheelAxisAngle = this.orientation - (Math.PI / 2) * signMultiplier
@@ -70,7 +82,6 @@ export class ControlledRobot extends GenericRobot {
         this.y -=
             middleCircleRadius *
             (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle))
-
         this.orientation += rotationAngle
     }
 
@@ -83,7 +94,10 @@ export class ControlledRobot extends GenericRobot {
         const newRobot = new ControlledRobot(this.color, this.x, this.y, this.orientation)
         Object.assign(newRobot, this)
 
-        const output = await serverStep({ encoder1: 10, encoder2: 20 })
+        const output = await serverStep({
+            encoder1: this.leftWheelDistance,
+            encoder2: this.rightWheelDistance,  
+        })
         newRobot.moveFromWheelRotationDistances(
             output.vitesse1_ratio * stepDurationMs,
             output.vitesse2_ratio * stepDurationMs
