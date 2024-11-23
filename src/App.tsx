@@ -36,7 +36,7 @@ const App = (): JSX.Element => {
             let inStep = false
             intervalIdRef.current = setInterval(async () => {
                 if (inStep) {
-                    console.log('Step called before the previous completed.')
+                    //console.log('Step called before the previous completed.')
                     return
                 }
 
@@ -44,7 +44,7 @@ const App = (): JSX.Element => {
                 await game.step()
                 if (canvasRef.current) game.currentStep.draw(canvasRef.current)
                 inStep = false
-            }, stepDurationMs)
+            }, 10)
         } else {
             if (intervalIdRef.current) clearInterval(intervalIdRef.current)
         }

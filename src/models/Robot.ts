@@ -1,5 +1,9 @@
 import { Canvas } from './Canvas'
-import { stepDurationMs } from './constants'
+import {
+    controlledRobotWheelDiameter,
+    encoderImpulsesPerWheelTurn,
+    stepDurationMs,
+} from './constants'
 import { serverStep } from './server'
 
 export abstract class GenericRobot {
@@ -94,13 +98,22 @@ export class ControlledRobot extends GenericRobot {
         const newRobot = new ControlledRobot(this.color, this.x, this.y, this.orientation)
         Object.assign(newRobot, this)
 
+        const wheelCircumference = Math.PI * controlledRobotWheelDiameter // millimeters
+        const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // millimeters
         const output = await serverStep({
-            encoder1: this.leftWheelDistance,
-            encoder2: this.rightWheelDistance,  
+            encoder1: this.leftWheelDistance / impulseDistance,
+            encoder2: this.rightWheelDistance / impulseDistance,
         })
+        console.log('traveled (mm)', this.leftWheelDistance, this.rightWheelDistance)
+        console.log(
+            'encoders impulses',
+            this.leftWheelDistance / impulseDistance,
+            this.rightWheelDistance / impulseDistance
+        )
+        console.log('reponse', output)
         newRobot.moveFromWheelRotationDistances(
-            output.vitesse1_ratio * stepDurationMs,
-            output.vitesse2_ratio * stepDurationMs
+            (output.vitesse1_ratio * 300 * stepDurationMs) / 1000, // Max is 1 which is 30 cm/s
+            (output.vitesse2_ratio * 300 * stepDurationMs) / 1000
         )
         return newRobot
     }
