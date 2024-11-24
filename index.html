@@ -15,48 +15,5 @@
     <body>
         <div id="root"></div>
         <script type="module" src="/src/main.tsx"></script>
-        <script>
-            const textDecoder = new TextDecoder() // For decoding UTF-8 strings
-
-            const importObject = {
-                wasi_snapshot_preview1: {
-                    proc_exit: (code) => console.log(`Exit code: ${code}`),
-                    fd_write: (fd, iovs, iovs_len, nwritten) => {
-                        const memory = wasmInstance.exports.memory
-                        const memoryView = new DataView(memory.buffer)
-
-                        let output = ''
-                        for (let i = 0; i < iovs_len; i++) {
-                            const iovPtr = iovs + i * 8
-                            const ptr = memoryView.getUint32(iovPtr, true)
-                            const len = memoryView.getUint32(iovPtr + 4, true)
-                            const bytes = new Uint8Array(memory.buffer, ptr, len)
-                            output += textDecoder.decode(bytes)
-                        }
-
-                        if (fd === 1) {
-                            console.log(output)
-                        } else if (fd === 2) {
-                            console.error(output)
-                        }
-
-                        // Set nwritten to the total bytes written to prevent infinite loop
-                        if (nwritten) {
-                            memoryView.setUint32(nwritten, output.length, true)
-                        }
-                    },
-                },
-            }
-
-            let wasmInstance
-
-            WebAssembly.instantiateStreaming(fetch('simulator-connector.wasm'), importObject).then(
-                (obj) => {
-                    wasmInstance = obj.instance
-                    const result = wasmInstance.exports.exported_log_42()
-                    console.log('WASM function returned:', result)
-                }
-            )
-        </script>
     </body>
 </html>

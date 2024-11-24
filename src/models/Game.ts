@@ -1,10 +1,10 @@
+import { topInit } from 'src/utils/wasm-connector'
 import { ControlledRobot, SequentialRobot } from './Robot'
-import { serverInit } from './server'
 import { Step } from './Step'
 
 export class Game {
     private steps: Step[]
-    private currentStepNumber = 0
+    private _currentStepNumber = 0
 
     constructor() {
         const startingRobots = [
@@ -16,16 +16,20 @@ export class Game {
             new SequentialRobot('yellow', 2900, 2700, -Math.PI / 2),*/
         ]
         this.steps = [new Step(startingRobots)]
-        void serverInit()
+        void topInit()
     }
 
     get currentStep() {
-        return this.steps[this.currentStepNumber]
+        return this.steps[this._currentStepNumber]
     }
 
-    async step() {
-        const newStep = await this.currentStep.nextStep()
+    get currentStepNumber() {
+        return this._currentStepNumber
+    }
+
+    step() {
+        const newStep = this.currentStep.nextStep()
         this.steps.push(newStep)
-        this.currentStepNumber++
+        this._currentStepNumber++
     }
 }

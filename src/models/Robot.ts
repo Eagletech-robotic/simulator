@@ -1,10 +1,10 @@
+import { topStep } from 'src/utils/wasm-connector'
 import { Canvas } from './Canvas'
 import {
     controlledRobotWheelDiameter,
     encoderImpulsesPerWheelTurn,
     stepDurationMs,
 } from './constants'
-import { serverStep } from './server'
 
 export abstract class GenericRobot {
     abstract readonly type: 'controlled' | 'sequential'
@@ -12,7 +12,7 @@ export abstract class GenericRobot {
     abstract readonly height: number
 
     abstract draw(canvas: Canvas): void
-    abstract nextStep(): Promise<GenericRobot>
+    abstract nextStep(): GenericRobot
 
     readonly color: 'blue' | 'yellow'
     readonly id: number
@@ -94,23 +94,29 @@ export class ControlledRobot extends GenericRobot {
         canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
     }
 
-    async nextStep(): Promise<ControlledRobot> {
+    nextStep(): ControlledRobot {
         const newRobot = new ControlledRobot(this.color, this.x, this.y, this.orientation)
         Object.assign(newRobot, this)
 
         const wheelCircumference = Math.PI * controlledRobotWheelDiameter // millimeters
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // millimeters
-        const output = await serverStep({
+        const output = topStep({
+            is_jack_gone: 1,
+            last_wifi_data: [],
             encoder1: this.leftWheelDistance / impulseDistance,
             encoder2: this.rightWheelDistance / impulseDistance,
+            tof: 0,
+            gyro: [0, 0, 0],
+            accelero: [0, 0, 0],
+            compass: [0, 0, 0],
         })
-        console.log('traveled (mm)', this.leftWheelDistance, this.rightWheelDistance)
+        /*console.log('traveled (mm)', this.leftWheelDistance, this.rightWheelDistance)
         console.log(
             'encoders impulses',
             this.leftWheelDistance / impulseDistance,
             this.rightWheelDistance / impulseDistance
         )
-        console.log('reponse', output)
+        console.log('reponse', output)*/
         newRobot.moveFromWheelRotationDistances(
             (output.vitesse1_ratio * 300 * stepDurationMs) / 1000, // Max is 1 which is 30 cm/s
             (output.vitesse2_ratio * 300 * stepDurationMs) / 1000
@@ -137,7 +143,7 @@ export class SequentialRobot extends GenericRobot {
         canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
     }
 
-    async nextStep(): Promise<SequentialRobot> {
+    nextStep(): SequentialRobot {
         const newRobot = new SequentialRobot(this.color, this.x, this.y, this.orientation)
         Object.assign(newRobot, this)
         newRobot.moveForward(10)

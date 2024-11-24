@@ -34,16 +34,12 @@ const App = (): JSX.Element => {
     useEffect(() => {
         if (isPlaying) {
             let inStep = false
-            intervalIdRef.current = setInterval(async () => {
-                if (inStep) {
-                    //console.log('Step called before the previous completed.')
-                    return
-                }
+            intervalIdRef.current = setInterval(() => {
+                for (let i = 0; i < 100; i++) game.step()
 
-                inStep = true
-                await game.step()
-                if (canvasRef.current) game.currentStep.draw(canvasRef.current)
-                inStep = false
+                if (canvasRef.current && game.currentStepNumber % 100 === 0) {
+                    game.currentStep.draw(canvasRef.current)
+                }
             }, 10)
         } else {
             if (intervalIdRef.current) clearInterval(intervalIdRef.current)

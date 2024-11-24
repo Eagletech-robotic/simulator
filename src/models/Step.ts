@@ -17,8 +17,8 @@ export class Step {
         return this._robots
     }
 
-    async nextStep(): Promise<Step> {
-        const newRobots = await Promise.all(this._robots.map((r) => r.nextStep()))
+    nextStep(): Step {
+        const newRobots = this._robots.map((r) => r.nextStep())
         return new Step(newRobots)
     }
 
