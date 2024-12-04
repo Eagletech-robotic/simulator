@@ -1,4 +1,4 @@
-import { topStep } from 'src/utils/wasm-connector'
+import { AiInstance, topInit, topStep } from 'src/utils/wasm-connector'
 import { Canvas } from './Canvas'
 import {
     controlledRobotWheelDiameter,
@@ -6,61 +6,96 @@ import {
     stepDurationMs,
 } from './constants'
 
+interface GenericRobotStep {
+    x: number // millimeters, 0 is left
+    y: number // millimeters, 0 is top
+    orientation: number // radians, 0 is top, positive is clockwise
+}
+
+interface ControlledRobotStep extends GenericRobotStep {
+    leftWheelDistance: number
+    rightWheelDistance: number
+}
+
 export abstract class GenericRobot {
     abstract readonly type: 'controlled' | 'sequential'
     abstract readonly width: number
     abstract readonly height: number
 
-    abstract draw(canvas: Canvas): void
-    abstract nextStep(): GenericRobot
+    abstract draw(canvas: Canvas, stepNb: number): void
+    abstract nextStep(): void
+    abstract get lastStep(): GenericRobotStep
 
     readonly color: 'blue' | 'yellow'
     readonly id: number
 
-    x: number // millimeters, 0 is left
-    y: number // millimeters, 0 is top
-    orientation: number // radians, 0 is top, positive is clockwise
+    abstract steps: Array<GenericRobotStep>
 
-    constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
+    constructor(color: 'blue' | 'yellow') {
         this.color = color
         this.id = Math.floor(Math.random() * 1000000)
-        this.x = x
-        this.y = y
-        this.orientation = orientation
+        this.restart()
     }
 
-    moveForward(distance: number) {
-        const unitCircleOrientation = -this.orientation + Math.PI / 2
-        this.x += Math.cos(unitCircleOrientation) * distance
-        this.y -= Math.sin(unitCircleOrientation) * distance
+    moveForward(distance: number): GenericRobotStep {
+        const step = this.lastStep
+
+        const unitCircleOrientation = -step.orientation + Math.PI / 2
+        return {
+            x: step.x + Math.cos(unitCircleOrientation) * distance,
+            y: step.y - Math.sin(unitCircleOrientation) * distance,
+            orientation: step.orientation,
+        }
     }
 
-    set orientationInDegrees(degrees: number) {
-        this.orientation = (degrees * Math.PI) / 180
+    setOrientationInDegrees(degrees: number) {
+        this.lastStep.orientation = (degrees * Math.PI) / 180
     }
 
-    get orientationInDegrees() {
-        return (this.orientation * 180) / Math.PI
+    orientationInDegrees(stepNb = this.steps.length - 1): number {
+        return (this.steps[stepNb].orientation * 180) / Math.PI
     }
+
+    isControlled(): this is ControlledRobot {
+        return this.type === 'controlled'
+    }
+
+    async restart(): Promise<void> {}
 }
 
 export class ControlledRobot extends GenericRobot {
     readonly type = 'controlled'
+    aiInstance: AiInstance | undefined
 
     readonly width = 350 // millimeters
     readonly height = 350 // millimeters
     readonly wheelsGap = 320 // millimeters
 
-    leftWheelDistance = 0
-    rightWheelDistance = 0
+    steps: Array<ControlledRobotStep>
+
+    constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
+        super(color)
+        this.steps = [{ x, y, orientation, leftWheelDistance: 0, rightWheelDistance: 0 }]
+    }
+
+    async restart() {
+        this.aiInstance = await topInit()
+    }
+
+    get lastStep(): ControlledRobotStep {
+        return this.steps[this.steps.length - 1]
+    }
 
     moveFromWheelRotationDistances(leftWheelDistance: number, rightWheelDistance: number) {
-        this.leftWheelDistance += leftWheelDistance
-        this.rightWheelDistance += rightWheelDistance
+        const step = this.lastStep
 
         // If both wheels have moved the same distance, the robot has moved forward
         if (leftWheelDistance === rightWheelDistance) {
-            this.moveForward(leftWheelDistance)
+            this.steps.push({
+                ...this.moveForward(leftWheelDistance),
+                leftWheelDistance,
+                rightWheelDistance,
+            })
             return
         }
 
@@ -79,49 +114,49 @@ export class ControlledRobot extends GenericRobot {
         const middleCircleRadius = bigCircleRadius - this.wheelsGap / 2 // the circle described by the middle of the robot
 
         // Update robot position and orientation
-        const wheelAxisAngle = this.orientation - (Math.PI / 2) * signMultiplier
-        this.x +=
-            middleCircleRadius *
-            (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle))
-        this.y -=
-            middleCircleRadius *
-            (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle))
-        this.orientation += rotationAngle
+        const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
+
+        this.steps.push({
+            x:
+                step.x +
+                middleCircleRadius *
+                    (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle)),
+            y:
+                step.y -
+                middleCircleRadius *
+                    (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle)),
+            orientation: step.orientation + rotationAngle,
+            leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
+            rightWheelDistance: step.rightWheelDistance + rightWheelDistance,
+        })
     }
 
-    draw(canvas: Canvas) {
-        canvas.drawCircle(this.x, this.y, this.width / 2, canvas.getDrawingColor(this.color))
-        canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
+    draw(canvas: Canvas, stepNb: number) {
+        const step = this.steps[stepNb]
+        canvas.drawCircle(step.x, step.y, this.width / 2, canvas.getDrawingColor(this.color))
+        canvas.drawOrientationLine(step.x, step.y, step.orientation, this.width / 2)
     }
 
-    nextStep(): ControlledRobot {
-        const newRobot = new ControlledRobot(this.color, this.x, this.y, this.orientation)
-        Object.assign(newRobot, this)
+    nextStep() {
+        const step = this.lastStep
 
         const wheelCircumference = Math.PI * controlledRobotWheelDiameter // millimeters
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // millimeters
-        const output = topStep({
+        const output = topStep(this.aiInstance!, {
             is_jack_gone: 1,
             last_wifi_data: [],
-            encoder1: this.leftWheelDistance / impulseDistance,
-            encoder2: this.rightWheelDistance / impulseDistance,
+            encoder1: step.leftWheelDistance / impulseDistance,
+            encoder2: step.rightWheelDistance / impulseDistance,
             tof: 0,
             gyro: [0, 0, 0],
             accelero: [0, 0, 0],
             compass: [0, 0, 0],
         })
-        /*console.log('traveled (mm)', this.leftWheelDistance, this.rightWheelDistance)
-        console.log(
-            'encoders impulses',
-            this.leftWheelDistance / impulseDistance,
-            this.rightWheelDistance / impulseDistance
-        )
-        console.log('reponse', output)*/
-        newRobot.moveFromWheelRotationDistances(
+
+        this.moveFromWheelRotationDistances(
             (output.vitesse1_ratio * 300 * stepDurationMs) / 1000, // Max is 1 which is 30 cm/s
             (output.vitesse2_ratio * 300 * stepDurationMs) / 1000
         )
-        return newRobot
     }
 }
 
@@ -131,22 +166,31 @@ export class SequentialRobot extends GenericRobot {
     readonly width = 150 // millimeters
     readonly height = 150 // millimeters
 
-    draw(canvas: Canvas) {
-        canvas.drawRectangle(
-            this.x,
-            this.y,
-            this.width,
-            this.height,
-            this.orientation,
-            canvas.getDrawingColor(this.color)
-        )
-        canvas.drawOrientationLine(this.x, this.y, this.orientation, this.width / 2)
+    steps: Array<GenericRobotStep>
+
+    constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
+        super(color)
+        this.steps = [{ x, y, orientation }]
     }
 
-    nextStep(): SequentialRobot {
-        const newRobot = new SequentialRobot(this.color, this.x, this.y, this.orientation)
-        Object.assign(newRobot, this)
-        newRobot.moveForward(10)
-        return newRobot
+    draw(canvas: Canvas, stepNb: number) {
+        const step = this.steps[stepNb]
+        canvas.drawRectangle(
+            step.x,
+            step.y,
+            this.width,
+            this.height,
+            step.orientation,
+            canvas.getDrawingColor(this.color)
+        )
+        canvas.drawOrientationLine(step.x, step.y, step.orientation, this.width / 2)
+    }
+
+    get lastStep(): GenericRobotStep {
+        return this.steps[this.steps.length - 1]
+    }
+
+    nextStep() {
+        this.moveForward(10)
     }
 }

@@ -3,11 +3,11 @@ import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
 import { ControlledRobot, GenericRobot, SequentialRobot } from 'src/models/Robot'
 import RobotSelector from '../RobotSelector'
-import { Step } from 'src/models/Step'
+import { Game } from 'src/models/Game'
 
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'
-    step: Step
+    game: Game
     editorElRef: React.RefObject<HTMLDivElement>
     stepChanged: () => void
 }
@@ -16,7 +16,7 @@ const robotTypes: Array<GenericRobot['type']> = ['controlled', 'sequential']
 
 const RobotSelectors = ({
     color,
-    step,
+    game,
     editorElRef,
     stepChanged,
 }: RobotSelectorsProps): JSX.Element => {
@@ -31,7 +31,7 @@ const RobotSelectors = ({
                         if (type === 'controlled') robot = new ControlledRobot(color, 1500, 1500, 0)
                         else robot = new SequentialRobot(color, 1500, 1500, 0)
 
-                        step.appendRobot(robot)
+                        game.appendRobot(robot)
 
                         stepChanged()
 

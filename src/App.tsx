@@ -7,7 +7,6 @@ import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
 import PlayButton from './components/PlayButton'
-import { stepDurationMs } from './models/constants'
 
 const App = (): JSX.Element => {
     const editorElRef = useRef<HTMLDivElement>(null)
@@ -16,7 +15,7 @@ const App = (): JSX.Element => {
     const canvasRef = useRef<Canvas | null>(null)
 
     useLayoutEffect(() => {
-        if (canvasRef.current) game.currentStep.draw(canvasRef.current)
+        if (canvasRef.current) game.draw(canvasRef.current)
     }, [])
 
     const [, reRender] = useReducer((a) => a + 1, 0)
@@ -24,7 +23,7 @@ const App = (): JSX.Element => {
     const stepChanged = () => {
         reRender()
         if (canvasRef.current) {
-            game.currentStep.draw(canvasRef.current)
+            game.draw(canvasRef.current)
         }
     }
 
@@ -33,20 +32,18 @@ const App = (): JSX.Element => {
 
     useEffect(() => {
         if (isPlaying) {
-            let inStep = false
             intervalIdRef.current = setInterval(() => {
-                for (let i = 0; i < 100; i++) game.step()
+                for (let i = 0; i < 100; i++) game.nextStep()
 
                 if (canvasRef.current && game.currentStepNumber % 100 === 0) {
-                    game.currentStep.draw(canvasRef.current)
+                    game.draw(canvasRef.current)
                 }
-            }, 10)
+            }, 0)
         } else {
             if (intervalIdRef.current) clearInterval(intervalIdRef.current)
         }
     }, [isPlaying])
 
-    const step = game.currentStep
     return (
         <>
             <GlobalStyles />
@@ -66,14 +63,14 @@ const App = (): JSX.Element => {
                 {game && (
                     <StepEditor>
                         <RobotChooser>
-                            <RobotSelectors color="blue" {...{ step, editorElRef, stepChanged }} />
+                            <RobotSelectors color="blue" {...{ game, editorElRef, stepChanged }} />
                             <RobotSelectors
                                 color="yellow"
-                                {...{ step, editorElRef, stepChanged }}
+                                {...{ game, editorElRef, stepChanged }}
                             />
                         </RobotChooser>
 
-                        <Editor {...{ step, stepChanged }} ref={editorElRef} />
+                        <Editor {...{ game, stepChanged }} ref={editorElRef} />
                     </StepEditor>
                 )}
             </Page>

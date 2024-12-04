@@ -1,6 +1,6 @@
 const textDecoder = new TextDecoder() // For decoding UTF-8 strings
 
-type MyInstance = WebAssembly.Instance & {
+export type AiInstance = WebAssembly.Instance & {
     exports: {
         memory: WebAssembly.Memory
         exported_top_init: () => void
@@ -10,45 +10,46 @@ type MyInstance = WebAssembly.Instance & {
     }
 }
 
-const importObject = {
-    wasi_snapshot_preview1: {
-        proc_exit: (code: number) => console.log(`Exit code: ${code}`),
-        fd_write: (fd: number, iovs: number, iovs_len: number, nwritten: number) => {
-            const memory = wasmInstance.exports.memory
-            const memoryView = new DataView(memory.buffer)
-
-            let output = ''
-            for (let i = 0; i < iovs_len; i++) {
-                const iovPtr = iovs + i * 8
-                const ptr = memoryView.getUint32(iovPtr, true)
-                const len = memoryView.getUint32(iovPtr + 4, true)
-                const bytes = new Uint8Array(memory.buffer, ptr, len)
-                output += textDecoder.decode(bytes)
-            }
-
-            if (fd === 1) {
-                console.log(output)
-            } else if (fd === 2) {
-                console.error(output)
-            }
-
-            // Set nwritten to the total bytes written to prevent infinite loop
-            if (nwritten) {
-                memoryView.setUint32(nwritten, output.length, true)
-            }
+export const topInit = async (): Promise<AiInstance> => {
+    let wasmInstance: AiInstance
+    
+    const importObject = {
+        wasi_snapshot_preview1: {
+            proc_exit: (code: number) => console.log(`Exit code: ${code}`),
+            fd_write: (fd: number, iovs: number, iovs_len: number, nwritten: number) => {
+                const memory = wasmInstance.exports.memory
+                const memoryView = new DataView(memory.buffer)
+    
+                let output = ''
+                for (let i = 0; i < iovs_len; i++) {
+                    const iovPtr = iovs + i * 8
+                    const ptr = memoryView.getUint32(iovPtr, true)
+                    const len = memoryView.getUint32(iovPtr + 4, true)
+                    const bytes = new Uint8Array(memory.buffer, ptr, len)
+                    output += textDecoder.decode(bytes)
+                }
+    
+                if (fd === 1) {
+                    console.log(output)
+                } else if (fd === 2) {
+                    console.error(output)
+                }
+    
+                // Set nwritten to the total bytes written to prevent infinite loop
+                if (nwritten) {
+                    memoryView.setUint32(nwritten, output.length, true)
+                }
+            },
         },
-    },
-}
+    }
 
-let wasmInstance: MyInstance
-
-export const topInit = async () => {
-    WebAssembly.instantiateStreaming(fetch('simulator-connector.wasm'), importObject).then(
-        (obj) => {
-            wasmInstance = obj.instance as MyInstance
-            wasmInstance.exports.exported_top_init()
-        }
+    const obj = await WebAssembly.instantiateStreaming(
+        fetch('simulator-connector.wasm'),
+        importObject
     )
+    wasmInstance = obj.instance as AiInstance
+    wasmInstance.exports.exported_top_init()
+    return wasmInstance
 }
 
 export interface StepInput {
@@ -68,7 +69,7 @@ export interface StepOutput {
     servo_pelle_ratio: number
 }
 
-export const topStep: (input: StepInput) => StepOutput = (input) => {
+export const topStep = (wasmInstance: AiInstance, input: StepInput): StepOutput => {
     const inputPtr = wasmInstance.exports.create_input()
     const outputPtr = wasmInstance.exports.create_output()
 
