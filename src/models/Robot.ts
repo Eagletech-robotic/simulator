@@ -191,6 +191,6 @@ export class SequentialRobot extends GenericRobot {
     }
 
     nextStep() {
-        this.moveForward(10)
+        this.steps.push(this.moveForward(0.05))
     }
 }
