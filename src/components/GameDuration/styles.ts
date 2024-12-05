@@ -9,7 +9,7 @@ export const Container = styled.div`
     width: 100%;
 `
 
-export const SliderInput = styled.input<{ seconds: number }>`
+export const SliderInput = styled.input<{ $seconds: number }>`
     position: relative;
     width: 100%;
     appearance: none;
@@ -58,7 +58,7 @@ export const SliderInput = styled.input<{ seconds: number }>`
     }
 
     &::after {
-        content: '${(props) => props.seconds} seconds';
+        content: '${(props) => props.$seconds} seconds';
         ${barLabelStyle}
     }
 

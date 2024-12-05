@@ -14,7 +14,7 @@ const GameDuration = ({
     return (
         <Container>
             <SliderInput
-                seconds={gameDuration}
+                $seconds={gameDuration}
                 id="game-duration"
                 type="range"
                 min={1}
