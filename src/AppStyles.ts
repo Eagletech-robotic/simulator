@@ -28,4 +28,8 @@ export const RobotChooser = styled.div`
 
 export const ControlButtons = styled.div`
     display: flex;
+    gap: 1rem;
+    height: 5rem;
+    padding: 1rem;
+    align-items: center;
 `

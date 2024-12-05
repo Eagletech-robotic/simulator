@@ -6,7 +6,6 @@ export const Container = styled.div`
     flex-direction: column;
     align-items: center;
     width: 10rem;
-    margin: 0.5rem 1rem;
 `
 
 export const SliderInput = styled.input`

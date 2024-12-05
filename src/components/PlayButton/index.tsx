@@ -1,10 +1,12 @@
+import { StyledPlayButton } from './styles'
+
 interface PlayButtonProps {
     isPlaying: boolean
     toggle: () => void
 }
 
 const PlayButton = ({ isPlaying, toggle }: PlayButtonProps): JSX.Element => {
-    return <button onClick={toggle}>{isPlaying ? 'Pause' : 'Play'}</button>
+    return <StyledPlayButton onClick={toggle}>{isPlaying ? 'Pause' : 'Play'}</StyledPlayButton>
 }
 
 export default PlayButton

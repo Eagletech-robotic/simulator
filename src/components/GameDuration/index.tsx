@@ -1,4 +1,4 @@
-import { Container, Label, SliderInput } from './style'
+import { Container, Label, SliderInput } from './styles'
 
 interface GameDurationProps {
     gameDuration: number

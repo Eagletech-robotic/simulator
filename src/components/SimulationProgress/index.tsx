@@ -8,7 +8,7 @@ const SimulationProgress = ({ progressPercentage }: SimulationProgressProps): JS
     return (
         <Container>
             <ProgressBar progressPercentage={progressPercentage} />
-            <StateIndicator>
+            <StateIndicator show={progressPercentage != 0}>
                 {progressPercentage == 0
                     ? ''
                     : progressPercentage == 100
