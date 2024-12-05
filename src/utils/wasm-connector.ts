@@ -12,14 +12,14 @@ export type AiInstance = WebAssembly.Instance & {
 
 export const topInit = async (): Promise<AiInstance> => {
     let wasmInstance: AiInstance
-    
+
     const importObject = {
         wasi_snapshot_preview1: {
             proc_exit: (code: number) => console.log(`Exit code: ${code}`),
             fd_write: (fd: number, iovs: number, iovs_len: number, nwritten: number) => {
                 const memory = wasmInstance.exports.memory
                 const memoryView = new DataView(memory.buffer)
-    
+
                 let output = ''
                 for (let i = 0; i < iovs_len; i++) {
                     const iovPtr = iovs + i * 8
@@ -28,13 +28,13 @@ export const topInit = async (): Promise<AiInstance> => {
                     const bytes = new Uint8Array(memory.buffer, ptr, len)
                     output += textDecoder.decode(bytes)
                 }
-    
+
                 if (fd === 1) {
                     console.log(output)
                 } else if (fd === 2) {
                     console.error(output)
                 }
-    
+
                 // Set nwritten to the total bytes written to prevent infinite loop
                 if (nwritten) {
                     memoryView.setUint32(nwritten, output.length, true)

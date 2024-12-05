@@ -7,6 +7,13 @@ import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
 import PlayButton from './components/PlayButton'
+import GameDuration from './components/GameDuration'
+import { stepDurationMs } from './models/constants'
+import SimulationProgress from './components/SimulationProgress'
+
+type AppState = 'playing' | 'paused' | 'editing'
+
+const NB_STEPS_PER_PLAYING_INTERVAL = 200
 
 const App = (): JSX.Element => {
     const editorElRef = useRef<HTMLDivElement>(null)
@@ -27,22 +34,40 @@ const App = (): JSX.Element => {
         }
     }
 
-    const [isPlaying, setIsPlaying] = useState(false)
-    const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
+    const [appState, setAppState] = useState<AppState>('editing')
+    const [playingStep, setPlayingStep] = useState(0)
+    const [simulationStep, setSimulationStep] = useState(0)
 
-    useEffect(() => {
-        if (isPlaying) {
-            intervalIdRef.current = setInterval(() => {
-                for (let i = 0; i < 100; i++) game.nextStep()
+    const [gameDurationSeconds, setGameDurationSeconds] = useState(100)
+    const simulatioIntervalRef = useRef<NodeJS.Timeout | null>(null)
+    const playingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-                if (canvasRef.current && game.currentStepNumber % 100 === 0) {
-                    game.draw(canvasRef.current)
-                }
-            }, 0)
-        } else {
-            if (intervalIdRef.current) clearInterval(intervalIdRef.current)
-        }
-    }, [isPlaying])
+    const nbSimulationSteps = (gameDurationSeconds * 1000) / stepDurationMs
+
+    const runSimulation = () => {
+        clearInterval(simulatioIntervalRef.current || undefined)
+        simulatioIntervalRef.current = setInterval(() => {
+            for (let i = 0; i < 100; i++) game.nextStep()
+            setSimulationStep((prevSimulationStep) => prevSimulationStep + 100)
+            if (game.lastStepNumber >= nbSimulationSteps) {
+                clearInterval(simulatioIntervalRef.current || undefined)
+            }
+        }, 0)
+    }
+
+    const play = () => {
+        clearInterval(playingIntervalRef.current || undefined)
+        playingIntervalRef.current = setInterval(() => {
+            setPlayingStep((prevPlayingStep) => {
+                const playingStep = Math.min(
+                    prevPlayingStep + NB_STEPS_PER_PLAYING_INTERVAL,
+                    game.lastStepNumber
+                )
+                if (canvasRef.current) game.draw(canvasRef.current, playingStep)
+                return playingStep
+            })
+        }, stepDurationMs * NB_STEPS_PER_PLAYING_INTERVAL)
+    }
 
     return (
         <>
@@ -56,7 +81,30 @@ const App = (): JSX.Element => {
                         }}
                     />
                     <ControlButtons>
-                        <PlayButton isPlaying={isPlaying} toggle={() => setIsPlaying(!isPlaying)} />
+                        <PlayButton
+                            isPlaying={appState === 'playing'}
+                            toggle={async () => {
+                                const newState = appState === 'playing' ? 'paused' : 'playing'
+                                setAppState(newState)
+                                if (appState === 'editing') {
+                                    await game.restart()
+                                    runSimulation()
+                                    play()
+                                } else {
+                                    clearInterval(playingIntervalRef.current || undefined)
+                                    if (newState === 'playing') {
+                                        play()
+                                    }
+                                }
+                            }}
+                        />
+                        <GameDuration
+                            gameDuration={gameDurationSeconds}
+                            setGameDuration={setGameDurationSeconds}
+                        />
+                        <SimulationProgress
+                            progressPercentage={(simulationStep / nbSimulationSteps) * 100}
+                        />
                     </ControlButtons>
                 </div>
 

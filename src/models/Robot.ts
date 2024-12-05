@@ -34,7 +34,6 @@ export abstract class GenericRobot {
     constructor(color: 'blue' | 'yellow') {
         this.color = color
         this.id = Math.floor(Math.random() * 1000000)
-        this.restart()
     }
 
     moveForward(distance: number): GenericRobotStep {
@@ -59,8 +58,6 @@ export abstract class GenericRobot {
     isControlled(): this is ControlledRobot {
         return this.type === 'controlled'
     }
-
-    async restart(): Promise<void> {}
 }
 
 export class ControlledRobot extends GenericRobot {
@@ -78,7 +75,7 @@ export class ControlledRobot extends GenericRobot {
         this.steps = [{ x, y, orientation, leftWheelDistance: 0, rightWheelDistance: 0 }]
     }
 
-    async restart() {
+    async resetAiInstance() {
         this.aiInstance = await topInit()
     }
 

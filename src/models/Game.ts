@@ -1,10 +1,9 @@
 import { Canvas } from './Canvas'
 import { ControlledRobot, GenericRobot, SequentialRobot } from './Robot'
-import { stepDurationMs } from './constants'
 
 export class Game {
     private _robots: Array<GenericRobot>
-    private _currentStepNumber = 0
+    private _lastStepNumber = 0
 
     constructor() {
         this._robots = [
@@ -17,21 +16,21 @@ export class Game {
         ]
     }
 
-    get currentStepNumber() {
-        return this._currentStepNumber
+    get lastStepNumber() {
+        return this._lastStepNumber
     }
 
-    get simulatedTimeMs() {
-        return this._currentStepNumber * stepDurationMs
-    }
-
-    draw(canvas: Canvas, stepNb = this._currentStepNumber) {
+    draw(canvas: Canvas, stepNb = this._lastStepNumber) {
         canvas.clearCanvas()
         this._robots.forEach((robot) => robot.draw(canvas, stepNb))
     }
 
     async restart() {
-        await Promise.all(this._robots.map((robot) => robot.restart()))
+        await Promise.all(
+            this._robots
+                .filter((robot) => robot.isControlled())
+                .map((robot) => robot.resetAiInstance())
+        )
     }
 
     get robots() {
@@ -40,7 +39,7 @@ export class Game {
 
     nextStep(): void {
         this._robots.map((r) => r.nextStep())
-        this._currentStepNumber++
+        this._lastStepNumber++
     }
 
     appendRobot(robot: GenericRobot) {
