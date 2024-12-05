@@ -107,7 +107,16 @@ const App = (): JSX.Element => {
                         <SimulationProgress
                             progressPercentage={(simulationStep / nbSimulationSteps) * 100}
                         />
-                        <StopButton />
+                        <StopButton
+                            onClick={() => {
+                                setAppState('editing')
+                                clearInterval(playingIntervalRef.current || undefined)
+                                clearInterval(simulatioIntervalRef.current || undefined)
+                                game.restart()
+                                setPlayingStep(0)
+                                setSimulationStep(0)
+                            }}
+                        />
                     </ControlButtons>
                 </div>
 
