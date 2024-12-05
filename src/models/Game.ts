@@ -31,6 +31,7 @@ export class Game {
                 .filter((robot) => robot.isControlled())
                 .map((robot) => robot.resetAiInstance())
         )
+        this._lastStepNumber = 0
     }
 
     get robots() {
