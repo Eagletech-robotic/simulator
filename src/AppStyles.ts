@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { colors } from './styles/commonStyles'
 
 export const Page = styled.div`
     display: grid;
@@ -12,7 +13,7 @@ export const StepEditor = styled.div`
     display: grid;
     grid-template-rows: 6rem 1fr;
     overflow: hidden;
-    background-color: #f0f0f0;
+    background-color: ${colors.lightGrey};
     margin: 2rem;
     border-radius: 1rem;
 `

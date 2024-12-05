@@ -2,9 +2,11 @@ import { createGlobalStyle, css } from 'styled-components'
 
 export const colors = {
     blue: '#2196f3',
+    blueHover: '#0056b3',
     yellow: '#ffeb3b',
     darkGrey: '#e0e0e0',
     darkGreyHover: '#d0d0d0',
+    lightGrey: '#f0f0f0',
 }
 
 const styles = css`

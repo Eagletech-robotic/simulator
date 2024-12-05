@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
+import { useLayoutEffect, useReducer, useRef, useState } from 'react'
 import { ControlButtons, Page, RobotChooser, StepEditor } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
 import RobotSelectors from './components/StepEditor/RobotSelectors'
@@ -101,6 +101,7 @@ const App = (): JSX.Element => {
                         <GameDuration
                             gameDuration={gameDurationSeconds}
                             setGameDuration={setGameDurationSeconds}
+                            isEditing={appState === 'editing'}
                         />
                         <SimulationProgress
                             progressPercentage={(simulationStep / nbSimulationSteps) * 100}
