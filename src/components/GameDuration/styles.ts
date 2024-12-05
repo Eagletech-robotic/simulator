@@ -1,14 +1,16 @@
-import { colors } from 'src/styles/commonStyles'
+import { barLabelStyle, colors } from 'src/styles/commonStyles'
 import styled from 'styled-components'
 
 export const Container = styled.div`
+    grid-area: gameDuration;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 10rem;
+    width: 100%;
 `
 
-export const SliderInput = styled.input`
+export const SliderInput = styled.input<{ seconds: number }>`
+    position: relative;
     width: 100%;
     appearance: none;
     background-color: ${colors.darkGrey};
@@ -53,6 +55,15 @@ export const SliderInput = styled.input`
         &::-moz-range-thumb {
             background: ${colors.darkGrey};
         }
+    }
+
+    &::after {
+        content: '${(props) => props.seconds} seconds';
+        ${barLabelStyle}
+    }
+
+    &:disabled::after {
+        color: ${colors.darkGrey};
     }
 `
 

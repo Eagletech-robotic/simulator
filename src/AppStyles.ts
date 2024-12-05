@@ -27,9 +27,12 @@ export const RobotChooser = styled.div`
 `
 
 export const ControlButtons = styled.div`
-    display: flex;
+    display: grid;
+    grid-template-columns: 3rem 1fr 4fr 4rem 3rem;
+    grid-template-rows: 3rem;
+    grid-template-areas: 'play gameDuration progress simulationProgress stop';
+
     gap: 1rem;
-    height: 5rem;
     padding: 1rem;
     align-items: center;
 `

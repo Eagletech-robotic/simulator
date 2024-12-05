@@ -1,4 +1,7 @@
 import { StyledPlayButton } from './styles'
+import playIcon from 'src/assets/play-icon.svg'
+import pauseIcon from 'src/assets/pause-icon.svg'
+import { Icon } from 'src/styles/commonStyles'
 
 interface PlayButtonProps {
     isPlaying: boolean
@@ -6,7 +9,11 @@ interface PlayButtonProps {
 }
 
 const PlayButton = ({ isPlaying, toggle }: PlayButtonProps): JSX.Element => {
-    return <StyledPlayButton onClick={toggle}>{isPlaying ? 'Pause' : 'Play'}</StyledPlayButton>
+    return (
+        <StyledPlayButton onClick={toggle}>
+            <Icon src={isPlaying ? pauseIcon : playIcon} />
+        </StyledPlayButton>
+    )
 }
 
 export default PlayButton

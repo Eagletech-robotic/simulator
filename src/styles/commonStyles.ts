@@ -1,4 +1,4 @@
-import { createGlobalStyle, css } from 'styled-components'
+import styled, { createGlobalStyle, css } from 'styled-components'
 
 export const colors = {
     blue: '#2196f3',
@@ -33,3 +33,26 @@ const styles = css`
 `
 
 export const GlobalStyles = createGlobalStyle`${styles}`
+
+export const playbackButtonStyle = css`
+    padding: 0.5rem;
+    border: none;
+    height: 100%;
+    width: 100%;
+    border-radius: 1rem;
+    cursor: pointer;
+`
+
+export const barLabelStyle = css`
+    font-size: 0.8rem;
+    position: absolute;
+    color: #000;
+    top: 1rem;
+    width: 100%;
+    text-align: center;
+`
+
+export const Icon = styled.img`
+    width: 100%;
+    height: 100%;
+`

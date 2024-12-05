@@ -14,6 +14,7 @@ const GameDuration = ({
     return (
         <Container>
             <SliderInput
+                seconds={gameDuration}
                 id="game-duration"
                 type="range"
                 min={1}
@@ -22,7 +23,6 @@ const GameDuration = ({
                 onChange={(e) => setGameDuration(parseInt(e.target.value))}
                 disabled={!isEditing}
             />
-            <Label htmlFor="game-duration">{gameDuration} seconds</Label>
         </Container>
     )
 }

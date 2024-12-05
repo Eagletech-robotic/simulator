@@ -10,6 +10,7 @@ import PlayButton from './components/PlayButton'
 import GameDuration from './components/GameDuration'
 import { stepDurationMs } from './models/constants'
 import SimulationProgress from './components/SimulationProgress'
+import StopButton from './components/StopButton'
 
 type AppState = 'playing' | 'paused' | 'editing'
 
@@ -106,6 +107,7 @@ const App = (): JSX.Element => {
                         <SimulationProgress
                             progressPercentage={(simulationStep / nbSimulationSteps) * 100}
                         />
+                        <StopButton />
                     </ControlButtons>
                 </div>
 
