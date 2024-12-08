@@ -47,7 +47,7 @@ export const barLabelStyle = css`
     font-size: 0.8rem;
     position: absolute;
     color: #000;
-    top: 1rem;
+    top: 1.2rem;
     width: 100%;
     text-align: center;
 `

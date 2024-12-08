@@ -1,5 +1,5 @@
 import { useLayoutEffect, useReducer, useRef, useState } from 'react'
-import { Controls, Page, RobotChooser, StepEditor } from './AppStyles'
+import { Controls, Page, PlaybackBar, RobotChooser, SimulationBar, StepEditor } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
 import RobotSelectors from './components/StepEditor/RobotSelectors'
 import Editor from './components/StepEditor/Editor'
@@ -9,8 +9,8 @@ import { Canvas } from './models/Canvas'
 import PlayButton from './components/Controls/PlayButton'
 import GameDuration from './components/Controls/GameDuration'
 import { stepDurationMs } from './models/constants'
-import SimulationProgress from './components/Controls/SimulationProgress'
 import StopButton from './components/Controls/StopButton'
+import ProgressBar from './components/Controls/ProgressBar'
 
 type AppState = 'playing' | 'paused' | 'editing'
 
@@ -107,9 +107,22 @@ const App = (): JSX.Element => {
                             setGameDuration={setGameDurationSeconds}
                             isEditing={appState === 'editing'}
                         />
-                        <SimulationProgress
-                            progressPercentage={(game.lastStepNumber / nbSimulationSteps) * 100}
-                        />
+                        <PlaybackBar>
+                            <ProgressBar
+                                progressPercentage={(playingStep / nbSimulationSteps) * 100}
+                                labelFunction={(progressPercentage: number) =>
+                                    `Progress: ${progressPercentage.toFixed(2)}%`
+                                }
+                            />
+                        </PlaybackBar>
+                        <SimulationBar>
+                            <ProgressBar
+                                progressPercentage={(game.lastStepNumber / nbSimulationSteps) * 100}
+                                labelFunction={(progressPercentage: number) =>
+                                    progressPercentage == 100 ? 'Finished' : 'Simulating...'
+                                }
+                            />
+                        </SimulationBar>
                         <StopButton
                             onClick={async () => {
                                 setAppState('editing')

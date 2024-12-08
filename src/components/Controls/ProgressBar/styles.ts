@@ -2,13 +2,13 @@ import { barLabelStyle, colors } from 'src/styles/commonStyles'
 import styled from 'styled-components'
 
 export const Container = styled.div`
-    grid-area: simulationProgress;
+    grid-area: playbackProgress;
     position: relative;
     width: 100%;
 `
 
-export const ProgressBar = styled.div<{ $progressPercentage: number }>`
-    height: 0.8rem;
+export const Bar = styled.div<{ $progressPercentage: number }>`
+    height: 14px;
     background-color: ${colors.darkGrey};
     border-radius: 0.4rem;
     position: relative;
@@ -25,8 +25,8 @@ export const ProgressBar = styled.div<{ $progressPercentage: number }>`
     }
 `
 
-export const StateIndicator = styled.div<{ $show: boolean }>`
-    display: ${(props) => (props.$show ? 'block' : 'none')};
-
+export const Label = styled.div<{ $visible: boolean }>`
+    opacity: ${(props) => (props.$visible ? 1 : 0)};
+    transition: opacity 0.3s;
     ${barLabelStyle}
 `
