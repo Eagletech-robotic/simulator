@@ -1,16 +1,14 @@
 import { useLayoutEffect, useReducer, useRef, useState } from 'react'
-import { Controls, Page, PlaybackBar, RobotChooser, SimulationBar, StepEditor } from './AppStyles'
+import { Page, RobotChooser, StepEditor } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
 import RobotSelectors from './components/StepEditor/RobotSelectors'
 import Editor from './components/StepEditor/Editor'
 import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
-import PlayButton from './components/Controls/PlayButton'
-import GameDuration from './components/Controls/GameDuration'
+
 import { stepDurationMs } from './models/constants'
-import StopButton from './components/Controls/StopButton'
-import ProgressBar from './components/Controls/ProgressBar'
+import Controls from './components/ControlSection/Controls'
 
 type AppState = 'playing' | 'paused' | 'editing'
 
@@ -84,56 +82,25 @@ const App = (): JSX.Element => {
                             if (canvasEl) canvasRef.current = new Canvas(canvasEl)
                         }}
                     />
-                    <Controls>
-                        <PlayButton
-                            isPlaying={appState === 'playing'}
-                            toggle={async () => {
-                                const newState = appState === 'playing' ? 'paused' : 'playing'
-                                setAppState(newState)
-                                if (appState === 'editing') {
-                                    await game.restart()
-                                    runSimulation()
-                                    play()
-                                } else {
-                                    clearInterval(playingIntervalRef.current || undefined)
-                                    if (newState === 'playing') {
-                                        play()
-                                    }
-                                }
-                            }}
-                        />
-                        <GameDuration
-                            gameDuration={gameDurationSeconds}
-                            setGameDuration={setGameDurationSeconds}
-                            isEditing={appState === 'editing'}
-                        />
-                        <PlaybackBar>
-                            <ProgressBar
-                                progressPercentage={(playingStep / nbSimulationSteps) * 100}
-                                labelFunction={(progressPercentage: number) =>
-                                    `Progress: ${progressPercentage.toFixed(2)}%`
-                                }
-                            />
-                        </PlaybackBar>
-                        <SimulationBar>
-                            <ProgressBar
-                                progressPercentage={(game.lastStepNumber / nbSimulationSteps) * 100}
-                                labelFunction={(progressPercentage: number) =>
-                                    progressPercentage == 100 ? 'Finished' : 'Simulating...'
-                                }
-                            />
-                        </SimulationBar>
-                        <StopButton
-                            onClick={async () => {
-                                setAppState('editing')
-                                clearInterval(playingIntervalRef.current || undefined)
-                                clearInterval(simulatioIntervalRef.current || undefined)
-                                await game.restart()
-                                if (canvasRef.current) game.draw(canvasRef.current)
-                                setPlayingStep(0)
-                            }}
-                        />
-                    </Controls>
+
+                    <Controls
+                        {...{
+                            playingIntervalRef,
+                            simulatioIntervalRef,
+                            nbSimulationSteps,
+                            runSimulation,
+                            appState,
+                            setAppState,
+                            gameDurationSeconds,
+                            setGameDurationSeconds,
+                            playingStep,
+                            setPlayingStep,
+                            game,
+                            canvasRef,
+                            stepChanged,
+                            play,
+                        }}
+                    />
                 </div>
 
                 {game && (

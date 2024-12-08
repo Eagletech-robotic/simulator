@@ -21,7 +21,7 @@ export const Bar = styled.div<{ $progressPercentage: number }>`
         height: 100%;
         background-color: ${colors.blue};
         border-radius: 0.4rem;
-        transition: width 0.3s;
+        transition: width 0.3s linear;
     }
 `
 
