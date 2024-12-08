@@ -8,11 +8,11 @@ export class Game {
     constructor() {
         this._robots = [
             new ControlledRobot('blue', 250, 250, Math.PI / 2),
-            /*new SequentialRobot('blue', 100, 2900, Math.PI / 2),
+            new SequentialRobot('blue', 100, 2900, Math.PI / 2),
             new SequentialRobot('blue', 100, 2700, Math.PI / 2),
             new ControlledRobot('yellow', 2750, 250, -Math.PI / 2),
             new SequentialRobot('yellow', 2900, 2900, -Math.PI / 2),
-            new SequentialRobot('yellow', 2900, 2700, -Math.PI / 2),*/
+            new SequentialRobot('yellow', 2900, 2700, -Math.PI / 2),
         ]
     }
 
@@ -26,11 +26,7 @@ export class Game {
     }
 
     async restart() {
-        await Promise.all(
-            this._robots
-                .filter((robot) => robot.isControlled())
-                .map((robot) => robot.resetAiInstance())
-        )
+        await Promise.all(this._robots.map((robot) => robot.reset()))
         this._lastStepNumber = 0
     }
 

@@ -35,8 +35,6 @@ const App = (): JSX.Element => {
         }
     }
 
-    const [_, rerender] = useReducer((a) => a + 1, 0)
-
     const [appState, setAppState] = useState<AppState>('editing')
     const [playingStep, setPlayingStep] = useState(0)
 
@@ -49,11 +47,15 @@ const App = (): JSX.Element => {
     const runSimulation = () => {
         clearInterval(simulatioIntervalRef.current || undefined)
         simulatioIntervalRef.current = setInterval(() => {
-            for (let i = 0; i < 100; i++) game.nextStep()
-            rerender()
-            if (game.lastStepNumber >= nbSimulationSteps) {
-                clearInterval(simulatioIntervalRef.current || undefined)
+            for (let i = 0; i < 500; i++) {
+                game.nextStep()
+
+                if (game.lastStepNumber >= nbSimulationSteps) {
+                    clearInterval(simulatioIntervalRef.current || undefined)
+                    break
+                }
             }
+            reRender()
         }, 0)
     }
 
@@ -109,11 +111,12 @@ const App = (): JSX.Element => {
                             progressPercentage={(game.lastStepNumber / nbSimulationSteps) * 100}
                         />
                         <StopButton
-                            onClick={() => {
+                            onClick={async () => {
                                 setAppState('editing')
                                 clearInterval(playingIntervalRef.current || undefined)
                                 clearInterval(simulatioIntervalRef.current || undefined)
-                                game.restart()
+                                await game.restart()
+                                if (canvasRef.current) game.draw(canvasRef.current)
                                 setPlayingStep(0)
                             }}
                         />

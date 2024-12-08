@@ -29,11 +29,11 @@ export const topInit = async (): Promise<AiInstance> => {
                     output += textDecoder.decode(bytes)
                 }
 
-                if (fd === 1) {
+                /*if (fd === 1) {
                     console.log(output)
                 } else if (fd === 2) {
                     console.error(output)
-                }
+                }*/
 
                 // Set nwritten to the total bytes written to prevent infinite loop
                 if (nwritten) {

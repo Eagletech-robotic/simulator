@@ -25,6 +25,7 @@ export abstract class GenericRobot {
     abstract draw(canvas: Canvas, stepNb: number): void
     abstract nextStep(): void
     abstract get lastStep(): GenericRobotStep
+    abstract reset(): Promise<void> | void
 
     readonly color: 'blue' | 'yellow'
     readonly id: number
@@ -75,7 +76,12 @@ export class ControlledRobot extends GenericRobot {
         this.steps = [{ x, y, orientation, leftWheelDistance: 0, rightWheelDistance: 0 }]
     }
 
-    async resetAiInstance() {
+    async reset() {
+        this.steps = [this.steps[0]]
+        await this.resetAiInstance()
+    }
+
+    private async resetAiInstance() {
         this.aiInstance = await topInit()
     }
 
@@ -168,6 +174,10 @@ export class SequentialRobot extends GenericRobot {
     constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
         super(color)
         this.steps = [{ x, y, orientation }]
+    }
+
+    reset() {
+        this.steps = [this.steps[0]]
     }
 
     draw(canvas: Canvas, stepNb: number) {
