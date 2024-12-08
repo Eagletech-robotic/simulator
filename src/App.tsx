@@ -12,7 +12,7 @@ import Controls from './components/ControlSection/Controls'
 
 type AppState = 'playing' | 'paused' | 'editing'
 
-const NB_STEPS_PER_PLAYING_INTERVAL = 200
+const NB_STEPS_PER_PLAYING_INTERVAL = 30
 
 const App = (): JSX.Element => {
     const editorElRef = useRef<HTMLDivElement>(null)
