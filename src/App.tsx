@@ -1,16 +1,16 @@
 import { useLayoutEffect, useReducer, useRef, useState } from 'react'
-import { ControlButtons, Page, RobotChooser, StepEditor } from './AppStyles'
+import { Controls, Page, RobotChooser, StepEditor } from './AppStyles'
 import { GlobalStyles } from './styles/commonStyles'
 import RobotSelectors from './components/StepEditor/RobotSelectors'
 import Editor from './components/StepEditor/Editor'
 import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
-import PlayButton from './components/PlayButton'
-import GameDuration from './components/GameDuration'
+import PlayButton from './components/Controls/PlayButton'
+import GameDuration from './components/Controls/GameDuration'
 import { stepDurationMs } from './models/constants'
-import SimulationProgress from './components/SimulationProgress'
-import StopButton from './components/StopButton'
+import SimulationProgress from './components/Controls/SimulationProgress'
+import StopButton from './components/Controls/StopButton'
 
 type AppState = 'playing' | 'paused' | 'editing'
 
@@ -84,7 +84,7 @@ const App = (): JSX.Element => {
                             if (canvasEl) canvasRef.current = new Canvas(canvasEl)
                         }}
                     />
-                    <ControlButtons>
+                    <Controls>
                         <PlayButton
                             isPlaying={appState === 'playing'}
                             toggle={async () => {
@@ -120,7 +120,7 @@ const App = (): JSX.Element => {
                                 setPlayingStep(0)
                             }}
                         />
-                    </ControlButtons>
+                    </Controls>
                 </div>
 
                 {game && (

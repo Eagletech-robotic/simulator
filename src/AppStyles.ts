@@ -26,7 +26,7 @@ export const RobotChooser = styled.div`
     border-radius: 1rem;
 `
 
-export const ControlButtons = styled.div`
+export const Controls = styled.div`
     display: grid;
     grid-template-columns: 3rem 1fr 4fr 4rem 3rem;
     grid-template-rows: 3rem;

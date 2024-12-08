@@ -4,13 +4,13 @@ import styled from 'styled-components'
 export const StyledEditor = styled.div`
     display: flex;
     flex-direction: column;
-    margin: 10px;
+    margin: 0.6rem;
     overflow: auto;
 `
 
 export const EditRobot = styled.div<{ color: 'blue' | 'yellow' }>`
     background-color: ${colors.darkGrey};
-    margin: 10px;
+    margin: 0.6rem;
     padding: 1rem;
     position: relative;
     border-left: 5px solid ${(props) => (props.color === 'blue' ? colors.blue : colors.yellow)};
@@ -30,6 +30,6 @@ export const RobotAttribute = styled.div`
 export const Input = styled.input`
     font-size: 0.8rem;
     margin-left: 5px;
-    width: 4rem;
+    width: 5rem;
     height: 1.5rem;
 `
