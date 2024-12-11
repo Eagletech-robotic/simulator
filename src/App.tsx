@@ -1,14 +1,13 @@
 import { useLayoutEffect, useReducer, useRef, useState } from 'react'
-import { Page, RobotChooser, StepEditor } from './AppStyles'
+import { BoardAndControls, Page } from './styles'
 import { GlobalStyles } from './styles/commonStyles'
-import RobotSelectors from './components/StepEditor/RobotSelectors'
-import Editor from './components/StepEditor/Editor'
 import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
 
 import { stepDurationMs } from './models/constants'
-import Controls from './components/ControlSection/Controls'
+import Controls from './components/Controls'
+import Editor from './components/Editor'
 
 type AppState = 'playing' | 'paused' | 'editing'
 
@@ -76,7 +75,7 @@ const App = (): JSX.Element => {
             <GlobalStyles />
 
             <Page>
-                <div>
+                <BoardAndControls>
                     <GameBoard
                         ref={(canvasEl) => {
                             if (canvasEl) canvasRef.current = new Canvas(canvasEl)
@@ -101,21 +100,9 @@ const App = (): JSX.Element => {
                             play,
                         }}
                     />
-                </div>
+                </BoardAndControls>
 
-                {game && (
-                    <StepEditor>
-                        <RobotChooser>
-                            <RobotSelectors color="blue" {...{ game, editorElRef, stepChanged }} />
-                            <RobotSelectors
-                                color="yellow"
-                                {...{ game, editorElRef, stepChanged }}
-                            />
-                        </RobotChooser>
-
-                        <Editor {...{ game, stepChanged }} ref={editorElRef} />
-                    </StepEditor>
-                )}
+                {game && <Editor {...{ game, editorElRef, stepChanged }} />}
             </Page>
         </>
     )

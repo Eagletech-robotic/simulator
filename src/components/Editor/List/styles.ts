@@ -1,7 +1,7 @@
 import { colors } from 'src/styles/commonStyles'
 import styled from 'styled-components'
 
-export const StyledEditor = styled.div`
+export const StyledList = styled.div`
     display: flex;
     flex-direction: column;
     margin: 0.6rem;

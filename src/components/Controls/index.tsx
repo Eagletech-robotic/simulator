@@ -1,7 +1,7 @@
-import GameDuration from '../GameDuration'
-import PlayButton from '../PlayButton'
-import ProgressBar from '../ProgressBar'
-import StopButton from '../StopButton'
+import GameDuration from './GameDuration'
+import PlayButton from './PlayButton'
+import ProgressBar from './ProgressBar'
+import StopButton from './StopButton'
 import { PlaybackBar, SimulationBar, StyledControls } from './styles'
 
 interface ControlsProps {

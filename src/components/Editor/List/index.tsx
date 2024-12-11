@@ -1,4 +1,4 @@
-import { EditRobot, Input, RobotAttribute, RobotType, StyledEditor } from './styles'
+import { EditRobot, Input, RobotAttribute, RobotType, StyledList } from './styles'
 import React from 'react'
 import DeleteButton from '../DeleteButton'
 import { GenericRobot } from 'src/models/Robot'
@@ -9,10 +9,10 @@ interface EditorProps {
     stepChanged: () => void
 }
 
-const Editor = React.forwardRef<HTMLDivElement, EditorProps>(
+const List = React.forwardRef<HTMLDivElement, EditorProps>(
     ({ game, stepChanged }, ref): JSX.Element => {
         return (
-            <StyledEditor ref={ref}>
+            <StyledList ref={ref}>
                 {game.robots.map((robot) => (
                     <EditRobot key={robot.id} color={robot.color}>
                         <RobotType>{robotName(robot.type)}</RobotType>
@@ -39,7 +39,7 @@ const Editor = React.forwardRef<HTMLDivElement, EditorProps>(
                         />
                     </EditRobot>
                 ))}
-            </StyledEditor>
+            </StyledList>
         )
     }
 )
@@ -83,4 +83,4 @@ const RobotInput = ({ robot, attribute, game, stepChanged }: RobotInputProps): J
     )
 }
 
-export default Editor
+export default List

@@ -1,15 +1,7 @@
-import styled from 'styled-components'
-import { colors } from './styles/commonStyles'
+import styled from "styled-components";
+import { colors } from "../../styles/commonStyles";
 
-export const Page = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-column-gap: 1rem;
-    height: 100vh;
-    overflow: hidden;
-`
-
-export const StepEditor = styled.div`
+export const StyledEditor = styled.div`
     display: grid;
     grid-template-rows: 6rem 1fr;
     overflow: hidden;
