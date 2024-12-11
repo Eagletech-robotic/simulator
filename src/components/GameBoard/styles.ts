@@ -6,8 +6,8 @@ export const GameBoardWrapper = styled.div`
 `
 
 export const GameBoardCanvas = styled.canvas`
-    height: 800px;
-    width: 800px;
+    height: 801px;
+    width: 534px;
     display: block;
     background-color: ${colors.lightGrey};
 `
