@@ -1,5 +1,7 @@
 import { Canvas } from './Canvas'
-import { ControlledRobot, GenericRobot, SequentialRobot } from './Robot'
+import { ControlledRobot } from './ControlledRobot'
+import { GenericRobot } from './GenericRobot'
+import { SequentialRobot } from './SequentialRobot'
 
 export class Game {
     private _robots: Array<GenericRobot>

@@ -1,69 +1,16 @@
 import { AiInstance, topInit, topStep } from 'src/utils/wasm-connector'
 import { Canvas } from './Canvas'
 import {
-    controlledRobotHeight,
-    controlledRobotMaxSpeed,
-    controlledRobotWheelDiameter,
-    controlledRobotWheelsGap,
     controlledRobotWidth,
+    controlledRobotHeight,
+    controlledRobotWheelsGap,
+    controlledRobotWheelDiameter,
     encoderImpulsesPerWheelTurn,
+    controlledRobotMaxSpeed,
     stepDurationMs,
 } from './constants'
-
-interface GenericRobotStep {
-    x: number // millimeters, 0 is left
-    y: number // millimeters, 0 is top
-    orientation: number // radians, 0 is top, positive is clockwise
-}
-
-interface ControlledRobotStep extends GenericRobotStep {
-    leftWheelDistance: number
-    rightWheelDistance: number
-}
-
-export abstract class GenericRobot {
-    abstract readonly type: 'controlled' | 'sequential'
-    abstract readonly width: number
-    abstract readonly height: number
-
-    abstract draw(canvas: Canvas, stepNb: number): void
-    abstract nextStep(): void
-    abstract get lastStep(): GenericRobotStep
-    abstract reset(): Promise<void> | void
-
-    readonly color: 'blue' | 'yellow'
-    readonly id: number
-
-    abstract steps: Array<GenericRobotStep>
-
-    constructor(color: 'blue' | 'yellow') {
-        this.color = color
-        this.id = Math.floor(Math.random() * 1000000)
-    }
-
-    moveForward(distance: number): GenericRobotStep {
-        const step = this.lastStep
-
-        const unitCircleOrientation = -step.orientation + Math.PI / 2
-        return {
-            x: step.x + Math.cos(unitCircleOrientation) * distance,
-            y: step.y - Math.sin(unitCircleOrientation) * distance,
-            orientation: step.orientation,
-        }
-    }
-
-    setOrientationInDegrees(degrees: number) {
-        this.lastStep.orientation = (degrees * Math.PI) / 180
-    }
-
-    orientationInDegrees(stepNb = this.steps.length - 1): number {
-        return (this.steps[stepNb].orientation * 180) / Math.PI
-    }
-
-    isControlled(): this is ControlledRobot {
-        return this.type === 'controlled'
-    }
-}
+import { GenericRobot } from './GenericRobot'
+import { ControlledRobotStep } from './RobotStep'
 
 export class ControlledRobot extends GenericRobot {
     readonly type = 'controlled'
@@ -163,44 +110,5 @@ export class ControlledRobot extends GenericRobot {
             output.vitesse1_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
             output.vitesse2_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000)
         )
-    }
-}
-
-export class SequentialRobot extends GenericRobot {
-    readonly type = 'sequential'
-
-    readonly width = 150 // millimeters
-    readonly height = 150 // millimeters
-
-    steps: Array<GenericRobotStep>
-
-    constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
-        super(color)
-        this.steps = [{ x, y, orientation }]
-    }
-
-    reset() {
-        this.steps = [this.steps[0]]
-    }
-
-    draw(canvas: Canvas, stepNb: number) {
-        const step = this.steps[stepNb]
-        canvas.drawRectangle(
-            step.x,
-            step.y,
-            this.width,
-            this.height,
-            step.orientation,
-            canvas.getDrawingColor(this.color)
-        )
-        canvas.drawOrientationLine(step.x, step.y, step.orientation, this.width / 2)
-    }
-
-    get lastStep(): GenericRobotStep {
-        return this.steps[this.steps.length - 1]
-    }
-
-    nextStep() {
-        this.steps.push(this.moveForward(0.25))
     }
 }

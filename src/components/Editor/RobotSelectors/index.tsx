@@ -1,9 +1,11 @@
 import { ColorContainer, ColorIndicator } from './styles'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
-import { ControlledRobot, GenericRobot, SequentialRobot } from 'src/models/Robot'
 import RobotSelector from '../RobotSelector'
 import { Game } from 'src/models/Game'
+import { GenericRobot } from 'src/models/GenericRobot'
+import { ControlledRobot } from 'src/models/ControlledRobot'
+import { SequentialRobot } from 'src/models/SequentialRobot'
 
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { ControlledRobot } from './Robot'
 import { controlledRobotWheelsGap } from './constants'
+import { ControlledRobot } from './ControlledRobot'
 
 describe('moveFromWheelRotationDistances', () => {
     it('goes in a straight line (angle 0)', () => {
