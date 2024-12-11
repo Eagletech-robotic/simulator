@@ -1,4 +1,4 @@
-import { Bar, Container, Label } from './styles'
+import { Bar, BarProgress, Container, Label } from './styles'
 
 interface ProgressBarProps {
     progressPercentage: number
@@ -8,7 +8,9 @@ interface ProgressBarProps {
 const ProgressBar = ({ progressPercentage, labelFunction }: ProgressBarProps): JSX.Element => {
     return (
         <Container>
-            <Bar $progressPercentage={progressPercentage} />
+            <Bar>
+                <BarProgress style={{ width: `${progressPercentage}%` }} />
+            </Bar>
             <Label $visible={progressPercentage > 0}>{labelFunction(progressPercentage)}</Label>
         </Container>
     )
