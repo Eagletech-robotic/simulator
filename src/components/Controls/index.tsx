@@ -15,8 +15,9 @@ interface ControlsProps {
     canvasRef: any
     play: () => void
     playingIntervalRef: any
-    simulatioIntervalRef: any
+    simulationIntervalRef: any
     nbSimulationSteps: number
+    nbStepsPerPlayingInterval: number
     runSimulation: () => void
 }
 
@@ -31,8 +32,9 @@ const Controls = ({
     canvasRef,
     play,
     playingIntervalRef,
-    simulatioIntervalRef,
+    simulationIntervalRef,
     nbSimulationSteps,
+    nbStepsPerPlayingInterval,
     runSimulation,
 }: ControlsProps): JSX.Element => {
     return (
@@ -62,8 +64,11 @@ const Controls = ({
             <PlaybackBar>
                 <ProgressBar
                     progressPercentage={(playingStep / nbSimulationSteps) * 100}
-                    labelFunction={(progressPercentage: number) =>
-                        `Progress: ${progressPercentage.toFixed(2)}%`
+                    labelFunction={() =>
+                        `Progress: ${(
+                            (playingStep / nbSimulationSteps) *
+                            gameDurationSeconds
+                        ).toFixed(1)}s / ${gameDurationSeconds}s`
                     }
                 />
             </PlaybackBar>
@@ -79,7 +84,7 @@ const Controls = ({
                 onClick={async () => {
                     setAppState('editing')
                     clearInterval(playingIntervalRef.current || undefined)
-                    clearInterval(simulatioIntervalRef.current || undefined)
+                    clearInterval(simulationIntervalRef.current || undefined)
                     await game.restart()
                     if (canvasRef.current) game.draw(canvasRef.current)
                     setPlayingStep(0)

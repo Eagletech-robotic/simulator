@@ -36,19 +36,19 @@ const App = (): JSX.Element => {
     const [playingStep, setPlayingStep] = useState(0)
 
     const [gameDurationSeconds, setGameDurationSeconds] = useState(100)
-    const simulatioIntervalRef = useRef<NodeJS.Timeout | null>(null)
+    const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null)
     const playingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
     const nbSimulationSteps = (gameDurationSeconds * 1000) / stepDurationMs
 
     const runSimulation = () => {
-        clearInterval(simulatioIntervalRef.current || undefined)
-        simulatioIntervalRef.current = setInterval(() => {
+        clearInterval(simulationIntervalRef.current || undefined)
+        simulationIntervalRef.current = setInterval(() => {
             for (let i = 0; i < 500; i++) {
                 game.nextStep()
 
                 if (game.lastStepNumber >= nbSimulationSteps) {
-                    clearInterval(simulatioIntervalRef.current || undefined)
+                    clearInterval(simulationIntervalRef.current || undefined)
                     break
                 }
             }
@@ -85,7 +85,7 @@ const App = (): JSX.Element => {
                     <Controls
                         {...{
                             playingIntervalRef,
-                            simulatioIntervalRef,
+                            simulationIntervalRef,
                             nbSimulationSteps,
                             runSimulation,
                             appState,
@@ -97,6 +97,7 @@ const App = (): JSX.Element => {
                             game,
                             canvasRef,
                             stepChanged,
+                            nbStepsPerPlayingInterval: NB_STEPS_PER_PLAYING_INTERVAL,
                             play,
                         }}
                     />
