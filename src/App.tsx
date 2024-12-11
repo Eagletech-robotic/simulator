@@ -97,7 +97,6 @@ const App = (): JSX.Element => {
                             game,
                             canvasRef,
                             stepChanged,
-                            nbStepsPerPlayingInterval: NB_STEPS_PER_PLAYING_INTERVAL,
                             play,
                         }}
                     />

@@ -17,7 +17,6 @@ interface ControlsProps {
     playingIntervalRef: any
     simulationIntervalRef: any
     nbSimulationSteps: number
-    nbStepsPerPlayingInterval: number
     runSimulation: () => void
 }
 
@@ -34,7 +33,6 @@ const Controls = ({
     playingIntervalRef,
     simulationIntervalRef,
     nbSimulationSteps,
-    nbStepsPerPlayingInterval,
     runSimulation,
 }: ControlsProps): JSX.Element => {
     return (
