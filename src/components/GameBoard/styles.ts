@@ -1,13 +1,10 @@
-import { colors } from 'src/styles/commonStyles'
 import styled from 'styled-components'
 
-export const GameBoardWrapper = styled.div`
-    border: 2px solid black;
-`
-
-export const GameBoardCanvas = styled.canvas`
-    height: 801px;
-    width: 534px;
+export const StyledGameBoardCanvas = styled.canvas`
+    height: auto;
+    width: 100%;
     display: block;
-    background-color: ${colors.lightGrey};
+    background-image: url('src/assets/playmat.png');
+    background-size: cover;
+    background-repeat: no-repeat;
 `
