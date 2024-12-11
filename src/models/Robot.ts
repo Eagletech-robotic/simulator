@@ -1,7 +1,11 @@
 import { AiInstance, topInit, topStep } from 'src/utils/wasm-connector'
 import { Canvas } from './Canvas'
 import {
+    controlledRobotHeight,
+    controlledRobotMaxSpeed,
     controlledRobotWheelDiameter,
+    controlledRobotWheelsGap,
+    controlledRobotWidth,
     encoderImpulsesPerWheelTurn,
     stepDurationMs,
 } from './constants'
@@ -65,9 +69,8 @@ export class ControlledRobot extends GenericRobot {
     readonly type = 'controlled'
     aiInstance: AiInstance | undefined
 
-    readonly width = 350 // millimeters
-    readonly height = 350 // millimeters
-    readonly wheelsGap = 320 // millimeters
+    readonly width = controlledRobotWidth
+    readonly height = controlledRobotHeight
 
     steps: Array<ControlledRobotStep>
 
@@ -111,10 +114,10 @@ export class ControlledRobot extends GenericRobot {
             Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
                 ? leftWheelDistance
                 : rightWheelDistance
-        const bigCircleRadius = this.wheelsGap / (1 - smallestDistance / largestDistance)
+        const bigCircleRadius = controlledRobotWheelsGap / (1 - smallestDistance / largestDistance)
 
         const rotationAngle = (largestDistance / bigCircleRadius) * signMultiplier // definition of the radian
-        const middleCircleRadius = bigCircleRadius - this.wheelsGap / 2 // the circle described by the middle of the robot
+        const middleCircleRadius = bigCircleRadius - controlledRobotWheelsGap / 2 // the circle described by the middle of the robot
 
         // Update robot position and orientation
         const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
@@ -157,8 +160,8 @@ export class ControlledRobot extends GenericRobot {
         })
 
         this.moveFromWheelRotationDistances(
-            (output.vitesse1_ratio * 300 * stepDurationMs) / 1000, // Max is 1 which is 30 cm/s
-            (output.vitesse2_ratio * 300 * stepDurationMs) / 1000
+            output.vitesse1_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
+            output.vitesse2_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000)
         )
     }
 }

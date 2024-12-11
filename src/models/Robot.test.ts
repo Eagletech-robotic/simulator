@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ControlledRobot } from './Robot'
+import { controlledRobotWheelsGap } from './constants'
 
 describe('moveFromWheelRotationDistances', () => {
     it('goes in a straight line (angle 0)', () => {
@@ -23,8 +24,8 @@ describe('moveFromWheelRotationDistances', () => {
     it('spins around the center of rotation', () => {
         const robot = new ControlledRobot('yellow', 500, 500, 0)
         robot.moveFromWheelRotationDistances(
-            (robot.wheelsGap / 4) * Math.PI,
-            (-robot.wheelsGap / 4) * Math.PI
+            (controlledRobotWheelsGap / 4) * Math.PI,
+            (-controlledRobotWheelsGap / 4) * Math.PI
         )
         expect([robot.lastStep.x, robot.lastStep.y, robot.lastStep.orientation]).toEqual([
             500,
@@ -35,9 +36,9 @@ describe('moveFromWheelRotationDistances', () => {
 
     it('spins around the right wheel', () => {
         const robot = new ControlledRobot('yellow', 500, 500, 0)
-        robot.moveFromWheelRotationDistances(Math.PI * robot.wheelsGap, 0)
+        robot.moveFromWheelRotationDistances(Math.PI * controlledRobotWheelsGap, 0)
         expect([robot.lastStep.x, robot.lastStep.y, robot.lastStep.orientation]).toEqual([
-            500 + robot.wheelsGap,
+            500 + controlledRobotWheelsGap,
             500,
             Math.PI,
         ])
@@ -45,9 +46,9 @@ describe('moveFromWheelRotationDistances', () => {
 
     it('spins around the left wheel', () => {
         const robot = new ControlledRobot('yellow', 500, 500, 0)
-        robot.moveFromWheelRotationDistances(0, Math.PI * robot.wheelsGap)
+        robot.moveFromWheelRotationDistances(0, Math.PI * controlledRobotWheelsGap)
         expect([robot.lastStep.x, robot.lastStep.y, robot.lastStep.orientation]).toEqual([
-            500 - robot.wheelsGap,
+            500 - controlledRobotWheelsGap,
             500,
             -Math.PI,
         ])
@@ -55,10 +56,10 @@ describe('moveFromWheelRotationDistances', () => {
 
     it('spins backwards around the left wheel', () => {
         const robot = new ControlledRobot('yellow', 500, 500, 0)
-        robot.moveFromWheelRotationDistances(0, (-Math.PI * robot.wheelsGap) / 2)
+        robot.moveFromWheelRotationDistances(0, (-Math.PI * controlledRobotWheelsGap) / 2)
         expect([robot.lastStep.x, robot.lastStep.y, robot.lastStep.orientation]).toEqual([
-            500 - robot.wheelsGap / 2,
-            500 + robot.wheelsGap / 2,
+            500 - controlledRobotWheelsGap / 2,
+            500 + controlledRobotWheelsGap / 2,
             Math.PI / 2,
         ])
     })
@@ -66,12 +67,12 @@ describe('moveFromWheelRotationDistances', () => {
     it('describes a ratio 2:1 circle anticlockwise', () => {
         const robot = new ControlledRobot('yellow', 500, 500, 0)
         robot.moveFromWheelRotationDistances(
-            (robot.wheelsGap * Math.PI) / 2,
-            robot.wheelsGap * Math.PI
+            (controlledRobotWheelsGap * Math.PI) / 2,
+            controlledRobotWheelsGap * Math.PI
         )
         expect([robot.lastStep.x, robot.lastStep.y, robot.lastStep.orientation]).toBeCloseToArray([
-            500 - robot.wheelsGap * 1.5,
-            500 - robot.wheelsGap * 1.5,
+            500 - controlledRobotWheelsGap * 1.5,
+            500 - controlledRobotWheelsGap * 1.5,
             -Math.PI / 2,
         ])
     })
@@ -79,12 +80,12 @@ describe('moveFromWheelRotationDistances', () => {
     it('describes a ratio 2:1 circle clockwise', () => {
         const robot = new ControlledRobot('yellow', 500, 500, Math.PI / 2)
         robot.moveFromWheelRotationDistances(
-            robot.wheelsGap * Math.PI,
-            (robot.wheelsGap * Math.PI) / 2
+            controlledRobotWheelsGap * Math.PI,
+            (controlledRobotWheelsGap * Math.PI) / 2
         )
         expect([robot.lastStep.x, robot.lastStep.y, robot.lastStep.orientation]).toBeCloseToArray([
-            500 + robot.wheelsGap * 1.5,
-            500 + robot.wheelsGap * 1.5,
+            500 + controlledRobotWheelsGap * 1.5,
+            500 + controlledRobotWheelsGap * 1.5,
             Math.PI,
         ])
     })
