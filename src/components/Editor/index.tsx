@@ -9,7 +9,7 @@ interface EditorProps {
     stepChanged: () => void
 }
 
-const StepEditor = ({ game, editorElRef, stepChanged }: EditorProps): JSX.Element => {
+const Editor = ({ game, editorElRef, stepChanged }: EditorProps): JSX.Element => {
     return (
         <StyledEditor>
             <RobotChooser>
@@ -22,4 +22,4 @@ const StepEditor = ({ game, editorElRef, stepChanged }: EditorProps): JSX.Elemen
     )
 }
 
-export default StepEditor
+export default Editor
