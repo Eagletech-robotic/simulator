@@ -1,17 +1,23 @@
+import { Log } from 'src/models/RobotStep'
+
 const textDecoder = new TextDecoder() // For decoding UTF-8 strings
 
-export type AiInstance = WebAssembly.Instance & {
-    exports: {
-        memory: WebAssembly.Memory
-        exported_top_init: () => void
-        create_input: () => number
-        create_output: () => number
-        exported_top_step: (input: number, output: number) => void
+export type AiInstance = {
+    wasmInstance: WebAssembly.Instance & {
+        exports: {
+            memory: WebAssembly.Memory
+            exported_top_init: () => void
+            create_input: () => number
+            create_output: () => number
+            exported_top_step: (input: number, output: number) => void
+        }
     }
+    logs: Array<Log>
 }
 
 export const topInit = async (): Promise<AiInstance> => {
-    let wasmInstance: AiInstance
+    const logs: Array<Log> = []
+    let wasmInstance: AiInstance['wasmInstance']
 
     const importObject = {
         wasi_snapshot_preview1: {
@@ -29,11 +35,7 @@ export const topInit = async (): Promise<AiInstance> => {
                     output += textDecoder.decode(bytes)
                 }
 
-                /*if (fd === 1) {
-                    console.log(output)
-                } else if (fd === 2) {
-                    console.error(output)
-                }*/
+                logs.push({ log: output, level: fd === 1 ? 'info' : 'error' })
 
                 // Set nwritten to the total bytes written to prevent infinite loop
                 if (nwritten) {
@@ -47,9 +49,9 @@ export const topInit = async (): Promise<AiInstance> => {
         fetch('simulator-connector.wasm'),
         importObject
     )
-    wasmInstance = obj.instance as AiInstance
+    wasmInstance = obj.instance as AiInstance['wasmInstance']
     wasmInstance.exports.exported_top_init()
-    return wasmInstance
+    return { wasmInstance, logs }
 }
 
 export interface StepInput {
@@ -69,7 +71,11 @@ export interface StepOutput {
     servo_pelle_ratio: number
 }
 
-export const topStep = (wasmInstance: AiInstance, input: StepInput): StepOutput => {
+export const topStep = (
+    aiInstance: AiInstance,
+    input: StepInput
+): { output: StepOutput; logs: Array<Log> } => {
+    const { wasmInstance, logs } = aiInstance
     const inputPtr = wasmInstance.exports.create_input()
     const outputPtr = wasmInstance.exports.create_output()
 
@@ -94,12 +100,16 @@ export const topStep = (wasmInstance: AiInstance, input: StepInput): StepOutput 
     intView[11] = input.encoder1
     intView[12] = input.encoder2
 
+    logs.length = 0
     wasmInstance.exports.exported_top_step(inputPtr, outputPtr)
 
     const floatViewOutput = new Float32Array(wasmMemory.buffer, outputPtr, 3)
     return {
-        vitesse1_ratio: floatViewOutput[0],
-        vitesse2_ratio: floatViewOutput[1],
-        servo_pelle_ratio: floatViewOutput[2],
+        output: {
+            vitesse1_ratio: floatViewOutput[0],
+            vitesse2_ratio: floatViewOutput[1],
+            servo_pelle_ratio: floatViewOutput[2],
+        },
+        logs: [...logs],
     }
 }

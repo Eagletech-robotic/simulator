@@ -1,4 +1,4 @@
-import { AiInstance, topInit, topStep } from 'src/utils/wasm-connector'
+import { AiInstance, StepInput, topInit, topStep } from 'src/utils/wasm-connector'
 import { Canvas } from './Canvas'
 import {
     controlledRobotWidth,
@@ -12,6 +12,11 @@ import {
 import { GenericRobot } from './GenericRobot'
 import { ControlledRobotStep } from './RobotStep'
 
+type Move = Pick<
+    ControlledRobotStep,
+    'x' | 'y' | 'orientation' | 'leftWheelDistance' | 'rightWheelDistance'
+>
+
 export class ControlledRobot extends GenericRobot {
     readonly type = 'controlled'
     aiInstance: AiInstance | undefined
@@ -23,7 +28,18 @@ export class ControlledRobot extends GenericRobot {
 
     constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
         super(color)
-        this.steps = [{ x, y, orientation, leftWheelDistance: 0, rightWheelDistance: 0 }]
+        this.steps = [
+            {
+                x,
+                y,
+                orientation,
+                leftWheelDistance: 0,
+                rightWheelDistance: 0,
+                input: null,
+                logs: null,
+                output: null,
+            },
+        ]
     }
 
     async reset() {
@@ -39,17 +55,16 @@ export class ControlledRobot extends GenericRobot {
         return this.steps[this.steps.length - 1]
     }
 
-    moveFromWheelRotationDistances(leftWheelDistance: number, rightWheelDistance: number) {
+    buildMove(leftWheelDistance: number, rightWheelDistance: number): Move {
         const step = this.lastStep
 
         // If both wheels have moved the same distance, the robot has moved forward
         if (leftWheelDistance === rightWheelDistance) {
-            this.steps.push({
+            return {
                 ...this.moveForward(leftWheelDistance),
                 leftWheelDistance,
                 rightWheelDistance,
-            })
-            return
+            }
         }
 
         const signMultiplier = Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance) ? 1 : -1
@@ -69,7 +84,7 @@ export class ControlledRobot extends GenericRobot {
         // Update robot position and orientation
         const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
 
-        this.steps.push({
+        return {
             x:
                 step.x +
                 middleCircleRadius *
@@ -81,7 +96,7 @@ export class ControlledRobot extends GenericRobot {
             orientation: step.orientation + rotationAngle,
             leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
             rightWheelDistance: step.rightWheelDistance + rightWheelDistance,
-        })
+        }
     }
 
     draw(canvas: Canvas, stepNb: number) {
@@ -101,7 +116,7 @@ export class ControlledRobot extends GenericRobot {
 
         const wheelCircumference = Math.PI * controlledRobotWheelDiameter // millimeters
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // millimeters
-        const output = topStep(this.aiInstance!, {
+        const input: StepInput = {
             is_jack_gone: 1,
             last_wifi_data: [],
             encoder1: step.leftWheelDistance / impulseDistance,
@@ -110,11 +125,13 @@ export class ControlledRobot extends GenericRobot {
             gyro: [0, 0, 0],
             accelero: [0, 0, 0],
             compass: [0, 0, 0],
-        })
+        }
+        const { output, logs } = topStep(this.aiInstance!, input)
 
-        this.moveFromWheelRotationDistances(
+        const move = this.buildMove(
             output.vitesse1_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
             output.vitesse2_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000)
         )
+        this.steps.push({ ...move, input, logs, output })
     }
 }
