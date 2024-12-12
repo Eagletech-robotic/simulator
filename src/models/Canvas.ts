@@ -34,8 +34,9 @@ export class Canvas {
         this.ctx.restore()
     }
 
-    drawCircle(x: number, y: number, radius: number, color: string): void {
+    drawCircle(x: number, y: number, radius: number, color: string, opacity = 1): void {
         this.ctx.fillStyle = color
+        this.ctx.globalAlpha = opacity
         this.ctx.beginPath()
         this.ctx.arc(x, y, radius, 0, 2 * Math.PI)
         this.ctx.fill()
