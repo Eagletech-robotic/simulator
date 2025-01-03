@@ -5,6 +5,7 @@ export const StyledRobotSelector = styled.button`
     border: none;
     background-color: #c0c0e0;
     padding: 0.5rem;
+    cursor: pointer;
 
     &:hover {
         background-color: #b0b0d0;

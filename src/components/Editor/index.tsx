@@ -1,7 +1,8 @@
 import { Game } from 'src/models/Game'
 import List from './List'
 import RobotSelectors from './RobotSelectors'
-import { StyledEditor, RobotChooser } from './styles'
+import { RobotChooser } from './styles'
+import { RightPanel } from 'src/styles/commonStyles'
 
 interface EditorProps {
     game: Game
@@ -11,14 +12,14 @@ interface EditorProps {
 
 const Editor = ({ game, editorElRef, stepChanged }: EditorProps): JSX.Element => {
     return (
-        <StyledEditor>
+        <RightPanel>
             <RobotChooser>
                 <RobotSelectors color="blue" {...{ game, editorElRef, stepChanged }} />
                 <RobotSelectors color="yellow" {...{ game, editorElRef, stepChanged }} />
             </RobotChooser>
 
             <List {...{ game, stepChanged }} ref={editorElRef} />
-        </StyledEditor>
+        </RightPanel>
     )
 }
 

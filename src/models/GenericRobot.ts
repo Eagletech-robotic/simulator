@@ -39,4 +39,13 @@ export abstract class GenericRobot {
     orientationInDegrees(stepNb = this.steps.length - 1): number {
         return (this.steps[stepNb].orientation * 180) / Math.PI
     }
+
+    get displayName(): string {
+        switch (this.type) {
+            case 'controlled':
+                return 'Main Robot'
+            case 'sequential':
+                return 'Pami'
+        }
+    }
 }

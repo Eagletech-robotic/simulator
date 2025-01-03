@@ -34,6 +34,15 @@ const styles = css`
 
 export const GlobalStyles = createGlobalStyle`${styles}`
 
+export const RightPanel = styled.div`
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 2rem;
+    border-radius: 1rem;
+    background-color: ${colors.lightGrey};
+`
+
 export const playbackButtonStyle = css`
     padding: 0.5rem;
     border: none;

@@ -4,10 +4,10 @@ import { GlobalStyles } from './styles/commonStyles'
 import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
-
 import { stepDurationMs } from './models/constants'
 import Controls from './components/Controls'
 import Editor from './components/Editor'
+import Visualizer from './components/Visualizer'
 
 type AppState = 'playing' | 'paused' | 'editing'
 
@@ -34,6 +34,7 @@ const App = (): JSX.Element => {
 
     const [appState, setAppState] = useState<AppState>('editing')
     const [playingStep, setPlayingStep] = useState(0)
+    const [selectedRobotId, setSelectedRobotId] = useState<number | null>(null)
 
     const [gameDurationSeconds, setGameDurationSeconds] = useState(100)
     const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -102,7 +103,12 @@ const App = (): JSX.Element => {
                     />
                 </BoardAndControls>
 
-                {game && <Editor {...{ game, editorElRef, stepChanged }} />}
+                {game &&
+                    (appState === 'editing' ? (
+                        <Editor {...{ game, editorElRef, stepChanged }} />
+                    ) : (
+                        <Visualizer {...{ game, selectedRobotId, setSelectedRobotId }} />
+                    ))}
             </Page>
         </>
     )

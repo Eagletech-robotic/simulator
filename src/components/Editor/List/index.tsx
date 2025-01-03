@@ -15,7 +15,7 @@ const List = React.forwardRef<HTMLDivElement, EditorProps>(
             <StyledList ref={ref}>
                 {game.robots.map((robot) => (
                     <EditRobot key={robot.id} color={robot.color}>
-                        <RobotType>{robotName(robot.type)}</RobotType>
+                        <RobotType>{robot.displayName}</RobotType>
                         <RobotAttribute>
                             x =
                             <RobotInput {...{ robot, attribute: 'x', game, stepChanged }} />
@@ -43,15 +43,6 @@ const List = React.forwardRef<HTMLDivElement, EditorProps>(
         )
     }
 )
-
-const robotName = (type: GenericRobot['type']) => {
-    switch (type) {
-        case 'controlled':
-            return 'Main Robot'
-        case 'sequential':
-            return 'Pami'
-    }
-}
 
 interface RobotInputProps {
     robot: GenericRobot
