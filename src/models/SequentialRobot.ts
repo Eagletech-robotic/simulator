@@ -19,17 +19,17 @@ export class SequentialRobot extends GenericRobot {
         this.steps = [this.steps[0]]
     }
 
-    draw(canvas: Canvas, stepNb: number) {
+    draw(canvas: Canvas, stepNb: number, isSelected: boolean) {
         const step = this.steps[stepNb]
-        canvas.drawRectangle(
-            step.x,
-            step.y,
-            this.width,
-            this.height,
-            step.orientation,
-            canvas.getDrawingColor(this.color)
-        )
-        canvas.drawOrientationLine(step.x, step.y, step.orientation, this.width / 2)
+
+        const { x, y, orientation } = step
+        const { width, height } = this
+        const color = canvas.getDrawingColor(this.color)
+
+        canvas.drawRectangle(x, y, width, height, orientation, color)
+        canvas.drawOrientationLine(x, y, orientation, width / 2)
+
+        if (isSelected) canvas.drawRectangleOutline(x, y, width, height, orientation, 'red')
     }
 
     get lastStep(): GenericRobotStep {

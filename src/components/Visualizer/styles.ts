@@ -1,12 +1,35 @@
 import { colors } from 'src/styles/commonStyles'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
-export const SelectedRobot = styled.div`
-    display: grid;
-    grid-template-columns: auto auto 1fr;
-    align-items: center;
+export const Header = styled.div`
     padding: 1rem;
+    display: grid;
+    grid-template-rows: auto auto;
+    grid-template-columns: 1fr;
     background-color: ${colors.darkGrey};
+`
+
+export const TopRow = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
+
+export const BottomRow = styled.div`
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+`
+
+export const RobotName = styled.div`
+    text-align: center;
+    align-content: center;
+`
+
+export const RobotTypeIndicator = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 `
 
 export const RobotColorIndicator = styled.div<{ color: 'yellow' | 'blue' }>`
@@ -14,7 +37,6 @@ export const RobotColorIndicator = styled.div<{ color: 'yellow' | 'blue' }>`
     width: 1rem;
     background-color: ${(props) => (props.color === 'yellow' ? colors.yellow : colors.blue)};
     border-radius: 50%;
-    margin: 0 0.5rem;
 `
 
 export const RobotIcon = styled.img`
@@ -22,6 +44,27 @@ export const RobotIcon = styled.img`
     height: 2rem;
 `
 
-export const RobotName = styled.div`
-    text-align: center;
+const switchRobotButton = css`
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    height: 2.5rem;
+    width: 2.5rem;
+    box-sizing: content-box;
+    padding: 0.5rem;
+    background-color: ${colors.darkGrey};
+
+    &:hover {
+        background-color: ${colors.darkGreyHover};
+    }
+`
+
+export const PreviousRobotButton = styled.button`
+    ${switchRobotButton}
+
+    transform: rotate(180deg);
+`
+
+export const NextRobotButton = styled.button`
+    ${switchRobotButton}
 `

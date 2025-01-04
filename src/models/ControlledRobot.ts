@@ -99,16 +99,20 @@ export class ControlledRobot extends GenericRobot {
         }
     }
 
-    draw(canvas: Canvas, stepNb: number) {
+    draw(canvas: Canvas, stepNb: number, isSelected: boolean) {
         for (let i = 0; i < stepNb; i += 50) {
             const color = canvas.getDrawingColor(this.color)
             const opacity = Math.max(1 - (stepNb - i) / 6500, 0)
-            canvas.drawCircle(this.steps[i].x, this.steps[i].y, 3, color, opacity)
+            canvas.drawDisc(this.steps[i].x, this.steps[i].y, 3, color, opacity)
         }
 
         const step = this.steps[stepNb]
-        canvas.drawCircle(step.x, step.y, this.width / 2, canvas.getDrawingColor(this.color))
+        canvas.drawDisc(step.x, step.y, this.width / 2, canvas.getDrawingColor(this.color))
         canvas.drawOrientationLine(step.x, step.y, step.orientation, this.width / 2)
+
+        if (isSelected) {
+            canvas.drawCircle(step.x, step.y, this.width / 2, 'red')
+        }
     }
 
     nextStep() {

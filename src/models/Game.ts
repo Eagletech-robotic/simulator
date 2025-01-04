@@ -22,9 +22,11 @@ export class Game {
         return this._lastStepNumber
     }
 
-    draw(canvas: Canvas, stepNb = this._lastStepNumber) {
+    draw(canvas: Canvas, selectedRobotId: number | null = null, stepNb = this._lastStepNumber) {
         canvas.clearCanvas()
-        this._robots.forEach((robot) => robot.draw(canvas, stepNb))
+        this._robots.forEach((robot) => {
+            robot.draw(canvas, stepNb, robot.id === selectedRobotId)
+        })
     }
 
     async restart() {
@@ -46,25 +48,20 @@ export class Game {
     }
 
     updateRobot(id: number, newRobot: GenericRobot) {
-        const index = this.getRobotIndexFromId(id)
-        if (index !== null) {
+        const index = this._robots.findIndex((robot) => robot.id === id)
+        if (index !== -1) {
             this._robots[index] = newRobot
         }
     }
 
     deleteRobot(id: number) {
-        const index = this.getRobotIndexFromId(id)
-        if (index !== null) {
+        const index = this._robots.findIndex((robot) => robot.id === id)
+        if (index !== -1) {
             this._robots.splice(index, 1)
         }
     }
 
-    private getRobotIndexFromId(id: number): number | null {
-        const index = this._robots.findIndex((robot) => robot.id === id)
-        if (index !== -1) {
-            return index
-        } else {
-            return null
-        }
+    getRobotById(id: number): GenericRobot | null {
+        return this._robots.find((robot) => robot.id === id) || null
     }
 }

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useReducer, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
 import { BoardAndControls, Page } from './styles'
 import { GlobalStyles } from './styles/commonStyles'
 import GameBoard from './components/GameBoard'
@@ -34,11 +34,12 @@ const App = (): JSX.Element => {
 
     const [appState, setAppState] = useState<AppState>('editing')
     const [playingStep, setPlayingStep] = useState(0)
-    const [selectedRobotId, setSelectedRobotId] = useState<number | null>(null)
 
     const [gameDurationSeconds, setGameDurationSeconds] = useState(100)
     const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null)
     const playingIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+    const selectedRobotId = useRef<number | null>(null)
 
     const nbSimulationSteps = (gameDurationSeconds * 1000) / stepDurationMs
 
@@ -65,10 +66,17 @@ const App = (): JSX.Element => {
                     prevPlayingStep + NB_STEPS_PER_PLAYING_INTERVAL,
                     game.lastStepNumber
                 )
-                if (canvasRef.current) game.draw(canvasRef.current, playingStep)
+                if (canvasRef.current)
+                    game.draw(canvasRef.current, selectedRobotId.current, playingStep)
                 return playingStep
             })
         }, stepDurationMs * NB_STEPS_PER_PLAYING_INTERVAL)
+    }
+
+    const setSelectedRobotId = (robotId: number) => {
+        selectedRobotId.current = robotId
+        reRender()
+        if (canvasRef.current) game.draw(canvasRef.current, robotId, playingStep)
     }
 
     return (
@@ -107,7 +115,13 @@ const App = (): JSX.Element => {
                     (appState === 'editing' ? (
                         <Editor {...{ game, editorElRef, stepChanged }} />
                     ) : (
-                        <Visualizer {...{ game, selectedRobotId, setSelectedRobotId }} />
+                        <Visualizer
+                            {...{
+                                game,
+                                selectedRobotId: selectedRobotId.current,
+                                setSelectedRobotId,
+                            }}
+                        />
                     ))}
             </Page>
         </>

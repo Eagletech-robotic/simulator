@@ -6,7 +6,7 @@ export abstract class GenericRobot {
     abstract readonly width: number
     abstract readonly height: number
 
-    abstract draw(canvas: Canvas, stepNb: number): void
+    abstract draw(canvas: Canvas, stepNb: number, isSelected: boolean): void
     abstract nextStep(): void
     abstract get lastStep(): GenericRobotStep
     abstract reset(): Promise<void> | void
