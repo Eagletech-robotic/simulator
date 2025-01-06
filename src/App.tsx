@@ -19,27 +19,20 @@ const App = (): JSX.Element => {
     const [game, _setGame] = useState(new Game())
     const canvasRef = useRef<Canvas | null>(null)
 
-    useLayoutEffect(() => {
-        if (canvasRef.current) game.draw(canvasRef.current)
-    }, [])
-
     const [, reRender] = useReducer((a) => a + 1, 0)
-
-    const stepChanged = () => {
-        reRender()
-        if (canvasRef.current) {
-            game.draw(canvasRef.current)
-        }
-    }
+    const [redrawStep, redrawCanvas] = useReducer((a) => a + 1, 0)
 
     const [appState, setAppState] = useState<AppState>('editing')
     const [playingStep, setPlayingStep] = useState(0)
-
     const [gameDurationSeconds, setGameDurationSeconds] = useState(100)
+    const [selectedRobotId, setSelectedRobotId] = useState<number | null>(null)
+
     const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null)
     const playingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-    const selectedRobotId = useRef<number | null>(null)
+    useLayoutEffect(() => {
+        if (canvasRef.current) game.draw(canvasRef.current, selectedRobotId, playingStep)
+    }, [selectedRobotId, playingStep, redrawStep])
 
     const nbSimulationSteps = (gameDurationSeconds * 1000) / stepDurationMs
 
@@ -62,21 +55,12 @@ const App = (): JSX.Element => {
         clearInterval(playingIntervalRef.current || undefined)
         playingIntervalRef.current = setInterval(() => {
             setPlayingStep((prevPlayingStep) => {
-                const playingStep = Math.min(
+                return Math.min(
                     prevPlayingStep + NB_STEPS_PER_PLAYING_INTERVAL,
                     game.lastStepNumber
                 )
-                if (canvasRef.current)
-                    game.draw(canvasRef.current, selectedRobotId.current, playingStep)
-                return playingStep
             })
         }, stepDurationMs * NB_STEPS_PER_PLAYING_INTERVAL)
-    }
-
-    const setSelectedRobotId = (robotId: number) => {
-        selectedRobotId.current = robotId
-        reRender()
-        if (canvasRef.current) game.draw(canvasRef.current, robotId, playingStep)
     }
 
     return (
@@ -105,7 +89,6 @@ const App = (): JSX.Element => {
                             setPlayingStep,
                             game,
                             canvasRef,
-                            stepChanged,
                             play,
                         }}
                     />
@@ -113,12 +96,12 @@ const App = (): JSX.Element => {
 
                 {game &&
                     (appState === 'editing' ? (
-                        <Editor {...{ game, editorElRef, stepChanged }} />
+                        <Editor {...{ game, editorElRef, gameChanged: redrawCanvas }} />
                     ) : (
                         <Visualizer
                             {...{
                                 game,
-                                selectedRobotId: selectedRobotId.current,
+                                selectedRobotId,
                                 setSelectedRobotId,
                             }}
                         />

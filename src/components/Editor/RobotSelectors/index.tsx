@@ -10,8 +10,8 @@ import { SequentialRobot } from 'src/models/SequentialRobot'
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'
     game: Game
+    gameChanged: () => void
     editorElRef: React.RefObject<HTMLDivElement>
-    stepChanged: () => void
 }
 
 const robotTypes: Array<GenericRobot['type']> = ['controlled', 'sequential']
@@ -19,8 +19,8 @@ const robotTypes: Array<GenericRobot['type']> = ['controlled', 'sequential']
 const RobotSelectors = ({
     color,
     game,
+    gameChanged,
     editorElRef,
-    stepChanged,
 }: RobotSelectorsProps): JSX.Element => {
     return (
         <ColorContainer>
@@ -34,8 +34,7 @@ const RobotSelectors = ({
                         else robot = new SequentialRobot(color, 1500, 1500, 0)
 
                         game.appendRobot(robot)
-
-                        stepChanged()
+                        gameChanged()
 
                         setTimeout(() => {
                             editorElRef.current?.scrollTo({

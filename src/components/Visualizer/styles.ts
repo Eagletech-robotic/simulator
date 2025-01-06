@@ -42,6 +42,7 @@ export const RobotColorIndicator = styled.div<{ color: 'yellow' | 'blue' }>`
 export const RobotIcon = styled.img`
     width: 2rem;
     height: 2rem;
+    user-select: none;
 `
 
 const switchRobotButton = css`

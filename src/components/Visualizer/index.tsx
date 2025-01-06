@@ -13,7 +13,7 @@ import { Game } from 'src/models/Game'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
 import { RightPanel } from 'src/styles/commonStyles'
-import { GenericRobot } from 'src/models/GenericRobot'
+import { useLayoutEffect, useRef } from 'react'
 
 const SwitchRobotIcon = (
     <svg
@@ -32,7 +32,7 @@ const SwitchRobotIcon = (
 interface VisualizerProps {
     game: Game
     selectedRobotId: number | null
-    setSelectedRobotId: (robotId: number) => void
+    setSelectedRobotId: React.Dispatch<React.SetStateAction<number | null>>
 }
 
 const Visualizer = ({
@@ -40,7 +40,33 @@ const Visualizer = ({
     selectedRobotId,
     setSelectedRobotId,
 }: VisualizerProps): JSX.Element => {
-    if (game.robots.length === 0) {
+    const headerRef = useRef(null)
+
+    const prevRobot = () => {
+        if (game.robots.length) {
+            setSelectedRobotId((robotId) => previousRobotId(robotId || game.robots[0].id, game))
+        }
+    }
+
+    const nextRobot = () => {
+        if (game.robots.length) {
+            setSelectedRobotId((robotId) =>
+                nextRobotId(robotId || game.robots[game.robots.length - 1].id, game)
+            )
+        }
+    }
+
+    useLayoutEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'ArrowLeft') prevRobot()
+            else if (event.key === 'ArrowRight') nextRobot()
+        }
+
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [])
+
+    if (!game.robots.length) {
         return (
             <RightPanel>
                 <div
@@ -58,39 +84,27 @@ const Visualizer = ({
         )
     }
 
-    const robot: GenericRobot =
-        (selectedRobotId && game.getRobotById(selectedRobotId)) ||
-        (setSelectedRobotId(game.robots[0].id), game.getRobotById(selectedRobotId!)!)
+    const robot = selectedRobotId ? game.getRobotById(selectedRobotId) : null
 
     return (
         <RightPanel>
-            <Header>
+            <Header ref={headerRef.current}>
                 <TopRow>
-                    <PreviousRobotButton
-                        onClick={() => setSelectedRobotId(previousRobotId(robot.id, game))}
-                    >
-                        {SwitchRobotIcon}
-                    </PreviousRobotButton>
-
-                    <RobotName>
-                        {robot.displayName}: {robot.id}
-                    </RobotName>
-
-                    <NextRobotButton
-                        onClick={() => {
-                            setSelectedRobotId(nextRobotId(robot?.id, game))
-                        }}
-                    >
-                        {SwitchRobotIcon}
-                    </NextRobotButton>
+                    <PreviousRobotButton onClick={prevRobot}>{SwitchRobotIcon}</PreviousRobotButton>
+                    <RobotName>{robot && `${robot.displayName}: ${robot.id}`}</RobotName>
+                    <NextRobotButton onClick={nextRobot}>{SwitchRobotIcon}</NextRobotButton>
                 </TopRow>
 
-                <BottomRow>
-                    <RobotTypeIndicator>
-                        <RobotColorIndicator color={robot.color} />
-                        <RobotIcon src={robot.type === 'controlled' ? MainRobotIcon : PamiIcon} />
-                    </RobotTypeIndicator>
-                </BottomRow>
+                {robot && (
+                    <BottomRow>
+                        <RobotTypeIndicator>
+                            <RobotColorIndicator color={robot.color} />
+                            <RobotIcon
+                                src={robot.type === 'controlled' ? MainRobotIcon : PamiIcon}
+                            />
+                        </RobotTypeIndicator>
+                    </BottomRow>
+                )}
             </Header>
         </RightPanel>
     )
@@ -98,9 +112,11 @@ const Visualizer = ({
 
 const previousRobotId = (selectedRobotId: number, game: Game) => {
     const robotIndex = game.robots.findIndex((robot) => robot.id === selectedRobotId)
-    let nextRobotIndex = (robotIndex - 1) % game.robots.length
-    if (nextRobotIndex < 0) nextRobotIndex += game.robots.length
-    return game.robots[nextRobotIndex].id
+    let previousRobotIndex = (robotIndex - 1) % game.robots.length
+    if (previousRobotIndex < 0) previousRobotIndex += game.robots.length
+    const a = game.robots[previousRobotIndex].id
+    console.log(game.robots, selectedRobotId, a)
+    return a
 }
 
 const nextRobotId = (selectedRobotId: number, game: Game) => {

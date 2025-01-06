@@ -6,11 +6,11 @@ import { Game } from 'src/models/Game'
 
 interface EditorProps {
     game: Game
-    stepChanged: () => void
+    gameChanged: () => void
 }
 
 const List = React.forwardRef<HTMLDivElement, EditorProps>(
-    ({ game, stepChanged }, ref): JSX.Element => {
+    ({ game, gameChanged }, ref): JSX.Element => {
         return (
             <StyledList ref={ref}>
                 {game.robots.map((robot) => (
@@ -18,23 +18,23 @@ const List = React.forwardRef<HTMLDivElement, EditorProps>(
                         <RobotType>{robot.displayName}</RobotType>
                         <RobotAttribute>
                             x =
-                            <RobotInput {...{ robot, attribute: 'x', game, stepChanged }} />
+                            <RobotInput {...{ robot, attribute: 'x', game, gameChanged }} />
                         </RobotAttribute>
                         <RobotAttribute>
                             y =
-                            <RobotInput {...{ robot, attribute: 'y', game, stepChanged }} />
+                            <RobotInput {...{ robot, attribute: 'y', game, gameChanged }} />
                         </RobotAttribute>
                         <RobotAttribute>
                             orientation (deg) =
                             <RobotInput
-                                {...{ robot, attribute: 'orientationDeg', game, stepChanged }}
+                                {...{ robot, attribute: 'orientationDeg', game, gameChanged }}
                             />
                         </RobotAttribute>
 
                         <DeleteButton
                             doDeletion={() => {
                                 game.deleteRobot(robot.id)
-                                setTimeout(() => stepChanged(), 0)
+                                setTimeout(() => gameChanged(), 0)
                             }}
                         />
                     </EditRobot>
@@ -48,10 +48,10 @@ interface RobotInputProps {
     robot: GenericRobot
     attribute: 'x' | 'y' | 'orientationDeg'
     game: Game
-    stepChanged: () => void
+    gameChanged: () => void
 }
 
-const RobotInput = ({ robot, attribute, game, stepChanged }: RobotInputProps): JSX.Element => {
+const RobotInput = ({ robot, attribute, game, gameChanged }: RobotInputProps): JSX.Element => {
     const value =
         attribute === 'orientationDeg' ? robot.orientationInDegrees() : robot.lastStep[attribute]
 
@@ -68,7 +68,7 @@ const RobotInput = ({ robot, attribute, game, stepChanged }: RobotInputProps): J
                     robot.lastStep[attribute] = value
                 }
                 game.updateRobot(robot.id, robot)
-                stepChanged()
+                gameChanged()
             }}
         />
     )

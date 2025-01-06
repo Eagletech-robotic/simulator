@@ -7,18 +7,18 @@ import { RightPanel } from 'src/styles/commonStyles'
 interface EditorProps {
     game: Game
     editorElRef: React.RefObject<HTMLDivElement>
-    stepChanged: () => void
+    gameChanged: () => void
 }
 
-const Editor = ({ game, editorElRef, stepChanged }: EditorProps): JSX.Element => {
+const Editor = ({ game, editorElRef, gameChanged }: EditorProps): JSX.Element => {
     return (
         <RightPanel>
             <RobotChooser>
-                <RobotSelectors color="blue" {...{ game, editorElRef, stepChanged }} />
-                <RobotSelectors color="yellow" {...{ game, editorElRef, stepChanged }} />
+                <RobotSelectors color="blue" {...{ game, editorElRef, gameChanged }} />
+                <RobotSelectors color="yellow" {...{ game, editorElRef, gameChanged }} />
             </RobotChooser>
 
-            <List {...{ game, stepChanged }} ref={editorElRef} />
+            <List {...{ game, gameChanged }} ref={editorElRef} />
         </RightPanel>
     )
 }

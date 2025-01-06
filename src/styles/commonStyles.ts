@@ -50,6 +50,7 @@ export const playbackButtonStyle = css`
     width: 100%;
     border-radius: 1rem;
     cursor: pointer;
+    user-select: none;
 `
 
 export const barLabelStyle = css`
