@@ -42,6 +42,8 @@ export const topInit = async (): Promise<AiInstance> => {
                     memoryView.setUint32(nwritten, output.length, true)
                 }
             },
+            fd_close: (fd: number) => console.log(`Close file descriptor: ${fd}`),
+            fd_seek: (fd: number) => console.log(`Seek file descriptor: ${fd}`),
         },
     }
 
