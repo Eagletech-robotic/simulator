@@ -103,6 +103,7 @@ const App = (): JSX.Element => {
                                 game,
                                 selectedRobotId,
                                 setSelectedRobotId,
+                                playingStep,
                             }}
                         />
                     ))}

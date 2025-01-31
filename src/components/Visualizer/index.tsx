@@ -33,12 +33,14 @@ interface VisualizerProps {
     game: Game
     selectedRobotId: number | null
     setSelectedRobotId: React.Dispatch<React.SetStateAction<number | null>>
+    playingStep: number
 }
 
 const Visualizer = ({
     game,
     selectedRobotId,
     setSelectedRobotId,
+    playingStep,
 }: VisualizerProps): JSX.Element => {
     const headerRef = useRef(null)
 
@@ -106,6 +108,11 @@ const Visualizer = ({
                     </BottomRow>
                 )}
             </Header>
+            <br />
+            <center>
+                Playing step:
+                <h1>{playingStep}</h1>
+            </center>
         </RightPanel>
     )
 }
@@ -115,7 +122,6 @@ const previousRobotId = (selectedRobotId: number, game: Game) => {
     let previousRobotIndex = (robotIndex - 1) % game.robots.length
     if (previousRobotIndex < 0) previousRobotIndex += game.robots.length
     const a = game.robots[previousRobotIndex].id
-    console.log(game.robots, selectedRobotId, a)
     return a
 }
 

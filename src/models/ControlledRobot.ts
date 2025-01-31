@@ -138,10 +138,31 @@ export class ControlledRobot extends GenericRobot {
         )
 
         if (move.x < 0 || move.x > 3000 || move.y < 0 || move.y > 2000) {
-            console.error('Robot out of bounds', move)
+            // console.error('Robot out of bounds', move)
             return
         }
 
         this.steps.push({ ...move, input, logs, output })
+
+        if (this.steps.length % 1000 === 999) {
+            const errors = this.steps
+                .filter(
+                    (step, i) =>
+                        i > this.steps.length - 1000 &&
+                        step.logs?.find((log) => log.level === 'error')
+                )
+                .map((step) => step.logs ?? [])
+            const infos = this.steps
+                .filter(
+                    (step, i) =>
+                        i > this.steps.length - 1000 &&
+                        step.logs?.find((log) => log.level === 'info')
+                )
+                .map((step) => step.logs ?? [])
+
+            console.log(`Logging for ${this.color} robot ${this.id}:`)
+            console.info(infos)
+            if (errors.length) console.error(errors)
+        }
     }
 }
