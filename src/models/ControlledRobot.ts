@@ -49,6 +49,7 @@ export class ControlledRobot extends GenericRobot {
 
     private async resetAiInstance() {
         this.aiInstance = await topInit()
+        console.log(`Top init logs for ${this.color} robot ${this.id}:`, [...this.aiInstance.logs])
     }
 
     get lastStep(): ControlledRobotStep {
