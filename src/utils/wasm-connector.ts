@@ -23,23 +23,27 @@ export const topInit = async (): Promise<AiInstance> => {
         wasi_snapshot_preview1: {
             proc_exit: (code: number) => console.log(`Exit code: ${code}`),
             fd_write: (fd: number, iovs: number, iovs_len: number, nwritten: number) => {
-                const memory = wasmInstance.exports.memory
-                const memoryView = new DataView(memory.buffer)
+                try {
+                    const memory = wasmInstance.exports.memory
+                    const memoryView = new DataView(memory.buffer)
 
-                let output = ''
-                for (let i = 0; i < iovs_len; i++) {
-                    const iovPtr = iovs + i * 8
-                    const ptr = memoryView.getUint32(iovPtr, true)
-                    const len = memoryView.getUint32(iovPtr + 4, true)
-                    const bytes = new Uint8Array(memory.buffer, ptr, len)
-                    output += textDecoder.decode(bytes)
-                }
+                    let output = ''
+                    for (let i = 0; i < iovs_len; i++) {
+                        const iovPtr = iovs + i * 8
+                        const ptr = memoryView.getUint32(iovPtr, true)
+                        const len = memoryView.getUint32(iovPtr + 4, true)
+                        const bytes = new Uint8Array(memory.buffer, ptr, len)
+                        output += textDecoder.decode(bytes)
+                    }
 
-                logs.push({ log: output, level: fd === 1 ? 'info' : 'error' })
+                    logs.push({ log: output, level: fd === 1 ? 'info' : 'error' })
 
-                // Set nwritten to the total bytes written to prevent infinite loop
-                if (nwritten) {
-                    memoryView.setUint32(nwritten, output.length, true)
+                    // Set nwritten to the total bytes written to prevent infinite loop
+                    if (nwritten) {
+                        memoryView.setUint32(nwritten, output.length, true)
+                    }
+                } catch (e) {
+                    console.error(e)
                 }
             },
             fd_close: (fd: number) => console.log(`Close file descriptor: ${fd}`),
@@ -58,13 +62,13 @@ export const topInit = async (): Promise<AiInstance> => {
 
 export interface StepInput {
     is_jack_gone: number
-    last_wifi_data: number[]
+    tof_m: number
+    x_mm: number
+    y_mm: number
+    orientation_degrees: number
     encoder1: number
     encoder2: number
-    tof: number
-    gyro: number[]
-    accelero: number[]
-    compass: number[]
+    last_wifi_data: number[]
 }
 
 export interface StepOutput {
@@ -81,26 +85,24 @@ export const topStep = (
     const inputPtr = wasmInstance.exports.create_input()
     const outputPtr = wasmInstance.exports.create_output()
 
+    if (!inputPtr || !outputPtr) {
+        throw new Error('WebAssembly memory allocation failed: inputPtr or outputPtr is null')
+    }
+
     const wasmMemory = wasmInstance.exports.memory
 
-    const intView = new Int32Array(wasmMemory.buffer, inputPtr, 1 + 10 + 1 + 1) // `is_jack_gone`, `last_wifi_data[10]`, `encoder1`, `encoder2`
-    const floatView = new Float32Array(wasmMemory.buffer, inputPtr + 4, 1 + 3 + 3 + 3) // `tof`, `gyro[3]`, `accelero[3]`, `compass[3]`
-    intView[0] = input.is_jack_gone
-    floatView[0] = input.tof
-    floatView[1] = input.gyro[0]
-    floatView[2] = input.gyro[1]
-    floatView[3] = input.gyro[2]
-    floatView[4] = input.accelero[0]
-    floatView[5] = input.accelero[1]
-    floatView[6] = input.accelero[2]
-    floatView[7] = input.compass[0]
-    floatView[8] = input.compass[1]
-    floatView[9] = input.compass[2]
+    const dataView = new DataView(wasmMemory.buffer, inputPtr)
+
+    dataView.setInt32(0, input.is_jack_gone, true)
+    dataView.setFloat32(4, input.tof_m, true)
+    dataView.setFloat32(8, input.x_mm, true)
+    dataView.setFloat32(12, input.y_mm, true)
+    dataView.setFloat32(16, input.orientation_degrees, true)
+    dataView.setInt32(20, input.encoder1, true)
+    dataView.setInt32(24, input.encoder2, true)
     for (let i = 0; i < 10; i++) {
-        intView[1 + i] = input.last_wifi_data[i]
+        dataView.setInt32(28 + i * 4, input.last_wifi_data[i], true)
     }
-    intView[11] = input.encoder1
-    intView[12] = input.encoder2
 
     logs.length = 0
     wasmInstance.exports.exported_top_step(inputPtr, outputPtr)

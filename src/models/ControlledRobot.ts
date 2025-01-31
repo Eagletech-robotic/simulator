@@ -122,13 +122,13 @@ export class ControlledRobot extends GenericRobot {
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // millimeters
         const input: StepInput = {
             is_jack_gone: 1,
-            last_wifi_data: [],
+            tof_m: 1000,
+            x_mm: step.x,
+            y_mm: step.y,
+            orientation_degrees: (step.orientation * 180) / Math.PI,
             encoder1: step.leftWheelDistance / impulseDistance,
             encoder2: step.rightWheelDistance / impulseDistance,
-            tof: 0,
-            gyro: [0, 0, 0],
-            accelero: [0, 0, 0],
-            compass: [0, 0, 0],
+            last_wifi_data: [],
         }
         const { output, logs } = topStep(this.aiInstance!, input)
 
@@ -136,6 +136,12 @@ export class ControlledRobot extends GenericRobot {
             output.vitesse1_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
             output.vitesse2_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000)
         )
+
+        if (move.x < 0 || move.x > 3000 || move.y < 0 || move.y > 2000) {
+            console.error('Robot out of bounds', move)
+            return
+        }
+
         this.steps.push({ ...move, input, logs, output })
     }
 }
