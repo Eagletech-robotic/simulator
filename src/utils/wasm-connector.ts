@@ -97,7 +97,8 @@ export const topStep = (
     dataView.setFloat32(4, input.tof_m, true)
     dataView.setFloat32(8, input.x_mm, true)
     dataView.setFloat32(12, input.y_mm, true)
-    dataView.setFloat32(16, input.orientation_degrees, true)
+    const positiveOrientation = ((input.orientation_degrees % 360) + 360) % 360
+    dataView.setFloat32(16, positiveOrientation, true)
     dataView.setInt32(20, input.encoder1, true)
     dataView.setInt32(24, input.encoder2, true)
     for (let i = 0; i < 10; i++) {
