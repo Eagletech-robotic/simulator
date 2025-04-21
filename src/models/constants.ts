@@ -1,6 +1,7 @@
-export const stepDurationMs = 2 // Takes a long time to communicate with the server, so we need to wait a bit
-export const encoderImpulsesPerWheelTurn = 500 * 36 * 4
+export const stepDurationMs = 4 // Takes a long time to communicate with the server, so we need to wait a bit
+export const defaultGameDurationSeconds = 8 // seconds
 
+export const encoderImpulsesPerWheelTurn = 500 * 36 * 4
 export const controlledRobotWheelDiameter = 65 // millimeters
 export const controlledRobotWidth = 385 // millimeters
 export const controlledRobotHeight = 385 // millimeters

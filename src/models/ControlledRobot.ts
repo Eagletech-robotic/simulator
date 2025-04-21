@@ -89,11 +89,11 @@ export class ControlledRobot extends GenericRobot {
             x:
                 step.x +
                 middleCircleRadius *
-                    (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle)),
+                (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle)),
             y:
                 step.y -
                 middleCircleRadius *
-                    (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle)),
+                (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle)),
             orientation: step.orientation + rotationAngle,
             leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
             rightWheelDistance: step.rightWheelDistance + rightWheelDistance,
@@ -141,7 +141,7 @@ export class ControlledRobot extends GenericRobot {
 
         const move = this.buildMove(
             output.motor_left_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
-            output.motor_right_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000)
+            output.motor_right_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
         )
 
         if (move.x < 0 || move.x > 3000 || move.y < 0 || move.y > 2000) {
@@ -152,22 +152,15 @@ export class ControlledRobot extends GenericRobot {
         this.steps.push({ ...move, input, logs, output })
 
         if (this.steps.length % 1000 === 999) {
-            const errors = this.steps
-                .filter(
-                    (step, i) =>
-                        i > this.steps.length - 1000 &&
-                        step.logs?.find((log) => log.level === 'error')
-                )
-                .map((step) => step.logs ?? [])
-            const infos = this.steps
-                .filter(
-                    (step, i) =>
-                        i > this.steps.length - 1000 &&
-                        step.logs?.find((log) => log.level === 'info')
-                )
-                .map((step) => step.logs ?? [])
+            const logsByLevel = (level: 'error' | 'info') =>
+                this.steps
+                    .slice(-1000)
+                    .filter(step => step.logs?.some(log => log.level === level))
+                    .map(step => step.logs?.map(({ log }) => log).join() ?? [])
 
-            console.log(`Logging for ${this.color} robot ${this.id}:`)
+            const errors = logsByLevel('error')
+            const infos = logsByLevel('info')
+            console.log(`Logging for ${this.color} robot ${this.id} - steps ${this.steps.length - 1000} to ${this.steps.length}:`)
             console.info(infos)
             if (errors.length) console.error(errors)
         }
