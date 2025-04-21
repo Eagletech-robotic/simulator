@@ -118,6 +118,7 @@ export class ControlledRobot extends GenericRobot {
 
     nextStep() {
         const step = this.lastStep
+        const previousStep = this.steps[this.steps.length - 2] ?? step
 
         const wheelCircumference = Math.PI * controlledRobotWheelDiameter // millimeters
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // millimeters
@@ -127,15 +128,20 @@ export class ControlledRobot extends GenericRobot {
             x_mm: step.x,
             y_mm: step.y,
             orientation_degrees: (step.orientation * 180) / Math.PI,
-            encoder1: step.leftWheelDistance / impulseDistance,
-            encoder2: step.rightWheelDistance / impulseDistance,
-            last_wifi_data: [],
+            delta_yaw_deg: ((step.orientation - previousStep.orientation) * 180) / Math.PI,
+            encoder_left: step.rightWheelDistance / impulseDistance,
+            encoder_right: step.leftWheelDistance / impulseDistance,
+            imu_yaw_deg: 0,
+            imu_accel_x_mss: 0,
+            imu_accel_y_mss: 0,
+            imu_accel_z_mss: 0,
+            blue_button: 0,
         }
         const { output, logs } = topStep(this.aiInstance!, input)
 
         const move = this.buildMove(
-            output.vitesse1_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
-            output.vitesse2_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000)
+            output.motor_left_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
+            output.motor_right_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000)
         )
 
         if (move.x < 0 || move.x > 3000 || move.y < 0 || move.y > 2000) {

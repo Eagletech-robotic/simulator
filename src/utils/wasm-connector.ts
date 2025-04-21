@@ -63,18 +63,25 @@ export const topInit = async (): Promise<AiInstance> => {
 export interface StepInput {
     is_jack_gone: number
     tof_m: number
-    x_mm: number
-    y_mm: number
-    orientation_degrees: number
-    encoder1: number
-    encoder2: number
-    last_wifi_data: number[]
+    x_mm: number // obsolete
+    y_mm: number // obsolete
+    orientation_degrees: number // obsolete
+    delta_yaw_deg: number
+    encoder_left: number
+    encoder_right: number
+    imu_yaw_deg: number
+    imu_accel_x_mss: number
+    imu_accel_y_mss: number
+    imu_accel_z_mss: number
+    blue_button: number
 }
 
 export interface StepOutput {
-    vitesse1_ratio: number
-    vitesse2_ratio: number
+    motor_left_ratio: number
+    motor_right_ratio: number
     servo_pelle_ratio: number
+    servo_extra_ratio: number
+    led_ratio: number
 }
 
 export const topStep = (
@@ -99,21 +106,26 @@ export const topStep = (
     dataView.setFloat32(12, input.y_mm, true)
     const positiveOrientation = ((input.orientation_degrees % 360) + 360) % 360
     dataView.setFloat32(16, positiveOrientation, true)
-    dataView.setInt32(20, input.encoder1, true)
-    dataView.setInt32(24, input.encoder2, true)
-    for (let i = 0; i < 10; i++) {
-        dataView.setInt32(28 + i * 4, input.last_wifi_data[i], true)
-    }
+    dataView.setFloat32(20, input.delta_yaw_deg, true)
+    dataView.setInt32(24, input.encoder_left, true)
+    dataView.setInt32(28, input.encoder_right, true)
+    dataView.setFloat32(32, input.imu_yaw_deg, true)
+    dataView.setFloat32(36, input.imu_accel_x_mss, true)
+    dataView.setFloat32(40, input.imu_accel_y_mss, true)
+    dataView.setFloat32(44, input.imu_accel_z_mss, true)
+    dataView.setInt32(48, input.blue_button, true)
 
     logs.length = 0
     wasmInstance.exports.exported_top_step(inputPtr, outputPtr)
 
-    const floatViewOutput = new Float32Array(wasmMemory.buffer, outputPtr, 3)
+    const floatViewOutput = new Float32Array(wasmMemory.buffer, outputPtr, 5)
     return {
         output: {
-            vitesse1_ratio: floatViewOutput[0],
-            vitesse2_ratio: floatViewOutput[1],
+            motor_left_ratio: floatViewOutput[0],
+            motor_right_ratio: floatViewOutput[1],
             servo_pelle_ratio: floatViewOutput[2],
+            servo_extra_ratio: floatViewOutput[3],
+            led_ratio: floatViewOutput[4],
         },
         logs: [...logs],
     }
