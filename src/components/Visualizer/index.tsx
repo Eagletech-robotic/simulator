@@ -119,7 +119,7 @@ const Visualizer = ({
                         Position:
                         <h1>
                             {step.x.toFixed(3)}m x {step.y.toFixed(3)}m
-                            - {radiansToDegrees(step.orientation).toFixed(3)}°
+                            x {radiansToDegrees(step.orientation).toFixed(3)}°
                         </h1>
                     </>
                 )}

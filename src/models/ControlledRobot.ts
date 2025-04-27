@@ -130,7 +130,7 @@ export class ControlledRobot extends GenericRobot {
         const input: StepInput = {
             is_jack_gone: 1,
             tof_m: 1,
-            delta_yaw_deg: radiansToDegrees(step.orientation - previousStep.orientation),
+            delta_yaw_deg: -radiansToDegrees(step.orientation - previousStep.orientation), // IMU yaw is anticlockwise
             delta_encoder_left: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
             delta_encoder_right: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
             imu_yaw_deg: 0,
