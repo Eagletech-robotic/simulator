@@ -12,6 +12,7 @@ import {
 import { GenericRobot } from './GenericRobot'
 import { ControlledRobotStep, Log } from './RobotStep'
 import { metricToCanvas as c } from '../components/GameBoard'
+import { radiansToDegrees } from '../utils/maths'
 
 type Move = Pick<
     ControlledRobotStep,
@@ -129,9 +130,9 @@ export class ControlledRobot extends GenericRobot {
         const input: StepInput = {
             is_jack_gone: 1,
             tof_m: 1,
-            delta_yaw_deg: ((step.orientation - previousStep.orientation) * 180) / Math.PI,
-            delta_encoder_left: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
-            delta_encoder_right: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
+            delta_yaw_deg: radiansToDegrees(step.orientation - previousStep.orientation),
+            delta_encoder_left: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
+            delta_encoder_right: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
             imu_yaw_deg: 0,
             imu_accel_x_mss: 0,
             imu_accel_y_mss: 0,
@@ -160,7 +161,7 @@ export class ControlledRobot extends GenericRobot {
         const logs = this.steps
             .slice(1) // The first step is the initial position and doesn't have logs
             .map(step => {
-                return step.logs!.map(({ log, level }) => `[${level}] ${log}`).join("")
+                return step.logs!.map(({ log, level }) => `[${level}] ${log}`).join('')
             })
 
         console.log(`Logs for ${this.color} robot`)

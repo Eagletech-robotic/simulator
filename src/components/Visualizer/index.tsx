@@ -14,6 +14,7 @@ import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
 import { RightPanel } from 'src/styles/commonStyles'
 import { useLayoutEffect, useRef } from 'react'
+import { radiansToDegrees } from '../../utils/maths'
 
 const SwitchRobotIcon = (
     <svg
@@ -53,7 +54,7 @@ const Visualizer = ({
     const nextRobot = () => {
         if (game.robots.length) {
             setSelectedRobotId((robotId) =>
-                nextRobotId(robotId || game.robots[game.robots.length - 1].id, game)
+                nextRobotId(robotId || game.robots[game.robots.length - 1].id, game),
             )
         }
     }
@@ -87,6 +88,7 @@ const Visualizer = ({
     }
 
     const robot = selectedRobotId ? game.getRobotById(selectedRobotId) : null
+    const step = robot?.steps[playingStep]
 
     return (
         <RightPanel>
@@ -112,6 +114,15 @@ const Visualizer = ({
             <center>
                 Playing step:
                 <h1>{playingStep}</h1>
+                {step && (
+                    <>
+                        Position:
+                        <h1>
+                            {step.x.toFixed(3)}m x {step.y.toFixed(3)}m
+                            - {radiansToDegrees(step.orientation).toFixed(3)}°
+                        </h1>
+                    </>
+                )}
             </center>
         </RightPanel>
     )
