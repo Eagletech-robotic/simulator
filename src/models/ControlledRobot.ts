@@ -65,8 +65,8 @@ export class ControlledRobot extends GenericRobot {
         if (leftWheelDistance === rightWheelDistance) {
             return {
                 ...this.moveForward(leftWheelDistance),
-                leftWheelDistance,
-                rightWheelDistance,
+                leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
+                rightWheelDistance: step.leftWheelDistance + rightWheelDistance,
             }
         }
 
