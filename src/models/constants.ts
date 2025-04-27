@@ -9,4 +9,4 @@ export const controlledRobotWheelDiameter = 0.069 // meters
 export const controlledRobotWidth = 0.385 // meters
 export const controlledRobotHeight = 0.385 // meters
 export const controlledRobotWheelbase = 0.330 // meters
-export const controlledRobotMaxSpeed = 0.500 // meters per second
+export const controlledRobotMaxSpeed = 1.0 // meters per second
