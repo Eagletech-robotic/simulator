@@ -10,6 +10,7 @@ export abstract class GenericRobot {
     abstract nextStep(): void
     abstract get lastStep(): GenericRobotStep
     abstract reset(): Promise<void> | void
+    onSimulationEnd(): void {}
 
     readonly color: 'blue' | 'yellow'
     readonly id: number

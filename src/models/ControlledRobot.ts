@@ -150,19 +150,25 @@ export class ControlledRobot extends GenericRobot {
         }
 
         this.steps.push({ ...move, input, logs, output })
+    }
 
-        if (this.steps.length % 1000 === 999) {
-            const logsByLevel = (level: 'error' | 'info') =>
-                this.steps
-                    .slice(-1000)
-                    .filter(step => step.logs?.some(log => log.level === level))
-                    .map(step => step.logs?.map(({ log }) => log).join() ?? [])
+    onSimulationEnd = () => {
+        const chunkSize = 1000
 
-            const errors = logsByLevel('error')
-            const infos = logsByLevel('info')
-            console.log(`Logging for ${this.color} robot ${this.id} - steps ${this.steps.length - 1000} to ${this.steps.length}:`)
-            console.info(infos)
-            if (errors.length) console.error(errors)
+        const logs = this.steps.map(step => {
+            const stepLogs = step.logs ?? []
+            return stepLogs.map(({ log, level }) => `[${level}] ${log}`).join('')
+        })
+
+        console.log(`Logs for ${this.color} robot`)
+        for (let startIndex = 0; startIndex < logs.length; startIndex += chunkSize) {
+            const sliceLogs = logs.slice(startIndex, startIndex + chunkSize)
+
+            const renumberedLogs: Record<number, string> = {}
+            sliceLogs.forEach((item, index) => renumberedLogs[startIndex + index] = item)
+
+            console.table(renumberedLogs)
         }
+
     }
 }

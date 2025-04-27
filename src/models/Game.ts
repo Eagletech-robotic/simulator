@@ -43,6 +43,10 @@ export class Game {
         this._lastStepNumber++
     }
 
+    onSimulationEnd() {
+        this._robots.forEach((robot) => robot.onSimulationEnd())
+    }
+
     appendRobot(robot: GenericRobot) {
         this._robots.push(robot)
     }

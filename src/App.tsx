@@ -44,6 +44,7 @@ const App = (): JSX.Element => {
 
                 if (game.lastStepNumber >= nbSimulationSteps) {
                     clearInterval(simulationIntervalRef.current || undefined)
+                    game.onSimulationEnd()
                     break
                 }
             }
