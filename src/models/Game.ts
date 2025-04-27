@@ -9,12 +9,12 @@ export class Game {
 
     constructor() {
         this._robots = [
-            //new ControlledRobot('blue', 1.775, 1.775, 0),
-            //new SequentialRobot('blue', 2.925, 0.125, -Math.PI / 2),
-            //new SequentialRobot('blue', 2.925, 0.325, -Math.PI / 2),
-            new ControlledRobot('yellow', 1.225, 1.775, 0),
-            //new SequentialRobot('yellow', .075, .125, Math.PI / 2),
-            //new SequentialRobot('yellow', .075, .325, Math.PI / 2),
+            //new ControlledRobot('blue', 1.775, 0.225, 0),
+            //new SequentialRobot('blue', 2.925, 1.875, -Math.PI / 2),
+            //new SequentialRobot('blue', 2.925, 1.675, -Math.PI / 2),
+            new ControlledRobot('yellow', 1.225, 0.225, Math.PI / 2),
+            //new SequentialRobot('yellow', .075, 1.875, Math.PI / 2),
+            //new SequentialRobot('yellow', .075, 1.675, Math.PI / 2),
         ]
     }
 

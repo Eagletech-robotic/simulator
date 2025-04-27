@@ -25,10 +25,9 @@ export abstract class GenericRobot {
     moveForward(distance: number): GenericRobotStep {
         const step = this.lastStep
 
-        const unitCircleOrientation = -step.orientation + Math.PI / 2
         return {
-            x: step.x + Math.cos(unitCircleOrientation) * distance,
-            y: step.y - Math.sin(unitCircleOrientation) * distance,
+            x: step.x + Math.cos(step.orientation) * distance,
+            y: step.y + Math.sin(step.orientation) * distance,
             orientation: step.orientation,
         }
     }

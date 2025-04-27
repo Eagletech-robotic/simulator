@@ -1,7 +1,6 @@
 import { Canvas } from './Canvas'
 import { GenericRobot } from './GenericRobot'
 import { GenericRobotStep } from './RobotStep'
-import { metricToCanvas as c } from '../components/GameBoard'
 import { stepDuration } from './constants'
 
 export class SequentialRobot extends GenericRobot {
@@ -28,10 +27,10 @@ export class SequentialRobot extends GenericRobot {
         const { width, height } = this
         const color = canvas.getDrawingColor(this.color)
 
-        canvas.drawRectangle(c(x), c(y), c(width), c(height), orientation, color)
-        canvas.drawOrientationLine(c(x), c(y), orientation, c(width / 2))
+        canvas.drawRectangle(x, y, width, height, orientation, color)
+        canvas.drawOrientationLine(x, y, orientation, width / 2)
 
-        if (isSelected) canvas.drawRectangleOutline(c(x), c(y), c(width), c(height), orientation, 'red')
+        if (isSelected) canvas.drawRectangleOutline(x, y, width, height, orientation, 'red')
     }
 
     get lastStep(): GenericRobotStep {

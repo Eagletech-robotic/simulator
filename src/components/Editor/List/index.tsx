@@ -27,7 +27,7 @@ const List = React.forwardRef<HTMLDivElement, EditorProps>(
                         <RobotAttribute>
                             orientation (deg) =
                             <RobotInput
-                                {...{ robot, attribute: 'orientationDeg', game, gameChanged }}
+                                {...{ robot, attribute: 'orientationDeg', game, gameChanged, step: 1 }}
                             />
                         </RobotAttribute>
 
@@ -41,7 +41,7 @@ const List = React.forwardRef<HTMLDivElement, EditorProps>(
                 ))}
             </StyledList>
         )
-    }
+    },
 )
 
 interface RobotInputProps {
@@ -49,16 +49,17 @@ interface RobotInputProps {
     attribute: 'x' | 'y' | 'orientationDeg'
     game: Game
     gameChanged: () => void
+    step?: number
 }
 
-const RobotInput = ({ robot, attribute, game, gameChanged }: RobotInputProps): JSX.Element => {
+const RobotInput = ({ robot, attribute, game, gameChanged, step = 0.01 }: RobotInputProps): JSX.Element => {
     const value =
         attribute === 'orientationDeg' ? robot.orientationInDegrees() : robot.lastStep[attribute]
 
     return (
         <Input
             type="number"
-            step="0.01"
+            step={step}
             value={value}
             onChange={(e) => {
                 const value = parseFloat(e.target.value)
