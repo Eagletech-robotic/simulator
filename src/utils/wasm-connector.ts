@@ -9,7 +9,8 @@ export type AiInstance = {
             exported_top_init: () => void
             create_input: () => number
             create_output: () => number
-            exported_top_step: (input: number, output: number) => void
+            create_bluetooth: () => number
+            exported_top_step: (inputPtr: number, outputPtr: number, bluetoothPtr: number, bluetoothBlockSize: number) => void
         }
     }
     logs: Array<Log>
@@ -85,10 +86,12 @@ export interface StepOutput {
 export const topStep = (
     aiInstance: AiInstance,
     input: StepInput,
+    bluetooth: Array<number>,
 ): { output: StepOutput; logs: Array<Log> } => {
     const { wasmInstance, logs } = aiInstance
     const inputPtr = wasmInstance.exports.create_input()
     const outputPtr = wasmInstance.exports.create_output()
+    const bluetoothPtr = wasmInstance.exports.create_bluetooth()
 
     if (!inputPtr || !outputPtr) {
         throw new Error('WebAssembly memory allocation failed: inputPtr or outputPtr is null')
@@ -97,7 +100,6 @@ export const topStep = (
     const wasmMemory = wasmInstance.exports.memory
 
     const dataView = new DataView(wasmMemory.buffer, inputPtr)
-
     dataView.setInt32(0, input.is_jack_gone, true)
     dataView.setFloat32(4, input.tof_m, true)
     dataView.setFloat32(8, input.delta_yaw_deg, true)
@@ -110,8 +112,11 @@ export const topStep = (
     dataView.setInt32(36, input.blue_button, true)
     dataView.setInt32(40, 0, true)
 
+    const bluetoothView = new Uint8Array(wasmMemory.buffer, bluetoothPtr, bluetooth.length)
+    bluetoothView.set(bluetooth)
+
     logs.length = 0
-    wasmInstance.exports.exported_top_step(inputPtr, outputPtr)
+    wasmInstance.exports.exported_top_step(inputPtr, outputPtr, bluetoothPtr, bluetooth.length)
 
     const floatViewOutput = new Float32Array(wasmMemory.buffer, outputPtr, 5)
     return {

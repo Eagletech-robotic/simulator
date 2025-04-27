@@ -130,14 +130,15 @@ export class ControlledRobot extends GenericRobot {
             delta_yaw_deg: radiansToDegrees(step.orientation - previousStep.orientation),
             delta_encoder_left: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
             delta_encoder_right: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
-            imu_yaw_deg: 0,
+            imu_yaw_deg: radiansToDegrees(step.orientation),
             imu_accel_x_mss: 0,
             imu_accel_y_mss: 0,
             imu_accel_z_mss: 0,
             blue_button: 0,
             clock_ms: (this.steps.length * stepDuration) * 1000,
         }
-        const { output, logs } = topStep(this.aiInstance!, input)
+        const bluetoothInput = this.steps.length % 250 == 1 ? this.bluetoothBlock() : []
+        const { output, logs } = topStep(this.aiInstance!, input, bluetoothInput)
 
         const move = this.buildMove(
             output.motor_left_ratio * controlledRobotMaxSpeed * stepDuration,
@@ -171,5 +172,25 @@ export class ControlledRobot extends GenericRobot {
             console.table(renumberedLogs)
         }
 
+    }
+
+    private bluetoothBlock(): Array<number> {
+        const step = this.lastStep
+
+        const formattedX = Math.round(step.x * 100).toString().padStart(3, '0')
+        const formattedY = Math.round(step.y * 100).toString().padStart(3, '0')
+
+        let orientationDeg = radiansToDegrees(step.orientation)
+        if (orientationDeg < 0) {
+            orientationDeg += 360
+        } else if (orientationDeg > 360) {
+            orientationDeg -= 360
+        }
+        const formattedTheta = Math.round(orientationDeg).toString().padStart(3, '0')
+
+        const packetString = 'S' + formattedX + formattedY + formattedTheta // "S200100090"
+        console.log(`Bluetooth packet step ${this.steps.length}: ${packetString}`)
+
+        return Array.from(packetString).map(char => char.charCodeAt(0))
     }
 }
