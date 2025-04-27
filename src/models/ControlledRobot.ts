@@ -3,14 +3,15 @@ import { Canvas } from './Canvas'
 import {
     controlledRobotWidth,
     controlledRobotHeight,
-    controlledRobotWheelsGap,
+    controlledRobotWheelbase,
     controlledRobotWheelDiameter,
     encoderImpulsesPerWheelTurn,
     controlledRobotMaxSpeed,
-    stepDurationMs,
+    stepDuration, fieldWidth, fieldHeight,
 } from './constants'
 import { GenericRobot } from './GenericRobot'
-import { ControlledRobotStep } from './RobotStep'
+import { ControlledRobotStep, Log } from './RobotStep'
+import { metricToCanvas as c } from '../components/GameBoard'
 
 type Move = Pick<
     ControlledRobotStep,
@@ -77,10 +78,10 @@ export class ControlledRobot extends GenericRobot {
             Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
                 ? leftWheelDistance
                 : rightWheelDistance
-        const bigCircleRadius = controlledRobotWheelsGap / (1 - smallestDistance / largestDistance)
+        const bigCircleRadius = controlledRobotWheelbase / (1 - smallestDistance / largestDistance)
 
         const rotationAngle = (largestDistance / bigCircleRadius) * signMultiplier // definition of the radian
-        const middleCircleRadius = bigCircleRadius - controlledRobotWheelsGap / 2 // the circle described by the middle of the robot
+        const middleCircleRadius = bigCircleRadius - controlledRobotWheelbase / 2 // the circle described by the middle of the robot
 
         // Update robot position and orientation
         const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
@@ -104,15 +105,15 @@ export class ControlledRobot extends GenericRobot {
         for (let i = 0; i < stepNb; i += 50) {
             const color = canvas.getDrawingColor(this.color)
             const opacity = Math.max(1 - (stepNb - i) / 6500, 0)
-            canvas.drawDisc(this.steps[i].x, this.steps[i].y, 3, color, opacity)
+            canvas.drawDisc(c(this.steps[i].x), c(this.steps[i].y), c(0.003), color, opacity)
         }
 
         const step = this.steps[stepNb]
-        canvas.drawDisc(step.x, step.y, this.width / 2, canvas.getDrawingColor(this.color))
-        canvas.drawOrientationLine(step.x, step.y, step.orientation, this.width / 2)
+        canvas.drawDisc(c(step.x), c(step.y), c(this.width / 2), canvas.getDrawingColor(this.color))
+        canvas.drawOrientationLine(c(step.x), c(step.y), step.orientation, c(this.width / 2))
 
         if (isSelected) {
-            canvas.drawCircle(step.x, step.y, this.width / 2, 'red')
+            canvas.drawCircle(c(step.x), c(step.y), c(this.width / 2), 'red')
         }
     }
 
@@ -120,31 +121,32 @@ export class ControlledRobot extends GenericRobot {
         const step = this.lastStep
         const previousStep = this.steps[this.steps.length - 2] ?? step
 
-        const wheelCircumference = Math.PI * controlledRobotWheelDiameter // millimeters
-        const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // millimeters
+        const wheelCircumference = Math.PI * controlledRobotWheelDiameter // meters
+        const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // meters
+
+        // console.log('step.rightWheelDistance ', step.rightWheelDistance, 'previousStep.rightWheelDistance ', previousStep.rightWheelDistance, 'delta_encoder_left ', (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance)
+
         const input: StepInput = {
             is_jack_gone: 1,
-            tof_m: 1000,
-            x_mm: step.x,
-            y_mm: step.y,
-            orientation_degrees: (step.orientation * 180) / Math.PI,
+            tof_m: 1,
             delta_yaw_deg: ((step.orientation - previousStep.orientation) * 180) / Math.PI,
-            encoder_left: step.rightWheelDistance / impulseDistance,
-            encoder_right: step.leftWheelDistance / impulseDistance,
+            delta_encoder_left: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
+            delta_encoder_right: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
             imu_yaw_deg: 0,
             imu_accel_x_mss: 0,
             imu_accel_y_mss: 0,
             imu_accel_z_mss: 0,
             blue_button: 0,
+            clock_ms: (this.steps.length * stepDuration) * 1000,
         }
         const { output, logs } = topStep(this.aiInstance!, input)
 
         const move = this.buildMove(
-            output.motor_left_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
-            output.motor_right_ratio * controlledRobotMaxSpeed * (stepDurationMs / 1000),
+            output.motor_left_ratio * controlledRobotMaxSpeed * stepDuration,
+            output.motor_right_ratio * controlledRobotMaxSpeed * stepDuration,
         )
 
-        if (move.x < 0 || move.x > 3000 || move.y < 0 || move.y > 2000) {
+        if (move.x < 0 || move.x > fieldWidth || move.y < 0 || move.y > fieldHeight) {
             // console.error('Robot out of bounds', move)
             return
         }
@@ -155,10 +157,11 @@ export class ControlledRobot extends GenericRobot {
     onSimulationEnd = () => {
         const chunkSize = 1000
 
-        const logs = this.steps.map(step => {
-            const stepLogs = step.logs ?? []
-            return stepLogs.map(({ log, level }) => `[${level}] ${log}`).join('')
-        })
+        const logs = this.steps
+            .slice(1) // The first step is the initial position and doesn't have logs
+            .map(step => {
+                return step.logs!.map(({ log, level }) => `[${level}] ${log}`).join("")
+            })
 
         console.log(`Logs for ${this.color} robot`)
         for (let startIndex = 0; startIndex < logs.length; startIndex += chunkSize) {

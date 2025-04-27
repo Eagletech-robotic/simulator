@@ -58,10 +58,10 @@ const RobotInput = ({ robot, attribute, game, gameChanged }: RobotInputProps): J
     return (
         <Input
             type="number"
-            placeholder="0"
+            step="0.01"
             value={value}
             onChange={(e) => {
-                const value = parseInt(e.target.value)
+                const value = parseFloat(e.target.value)
                 if (attribute === 'orientationDeg') {
                     robot.setOrientationInDegrees(value)
                 } else {

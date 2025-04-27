@@ -30,8 +30,8 @@ const RobotSelectors = ({
                     robotIconSrc={type === 'controlled' ? MainRobotIcon : PamiIcon}
                     onClick={() => {
                         let robot: GenericRobot
-                        if (type === 'controlled') robot = new ControlledRobot(color, 1500, 1500, 0)
-                        else robot = new SequentialRobot(color, 1500, 1500, 0)
+                        if (type === 'controlled') robot = new ControlledRobot(color, 1.5, 1.0, 0)
+                        else robot = new SequentialRobot(color, 1.5, 1.0, 0)
 
                         game.appendRobot(robot)
                         gameChanged()

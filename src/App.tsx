@@ -4,7 +4,7 @@ import { GlobalStyles } from './styles/commonStyles'
 import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
-import { defaultGameDurationSeconds, stepDurationMs } from './models/constants'
+import { defaultGameDurationSeconds, stepDuration } from './models/constants'
 import Controls from './components/Controls'
 import Editor from './components/Editor'
 import Visualizer from './components/Visualizer'
@@ -34,7 +34,7 @@ const App = (): JSX.Element => {
         if (canvasRef.current) game.draw(canvasRef.current, selectedRobotId, playingStep)
     }, [selectedRobotId, playingStep, redrawStep])
 
-    const nbSimulationSteps = (gameDurationSeconds * 1000) / stepDurationMs
+    const nbSimulationSteps = gameDurationSeconds / stepDuration
 
     const runSimulation = () => {
         clearInterval(simulationIntervalRef.current || undefined)
@@ -58,10 +58,10 @@ const App = (): JSX.Element => {
             setPlayingStep((prevPlayingStep) => {
                 return Math.min(
                     prevPlayingStep + NB_STEPS_PER_PLAYING_INTERVAL,
-                    game.lastStepNumber
+                    game.lastStepNumber,
                 )
             })
-        }, stepDurationMs * NB_STEPS_PER_PLAYING_INTERVAL)
+        }, (stepDuration * NB_STEPS_PER_PLAYING_INTERVAL) * 1000)
     }
 
     return (

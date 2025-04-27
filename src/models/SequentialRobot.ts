@@ -1,12 +1,14 @@
 import { Canvas } from './Canvas'
 import { GenericRobot } from './GenericRobot'
 import { GenericRobotStep } from './RobotStep'
+import { metricToCanvas as c } from '../components/GameBoard'
+import { stepDuration } from './constants'
 
 export class SequentialRobot extends GenericRobot {
     readonly type = 'sequential'
 
-    readonly width = 150 // millimeters
-    readonly height = 150 // millimeters
+    readonly width = 0.15 // meters
+    readonly height = 0.15
 
     steps: Array<GenericRobotStep>
 
@@ -26,10 +28,10 @@ export class SequentialRobot extends GenericRobot {
         const { width, height } = this
         const color = canvas.getDrawingColor(this.color)
 
-        canvas.drawRectangle(x, y, width, height, orientation, color)
-        canvas.drawOrientationLine(x, y, orientation, width / 2)
+        canvas.drawRectangle(c(x), c(y), c(width), c(height), orientation, color)
+        canvas.drawOrientationLine(c(x), c(y), orientation, c(width / 2))
 
-        if (isSelected) canvas.drawRectangleOutline(x, y, width, height, orientation, 'red')
+        if (isSelected) canvas.drawRectangleOutline(c(x), c(y), c(width), c(height), orientation, 'red')
     }
 
     get lastStep(): GenericRobotStep {
@@ -37,6 +39,7 @@ export class SequentialRobot extends GenericRobot {
     }
 
     nextStep() {
-        this.steps.push(this.moveForward(0.25))
+        const speed = 0.15 // meters per second
+        this.steps.push(this.moveForward(stepDuration * speed))
     }
 }

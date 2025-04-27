@@ -53,7 +53,7 @@ export const topInit = async (): Promise<AiInstance> => {
 
     const obj = await WebAssembly.instantiateStreaming(
         fetch('simulator-connector.wasm'),
-        importObject
+        importObject,
     )
     wasmInstance = obj.instance as AiInstance['wasmInstance']
     wasmInstance.exports.exported_top_init()
@@ -63,17 +63,15 @@ export const topInit = async (): Promise<AiInstance> => {
 export interface StepInput {
     is_jack_gone: number
     tof_m: number
-    x_mm: number // obsolete
-    y_mm: number // obsolete
-    orientation_degrees: number // obsolete
     delta_yaw_deg: number
-    encoder_left: number
-    encoder_right: number
+    delta_encoder_left: number
+    delta_encoder_right: number
     imu_yaw_deg: number
     imu_accel_x_mss: number
     imu_accel_y_mss: number
     imu_accel_z_mss: number
     blue_button: number
+    clock_ms: number
 }
 
 export interface StepOutput {
@@ -86,7 +84,7 @@ export interface StepOutput {
 
 export const topStep = (
     aiInstance: AiInstance,
-    input: StepInput
+    input: StepInput,
 ): { output: StepOutput; logs: Array<Log> } => {
     const { wasmInstance, logs } = aiInstance
     const inputPtr = wasmInstance.exports.create_input()
@@ -102,18 +100,15 @@ export const topStep = (
 
     dataView.setInt32(0, input.is_jack_gone, true)
     dataView.setFloat32(4, input.tof_m, true)
-    dataView.setFloat32(8, input.x_mm, true)
-    dataView.setFloat32(12, input.y_mm, true)
-    const positiveOrientation = ((input.orientation_degrees % 360) + 360) % 360
-    dataView.setFloat32(16, positiveOrientation, true)
-    dataView.setFloat32(20, input.delta_yaw_deg, true)
-    dataView.setInt32(24, input.encoder_left, true)
-    dataView.setInt32(28, input.encoder_right, true)
-    dataView.setFloat32(32, input.imu_yaw_deg, true)
-    dataView.setFloat32(36, input.imu_accel_x_mss, true)
-    dataView.setFloat32(40, input.imu_accel_y_mss, true)
-    dataView.setFloat32(44, input.imu_accel_z_mss, true)
-    dataView.setInt32(48, input.blue_button, true)
+    dataView.setFloat32(8, input.delta_yaw_deg, true)
+    dataView.setInt32(12, input.delta_encoder_left, true)
+    dataView.setInt32(16, input.delta_encoder_right, true)
+    dataView.setFloat32(20, input.imu_yaw_deg, true)
+    dataView.setFloat32(24, input.imu_accel_x_mss, true)
+    dataView.setFloat32(28, input.imu_accel_y_mss, true)
+    dataView.setFloat32(32, input.imu_accel_z_mss, true)
+    dataView.setInt32(36, input.blue_button, true)
+    dataView.setInt32(40, 0, true)
 
     logs.length = 0
     wasmInstance.exports.exported_top_step(inputPtr, outputPtr)
