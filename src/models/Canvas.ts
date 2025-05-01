@@ -14,83 +14,69 @@ export class Canvas {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
 
-    drawFilledRectangle(
+    drawRectangle(
         x: number,
         y: number,
         width: number,
         height: number,
         orientation: number,
         color: string,
+        style: 'filled' | 'outlined',
     ): void {
         this.ctx.save()
 
-        // Translate to the rectangle's center
+        this.ctx.beginPath()
         this.ctx.translate(...toCanvasCoordinates(x, y))
-        // Rotate the context
         this.ctx.rotate(-orientation)
-        // Draw the rectangle centered at (0, 0)
-        this.ctx.fillStyle = color
-        this.ctx.fillRect(
+        const coordinates = [
             metricToCanvas(-width / 2),
             metricToCanvas(-height / 2),
             metricToCanvas(width),
             metricToCanvas(height),
-        )
+        ] as [number, number, number, number]
+
+        if (style === 'outlined') {
+            this.ctx.lineWidth = 12
+            this.ctx.strokeStyle = color
+            this.ctx.strokeRect(...coordinates)
+            this.ctx.stroke()
+        } else {
+            this.ctx.fillStyle = color
+            this.ctx.fillRect(...coordinates)
+        }
 
         this.ctx.restore()
     }
 
-    drawRectangleOutline(
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        orientation: number,
-        color: string,
-    ) {
+    drawEllipse(x: number, y: number, width: number, height: number, color: string, style: 'filled' | 'outlined', opacity = 1): void {
         this.ctx.save()
 
         this.ctx.beginPath()
-        this.ctx.translate(...toCanvasCoordinates(x, y))
-        this.ctx.rotate(-orientation)
-        this.ctx.lineWidth = 12
-        this.ctx.rect(
-            metricToCanvas(-width / 2),
-            metricToCanvas(-height / 2),
-            metricToCanvas(width) - this.ctx.lineWidth / 2,
-            metricToCanvas(height) - this.ctx.lineWidth / 2,
-        )
-        this.ctx.strokeStyle = color
-        this.ctx.stroke()
+        this.ctx.ellipse(
+            ...toCanvasCoordinates(x, y),
+            metricToCanvas(width),
+            metricToCanvas(height),
+            0,
+            0,
+            2 * Math.PI)
+
+        if (style === 'outlined') {
+            this.ctx.lineWidth = 16
+            this.ctx.strokeStyle = color
+            this.ctx.stroke()
+        } else {
+            this.ctx.globalAlpha = opacity
+            this.ctx.fillStyle = color
+            this.ctx.fill()
+        }
 
         this.ctx.restore()
     }
 
-    drawFilledEllipse(x: number, y: number, width: number, height: number, color: string, opacity = 1): void {
-        this.ctx.fillStyle = color
-        this.ctx.globalAlpha = opacity
-        this.ctx.beginPath()
-        this.ctx.ellipse(...toCanvasCoordinates(x, y), metricToCanvas(width), metricToCanvas(height), 0, 0, 2 * Math.PI)
-        this.ctx.fill()
-        this.ctx.globalAlpha = 1
-    }
-
-    drawEllipseOutline(x: number, y: number, width: number, height: number, color: string): void {
-        this.ctx.strokeStyle = color
-        this.ctx.lineWidth = 16
-        this.ctx.beginPath()
-        this.ctx.ellipse(
-            ...toCanvasCoordinates(x, y),
-            metricToCanvas(width) - this.ctx.lineWidth / 2,
-            metricToCanvas(height) - this.ctx.lineWidth / 2,
-            0,
-            0,
-            2 * Math.PI,
-        )
-        this.ctx.stroke()
-    }
-
     drawOrientationLine(x: number, y: number, orientation: number, length: number): void {
+        this.ctx.save()
+
+        this.ctx.beginPath()
         const orientationLineX = x + length * Math.cos(orientation)
         const orientationLineY = y + length * Math.sin(orientation)
         this.ctx.strokeStyle = 'black'
@@ -99,6 +85,8 @@ export class Canvas {
         this.ctx.moveTo(...toCanvasCoordinates(x, y))
         this.ctx.lineTo(...toCanvasCoordinates(orientationLineX, orientationLineY))
         this.ctx.stroke()
+
+        this.ctx.restore()
     }
 
     getDrawingColor(robotColor: color): string {

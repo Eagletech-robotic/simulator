@@ -27,10 +27,10 @@ export class PamiRobot extends GenericRobot {
         const { width, height } = this
         const color = canvas.getDrawingColor(this.color)
 
-        canvas.drawFilledRectangle(x, y, width, height, orientation, color)
+        canvas.drawRectangle(x, y, width, height, orientation, color, 'filled')
         canvas.drawOrientationLine(x, y, orientation, width / 2)
 
-        if (isSelected) canvas.drawRectangleOutline(x, y, width, height, orientation, 'red')
+        if (isSelected) canvas.drawRectangle(x, y, width, height, orientation, 'red', 'outlined')
     }
 
     get lastStep(): GenericRobotStep {
