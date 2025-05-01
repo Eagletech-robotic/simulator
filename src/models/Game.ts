@@ -2,9 +2,11 @@ import { Canvas } from './Canvas'
 import { ControlledRobot } from './ControlledRobot'
 import { GenericRobot } from './GenericRobot'
 import { PamiRobot } from './PamiRobot'
+import { Bleacher } from './Bleacher'
 
 export class Game {
-    private _robots: Array<GenericRobot>
+    private _robots: Array<GenericRobot> = []
+    private _bleachers: Array<Bleacher> = []
     private _lastStepNumber = 0
 
     constructor() {
@@ -16,8 +18,24 @@ export class Game {
 
             new ControlledRobot('yellow', 1.225, 0.225, Math.PI / 2),
             // new ControlledRobot('yellow', 2.775, 0.875, Math.PI),
-            new PamiRobot('yellow', .175, 1.875, 0),
-            new PamiRobot('yellow', .175, 1.675, 0),
+            new PamiRobot('yellow', .075, 1.875, 0),
+            new PamiRobot('yellow', .075, 1.675, 0),
+        ]
+    }
+
+    resetBleachers() {
+        this._bleachers = [
+            new Bleacher(0.075, 0.4, Math.PI / 2),
+            new Bleacher(0.075, 1.325, Math.PI / 2),
+            new Bleacher(0.775, 0.25, 0),
+            new Bleacher(0.825, 1.725, 0),
+            new Bleacher(1.1, 0.95, 0),
+
+            new Bleacher(3 - 0.075, 0.4, Math.PI / 2),
+            new Bleacher(3 - 0.075, 1.325, Math.PI / 2),
+            new Bleacher(3 - 0.775, 0.25, 0),
+            new Bleacher(3 - 0.825, 1.725, 0),
+            new Bleacher(3 - 1.1, 0.95, 0),
         ]
     }
 
@@ -29,6 +47,9 @@ export class Game {
         canvas.clearCanvas()
         this._robots.forEach((robot) => {
             robot.draw(canvas, stepNb, robot.id === selectedRobotId)
+        })
+        this._bleachers.forEach((bleacher) => {
+            bleacher.draw(canvas)
         })
     }
 
