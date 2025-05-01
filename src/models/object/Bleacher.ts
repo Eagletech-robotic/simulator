@@ -17,7 +17,7 @@ export class Bleacher {
         for (const [dx, dy] of offsets) {
             const rx = Math.cos(this.orientation) * dx - Math.sin(this.orientation) * dy
             const ry = Math.sin(this.orientation) * dx + Math.cos(this.orientation) * dy
-            canvas.drawEllipse(this.x + rx, this.y + ry, canWidth/2, canWidth/2, 'brown', 'dashed')
+            canvas.drawEllipse(this.x + rx, this.y + ry, canWidth / 2, canWidth / 2, 'brown', 'dashed')
         }
     }
 }
