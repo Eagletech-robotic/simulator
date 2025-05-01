@@ -27,7 +27,7 @@ export class PamiRobot extends GenericRobot {
         const { width, height } = this
         const color = canvas.getDrawingColor(this.color)
 
-        canvas.drawRectangle(x, y, width, height, orientation, color)
+        canvas.drawFilledRectangle(x, y, width, height, orientation, color)
         canvas.drawOrientationLine(x, y, orientation, width / 2)
 
         if (isSelected) canvas.drawRectangleOutline(x, y, width, height, orientation, 'red')

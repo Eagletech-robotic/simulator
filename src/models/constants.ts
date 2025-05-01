@@ -7,6 +7,6 @@ export const fieldHeight = 2.0 // meters
 export const encoderImpulsesPerWheelTurn = 500 * 36 * 4
 export const controlledRobotWheelDiameter = 0.069 // meters
 export const controlledRobotWidth = 0.385 // meters
-export const controlledRobotHeight = 0.385 // meters
+export const controlledRobotHeight = 0.30 // meters
 export const controlledRobotWheelbase = 0.330 // meters
 export const controlledRobotMaxSpeed = 1.0 // meters per second

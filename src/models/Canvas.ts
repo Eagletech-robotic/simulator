@@ -14,7 +14,7 @@ export class Canvas {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
 
-    drawRectangle(
+    drawFilledRectangle(
         x: number,
         y: number,
         width: number,
@@ -66,20 +66,27 @@ export class Canvas {
         this.ctx.restore()
     }
 
-    drawDisc(x: number, y: number, radius: number, color: string, opacity = 1): void {
+    drawFilledEllipse(x: number, y: number, width: number, height: number, color: string, opacity = 1): void {
         this.ctx.fillStyle = color
         this.ctx.globalAlpha = opacity
         this.ctx.beginPath()
-        this.ctx.arc(...toCanvasCoordinates(x, y), metricToCanvas(radius), 0, 2 * Math.PI)
+        this.ctx.ellipse(...toCanvasCoordinates(x, y), metricToCanvas(width), metricToCanvas(height), 0, 0, 2 * Math.PI)
         this.ctx.fill()
         this.ctx.globalAlpha = 1
     }
 
-    drawCircle(x: number, y: number, radius: number, color: string): void {
+    drawEllipseOutline(x: number, y: number, width: number, height: number, color: string): void {
         this.ctx.strokeStyle = color
         this.ctx.lineWidth = 16
         this.ctx.beginPath()
-        this.ctx.arc(...toCanvasCoordinates(x, y), metricToCanvas(radius) - this.ctx.lineWidth / 2, 0, 2 * Math.PI)
+        this.ctx.ellipse(
+            ...toCanvasCoordinates(x, y),
+            metricToCanvas(width) - this.ctx.lineWidth / 2,
+            metricToCanvas(height) - this.ctx.lineWidth / 2,
+            0,
+            0,
+            2 * Math.PI,
+        )
         this.ctx.stroke()
     }
 
