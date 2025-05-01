@@ -5,7 +5,7 @@ import GameBoard from './components/GameBoard'
 import { Game } from './models/Game'
 import { Canvas } from './models/Canvas'
 import { defaultGameDurationSeconds, stepDuration } from './models/constants'
-import Controls from './components/Controls'
+import Controls, { ControlsProps } from './components/Controls'
 import Editor from './components/Editor'
 import Visualizer from './components/Visualizer'
 
@@ -53,6 +53,17 @@ const App = (): JSX.Element => {
         }, 0)
     }
 
+    const stopSimulation = async () => {
+        clearInterval(playingIntervalRef.current || undefined)
+        playingIntervalRef.current = null
+
+        clearInterval(simulationIntervalRef.current || undefined)
+        simulationIntervalRef.current = null
+
+        await game.restart()
+        setPlayingStep(0)
+    }
+
     const play = () => {
         clearInterval(playingIntervalRef.current || undefined)
         playingIntervalRef.current = setInterval(() => {
@@ -63,6 +74,11 @@ const App = (): JSX.Element => {
                 )
             })
         }, (stepDuration * NB_STEPS_PER_PLAYING_INTERVAL) * 1000)
+    }
+
+    const pause = () => {
+        clearInterval(playingIntervalRef.current || undefined)
+        playingIntervalRef.current = null
     }
 
     return (
@@ -79,20 +95,19 @@ const App = (): JSX.Element => {
 
                     <Controls
                         {...{
-                            playingIntervalRef,
-                            simulationIntervalRef,
-                            nbSimulationSteps,
-                            runSimulation,
                             appState,
                             setAppState,
                             gameDurationSeconds,
                             setGameDurationSeconds,
+                            nbSimulationSteps,
                             playingStep,
-                            setPlayingStep,
                             game,
                             canvasRef,
                             play,
-                        }}
+                            pause,
+                            runSimulation,
+                            stopSimulation,
+                        } satisfies ControlsProps}
                     />
                 </BoardAndControls>
 

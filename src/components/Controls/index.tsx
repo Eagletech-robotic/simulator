@@ -4,20 +4,19 @@ import ProgressBar from './ProgressBar'
 import StopButton from './StopButton'
 import { PlaybackBar, SimulationBar, StyledControls } from './styles'
 
-interface ControlsProps {
+export interface ControlsProps {
     appState: 'playing' | 'paused' | 'editing'
     setAppState: (appState: 'playing' | 'paused' | 'editing') => void
     gameDurationSeconds: number
     setGameDurationSeconds: (gameDurationSeconds: number) => void
+    nbSimulationSteps: number
     playingStep: number
-    setPlayingStep: (playingStep: number) => void
     game: any
     canvasRef: any
     play: () => void
-    playingIntervalRef: any
-    simulationIntervalRef: any
-    nbSimulationSteps: number
+    pause: () => void
     runSimulation: () => void
+    stopSimulation: () => Promise<void>
 }
 
 const Controls = ({
@@ -25,15 +24,14 @@ const Controls = ({
     setAppState,
     gameDurationSeconds,
     setGameDurationSeconds,
+    nbSimulationSteps,
     playingStep,
-    setPlayingStep,
     game,
     canvasRef,
     play,
-    playingIntervalRef,
-    simulationIntervalRef,
-    nbSimulationSteps,
+    pause,
     runSimulation,
+    stopSimulation,
 }: ControlsProps): JSX.Element => {
     return (
         <StyledControls>
@@ -47,15 +45,19 @@ const Controls = ({
 
                     const newState = appState === 'playing' ? 'paused' : 'playing'
                     setAppState(newState)
-                    if (appState === 'editing') {
-                        await game.restart()
-                        runSimulation()
-                        play()
-                    } else {
-                        clearInterval(playingIntervalRef.current || undefined)
-                        if (newState === 'playing') {
+
+                    switch (appState) {
+                        case 'playing':
+                            pause()
+                            break
+                        case 'paused':
                             play()
-                        }
+                            break
+                        case 'editing':
+                            await game.restart()
+                            runSimulation()
+                            play()
+                            break
                     }
                 }}
             />
@@ -86,11 +88,8 @@ const Controls = ({
             <StopButton
                 onClick={async () => {
                     setAppState('editing')
-                    clearInterval(playingIntervalRef.current || undefined)
-                    clearInterval(simulationIntervalRef.current || undefined)
-                    await game.restart()
+                    await stopSimulation()
                     if (canvasRef.current) game.draw(canvasRef.current)
-                    setPlayingStep(0)
                 }}
             />
         </StyledControls>
