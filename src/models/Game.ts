@@ -6,6 +6,8 @@ import { GenericRobot } from './robot/GenericRobot'
 import { ControlledRobot } from './robot/ControlledRobot'
 import { PamiRobot } from './robot/PamiRobot'
 import { randInRange, randAngle } from '../utils/maths'
+import { Circle, circlesOverlap, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap } from '../utils/geometry'
+import { bleacherHeight, bleacherWidth, canWidth, controlledRobotWidth } from './constants'
 
 export class Game {
     private _robots: Array<GenericRobot> = []
@@ -65,12 +67,23 @@ export class Game {
         const randomIndex = Math.floor(Math.random() * this._bleachers.length)
         this._bleachers.splice(randomIndex, 1)
 
-        for (let i = 0; i < 2; i++) {
-            this._planks.push(new Plank(randInRange(minX, maxX), randInRange(minY, maxY), randAngle()))
+        let MAX = 25
+        let placed = 0
+        while (placed < 2 && --MAX) {
+            const p = { x: randInRange(minX, maxX), y: randInRange(minY, maxY), orientation: randAngle() }
+            if (this.isRectFree({ ...p, width: bleacherWidth, height: bleacherHeight })) {
+                this._planks.push(new Plank(p.x, p.y, p.orientation))
+                placed++
+            }
         }
 
-        for (let i = 0; i < 4; i++) {
-            this._cans.push(new Can(randInRange(minX, maxX), randInRange(minY, maxY)))
+        placed = 0
+        while (placed < 4 && --MAX) {
+            const c: Circle = { x: randInRange(minX, maxX), y: randInRange(minY, maxY), radius: canWidth / 2 }
+            if (this.isCircleFree(c)) {
+                this._cans.push(new Can(c.x, c.y))
+                placed++
+            }
         }
     }
 
@@ -93,10 +106,14 @@ export class Game {
         ]
 
         const randomIndex = Math.floor(Math.random() * this._bleachers.length)
-        this._bleachers.splice(randomIndex, 1)
-        const randomFinalPosition = Math.floor(Math.random() * finalPositions.length)
-        const [x, y, orientation] = finalPositions[randomFinalPosition]
-        this._bleachers.push(new Bleacher(x, y, orientation))
+        const freePositions = finalPositions.filter(([x, y, orientation]) =>
+            this.isRectFree({ x, y, width: bleacherWidth, height: bleacherHeight, orientation }),
+        )
+        if (freePositions.length) {
+            const [x, y, orientation] = freePositions[Math.floor(Math.random() * freePositions.length)]
+            this._bleachers.splice(randomIndex, 1)
+            this._bleachers.push(new Bleacher(x, y, orientation))
+        }
     }
 
     get lastStepNumber() {
@@ -165,5 +182,42 @@ export class Game {
 
     getRobotById(id: number): GenericRobot | null {
         return this._robots.find((robot) => robot.id === id) || null
+    }
+
+    private isCircleFree = (circle: Circle) =>
+        !this._robots.some(robot => circlesOverlap(circle, {
+            x: robot.lastStep.x,
+            y: robot.lastStep.y,
+            radius: controlledRobotWidth / 2,
+        })) &&
+        !this._cans.some(c => circlesOverlap(circle, { x: c.x, y: c.y, radius: canWidth / 2 })) &&
+        ![...this._planks, ...this._bleachers].some(rect =>
+            rectangleCircleOverlap({
+                x: rect.x,
+                y: rect.y,
+                width: bleacherWidth,
+                height: bleacherHeight,
+                orientation: rect.orientation,
+            }, circle),
+        )
+
+    private isRectFree = (rectangle: Rectangle) => {
+        return (
+            !this._robots.some(robot => rectangleCircleOverlap(rectangle, {
+                x: robot.lastStep.x,
+                y: robot.lastStep.y,
+                radius: controlledRobotWidth / 2,
+            })) &&
+            !this._cans.some(c => rectangleCircleOverlap(rectangle, { x: c.x, y: c.y, radius: canWidth / 2 })) &&
+            ![...this._planks, ...this._bleachers].some(other =>
+                rectangleRectangleOverlap(rectangle, {
+                    x: other.x,
+                    y: other.y,
+                    width: bleacherWidth,
+                    height: bleacherHeight,
+                    orientation: other.orientation,
+                }),
+            )
+        )
     }
 }
