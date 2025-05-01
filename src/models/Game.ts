@@ -122,13 +122,14 @@ export class Game {
 
     draw(canvas: Canvas, selectedRobotId: number | null = null, stepNb = this._lastStepNumber) {
         canvas.clearCanvas()
-        this._robots.forEach((robot) => {
-            robot.draw(canvas, stepNb, robot.id === selectedRobotId)
-        })
 
         const objects: Array<Bleacher | Plank | Can> = [...this._bleachers, ...this._planks, ...this._cans]
         objects.forEach((object) => {
             object.draw(canvas)
+        })
+
+        this._robots.forEach((robot) => {
+            robot.draw(canvas, stepNb, robot.id === selectedRobotId)
         })
     }
 
