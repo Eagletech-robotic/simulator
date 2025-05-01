@@ -1,7 +1,7 @@
 import { Canvas } from './Canvas'
 import { ControlledRobot } from './ControlledRobot'
 import { GenericRobot } from './GenericRobot'
-import { SequentialRobot } from './SequentialRobot'
+import { PamiRobot } from './PamiRobot'
 
 export class Game {
     private _robots: Array<GenericRobot>
@@ -9,12 +9,15 @@ export class Game {
 
     constructor() {
         this._robots = [
-            //new ControlledRobot('blue', 1.775, 0.225, 0),
-            //new SequentialRobot('blue', 2.925, 1.875, -Math.PI / 2),
-            //new SequentialRobot('blue', 2.925, 1.675, -Math.PI / 2),
+            new ControlledRobot('blue', 1.775, 0.225, Math.PI / 2),
+            // new ControlledRobot('blue', .225, 0.875, 0),
+            new PamiRobot('blue', 2.925, 1.875, Math.PI),
+            new PamiRobot('blue', 2.925, 1.675, Math.PI),
+
             new ControlledRobot('yellow', 1.225, 0.225, Math.PI / 2),
-            //new SequentialRobot('yellow', .075, 1.875, Math.PI / 2),
-            //new SequentialRobot('yellow', .075, 1.675, Math.PI / 2),
+            // new ControlledRobot('yellow', 2.775, 0.875, Math.PI),
+            new PamiRobot('yellow', .175, 1.875, 0),
+            new PamiRobot('yellow', .175, 1.675, 0),
         ]
     }
 

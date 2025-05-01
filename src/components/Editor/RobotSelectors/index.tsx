@@ -5,7 +5,7 @@ import RobotSelector from '../RobotSelector'
 import { Game } from 'src/models/Game'
 import { GenericRobot } from 'src/models/GenericRobot'
 import { ControlledRobot } from 'src/models/ControlledRobot'
-import { SequentialRobot } from 'src/models/SequentialRobot'
+import { PamiRobot } from 'src/models/PamiRobot'
 
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'
@@ -31,7 +31,7 @@ const RobotSelectors = ({
                     onClick={() => {
                         let robot: GenericRobot
                         if (type === 'controlled') robot = new ControlledRobot(color, 1.5, 1.0, 0)
-                        else robot = new SequentialRobot(color, 1.5, 1.0, 0)
+                        else robot = new PamiRobot(color, 1.5, 1.0, 0)
 
                         game.appendRobot(robot)
                         gameChanged()

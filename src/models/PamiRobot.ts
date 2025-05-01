@@ -3,7 +3,7 @@ import { GenericRobot } from './GenericRobot'
 import { GenericRobotStep } from './RobotStep'
 import { stepDuration } from './constants'
 
-export class SequentialRobot extends GenericRobot {
+export class PamiRobot extends GenericRobot {
     readonly type = 'sequential'
 
     readonly width = 0.15 // meters

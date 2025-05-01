@@ -31,8 +31,10 @@ export class Canvas {
         // Draw the rectangle centered at (0, 0)
         this.ctx.fillStyle = color
         this.ctx.fillRect(
-            ...toCanvasCoordinates(-width / 2, -height / 2),
-            ...toCanvasCoordinates(width, height),
+            metricToCanvas(-width / 2),
+            metricToCanvas(-height / 2),
+            metricToCanvas(width),
+            metricToCanvas(height),
         )
 
         this.ctx.restore()
@@ -49,13 +51,14 @@ export class Canvas {
         this.ctx.save()
 
         this.ctx.beginPath()
-        this.ctx.translate(x, y)
+        this.ctx.translate(...toCanvasCoordinates(x, y))
         this.ctx.rotate(-orientation)
         this.ctx.lineWidth = 12
-        const [w, h] = toCanvasCoordinates(width, height)
         this.ctx.rect(
-            ...toCanvasCoordinates(-width / 2, -height / 2),
-            w - this.ctx.lineWidth / 2, h - this.ctx.lineWidth / 2,
+            metricToCanvas(-width / 2),
+            metricToCanvas(-height / 2),
+            metricToCanvas(width) - this.ctx.lineWidth / 2,
+            metricToCanvas(height) - this.ctx.lineWidth / 2,
         )
         this.ctx.strokeStyle = color
         this.ctx.stroke()
