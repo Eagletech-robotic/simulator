@@ -13,3 +13,4 @@ export const controlledRobotMaxSpeed = 1.0 // meters per second
 
 export const bleacherWidth = 0.4 // meters
 export const bleacherHeight = 0.1 // meters
+export const canWidth = 0.07 // meters

@@ -10,9 +10,28 @@ const Objects = ({ game, gameChanged }: ObjectsProps): JSX.Element => {
     return (
         <Container>
             <Button onClick={() => {
-                game.resetBleachers()
+                game.resetObjects()
                 gameChanged()
-            }}>Reset Bleachers</Button>
+            }}>Reset</Button>
+
+            <Button onClick={() => {
+                game.clearObjects()
+                gameChanged()
+            }}>Clear</Button>
+
+            <Button
+                disabled={game.nbBleachers === 0}
+                onClick={() => {
+                    game.messBleacher()
+                    gameChanged()
+                }}>Mess Bleacher</Button>
+
+            <Button
+                disabled={game.nbBleachers === 0}
+                onClick={() => {
+                    game.moveBleacherToFinalPosition()
+                    gameChanged()
+                }}>Move Bleacher Final</Button>
         </Container>
     )
 }

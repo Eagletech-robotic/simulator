@@ -1,10 +1,10 @@
-import { Canvas } from './Canvas'
-import { bleacherHeight, bleacherWidth } from './constants'
+import { Canvas } from '../Canvas'
+import { bleacherHeight, bleacherWidth } from '../constants'
 
-export class Bleacher {
+export class Plank {
     constructor(public x: number, public y: number, public orientation: number) {}
 
-    draw(canvas: Canvas): void {
+    draw(canvas: Canvas) {
         canvas.drawRectangle(this.x, this.y, bleacherWidth, bleacherHeight, this.orientation, '#DEB887', 'filled')
     }
 }

@@ -9,7 +9,7 @@ export const StyledList = styled.div`
 `
 
 export const EditRobot = styled.div<{ color: 'blue' | 'yellow' }>`
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
     margin: 0.6rem;
     padding: 1rem;
     position: relative;

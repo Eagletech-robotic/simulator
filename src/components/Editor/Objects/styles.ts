@@ -5,7 +5,7 @@ export const Container = styled.div`
     display: flex;
     justify-content: space-evenly;
     padding: 1rem;
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
 `
 
 export const Button = styled.button`
@@ -20,5 +20,11 @@ export const Button = styled.button`
 
     &:hover {
         background-color: ${colors.blueHover};
+    }
+    
+    &:disabled {
+        background-color: ${colors.darkGrey};
+        color: white;
+        cursor: not-allowed;
     }
 `

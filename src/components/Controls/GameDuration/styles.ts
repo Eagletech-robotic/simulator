@@ -13,7 +13,7 @@ export const SliderInput = styled.input<{ $seconds: number }>`
     position: relative;
     width: 100%;
     appearance: none;
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
     height: 8px;
     border-radius: 4px;
     cursor: pointer;
@@ -45,15 +45,15 @@ export const SliderInput = styled.input<{ $seconds: number }>`
     }
 
     &:disabled {
-        background-color: ${colors.lightGrey};
+        background-color: ${colors.lighterGrey};
         cursor: default;
 
         &::-webkit-slider-thumb {
-            background: ${colors.darkGrey};
+            background: ${colors.lightGrey};
         }
 
         &::-moz-range-thumb {
-            background: ${colors.darkGrey};
+            background: ${colors.lightGrey};
         }
     }
 
@@ -63,7 +63,7 @@ export const SliderInput = styled.input<{ $seconds: number }>`
     }
 
     &:disabled::after {
-        color: ${colors.darkGrey};
+        color: ${colors.lightGrey};
     }
 `
 

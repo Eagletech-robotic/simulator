@@ -1,4 +1,4 @@
-import { Log } from 'src/models/RobotStep'
+import { Log } from 'src/models/robot/RobotStep'
 
 const textDecoder = new TextDecoder() // For decoding UTF-8 strings
 

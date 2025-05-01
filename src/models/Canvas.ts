@@ -48,7 +48,7 @@ export class Canvas {
         this.ctx.restore()
     }
 
-    drawEllipse(x: number, y: number, width: number, height: number, color: string, style: 'filled' | 'outlined', opacity = 1): void {
+    drawEllipse(x: number, y: number, width: number, height: number, color: string, style: 'filled' | 'outlined' | 'dashed', opacity = 1): void {
         this.ctx.save()
 
         this.ctx.beginPath()
@@ -60,14 +60,19 @@ export class Canvas {
             0,
             2 * Math.PI)
 
-        if (style === 'outlined') {
-            this.ctx.lineWidth = 16
-            this.ctx.strokeStyle = color
-            this.ctx.stroke()
-        } else {
+        if (style === 'filled') {
             this.ctx.globalAlpha = opacity
             this.ctx.fillStyle = color
             this.ctx.fill()
+        } else {
+            if (style === 'dashed') {
+                this.ctx.setLineDash([10, 10])
+                this.ctx.lineWidth = 8
+            } else {
+                this.ctx.lineWidth = 16
+            }
+            this.ctx.strokeStyle = color
+            this.ctx.stroke()
         }
 
         this.ctx.restore()

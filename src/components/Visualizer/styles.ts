@@ -6,7 +6,7 @@ export const Header = styled.div`
     display: grid;
     grid-template-rows: auto auto;
     grid-template-columns: 1fr;
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
 `
 
 export const TopRow = styled.div`
@@ -53,10 +53,10 @@ const switchRobotButton = css`
     width: 2.5rem;
     box-sizing: content-box;
     padding: 0.5rem;
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
 
     &:hover {
-        background-color: ${colors.darkGreyHover};
+        background-color: ${colors.lightGreyHover};
     }
 `
 

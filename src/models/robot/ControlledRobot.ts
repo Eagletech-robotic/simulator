@@ -1,5 +1,5 @@
 import { AiInstance, StepInput, topInit, topStep } from 'src/utils/wasm-connector'
-import { Canvas } from './Canvas'
+import { Canvas } from '../Canvas'
 import {
     controlledRobotWidth,
     controlledRobotHeight,
@@ -8,10 +8,10 @@ import {
     encoderImpulsesPerWheelTurn,
     controlledRobotMaxSpeed,
     stepDuration, fieldWidth, fieldHeight,
-} from './constants'
+} from '../constants'
 import { GenericRobot } from './GenericRobot'
 import { ControlledRobotStep, Log } from './RobotStep'
-import { radiansToDegrees } from '../utils/maths'
+import { radiansToDegrees } from '../../utils/maths'
 
 type Move = Pick<
     ControlledRobotStep,

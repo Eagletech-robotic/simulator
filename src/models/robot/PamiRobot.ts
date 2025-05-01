@@ -1,7 +1,7 @@
-import { Canvas } from './Canvas'
+import { Canvas } from '../Canvas'
 import { GenericRobot } from './GenericRobot'
 import { GenericRobotStep } from './RobotStep'
-import { stepDuration } from './constants'
+import { stepDuration } from '../constants'
 
 export class PamiRobot extends GenericRobot {
     readonly type = 'sequential'

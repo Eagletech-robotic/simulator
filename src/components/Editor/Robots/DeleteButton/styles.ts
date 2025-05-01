@@ -8,10 +8,10 @@ export const StyledDeleteButton = styled.button`
     height: 100%;
     padding: 1.5rem;
     border: none;
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
 
     &:hover {
-        background-color: ${colors.darkGreyHover};
+        background-color: ${colors.lightGreyHover};
     }
 `
 

@@ -5,5 +5,5 @@ export const RobotChooser = styled.div`
     display: flex;
     justify-content: space-evenly;
     padding: 1rem;
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
 `

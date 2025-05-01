@@ -4,9 +4,10 @@ export const colors = {
     blue: '#2196f3',
     blueHover: '#0056b3',
     yellow: '#ffeb3b',
-    darkGrey: '#e0e0e0',
-    darkGreyHover: '#d0d0d0',
-    lightGrey: '#f0f0f0',
+    darkGrey: '#999',
+    lightGrey: '#e0e0e0',
+    lightGreyHover: '#d0d0d0',
+    lighterGrey: '#f0f0f0',
 }
 
 const styles = css`
@@ -40,7 +41,7 @@ export const RightPanel = styled.div`
     overflow: hidden;
     margin: 2rem;
     border-radius: 1rem;
-    background-color: ${colors.lightGrey};
+    background-color: ${colors.lighterGrey};
 `
 
 export const playbackButtonStyle = css`

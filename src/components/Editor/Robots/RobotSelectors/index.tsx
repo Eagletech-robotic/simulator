@@ -3,9 +3,9 @@ import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
 import RobotSelector from '../RobotSelector'
 import { Game } from 'src/models/Game'
-import { GenericRobot } from 'src/models/GenericRobot'
-import { ControlledRobot } from 'src/models/ControlledRobot'
-import { PamiRobot } from 'src/models/PamiRobot'
+import { GenericRobot } from 'src/models/robot/GenericRobot'
+import { ControlledRobot } from 'src/models/robot/ControlledRobot'
+import { PamiRobot } from 'src/models/robot/PamiRobot'
 
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'

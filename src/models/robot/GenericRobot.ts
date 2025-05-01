@@ -1,4 +1,4 @@
-import { Canvas } from './Canvas'
+import { Canvas } from '../Canvas'
 import { GenericRobotStep } from './RobotStep'
 
 export abstract class GenericRobot {
@@ -7,9 +7,13 @@ export abstract class GenericRobot {
     abstract readonly height: number
 
     abstract draw(canvas: Canvas, stepNb: number, isSelected: boolean): void
+
     abstract nextStep(): void
+
     abstract get lastStep(): GenericRobotStep
+
     abstract reset(): Promise<void> | void
+
     onSimulationEnd(): void {}
 
     readonly color: 'blue' | 'yellow'

@@ -1,7 +1,7 @@
 import { EditRobot, Input, RobotAttribute, RobotType, StyledList } from './styles'
 import React from 'react'
 import DeleteButton from '../DeleteButton'
-import { GenericRobot } from 'src/models/GenericRobot'
+import { GenericRobot } from 'src/models/robot/GenericRobot'
 import { Game } from 'src/models/Game'
 
 interface EditorProps {

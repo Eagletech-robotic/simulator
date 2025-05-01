@@ -9,7 +9,7 @@ export const Container = styled.div`
 
 export const Bar = styled.div`
     height: 14px;
-    background-color: ${colors.darkGrey};
+    background-color: ${colors.lightGrey};
     border-radius: 0.4rem;
     position: relative;
     overflow: hidden;
