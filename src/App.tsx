@@ -38,6 +38,7 @@ const App = (): JSX.Element => {
 
     const runSimulation = () => {
         clearInterval(simulationIntervalRef.current || undefined)
+        setSelectedRobotId(game.firstRobotId)
         simulationIntervalRef.current = setInterval(() => {
             for (let i = 0; i < 500; i++) {
                 game.nextStep()

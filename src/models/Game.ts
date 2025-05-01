@@ -32,6 +32,14 @@ export class Game {
         })
     }
 
+    get nbRobots() {
+        return this._robots.length
+    }
+
+    get firstRobotId() {
+        return this._robots[0].id
+    }
+
     async restart() {
         await Promise.all(this._robots.map((robot) => robot.reset()))
         this._lastStepNumber = 0

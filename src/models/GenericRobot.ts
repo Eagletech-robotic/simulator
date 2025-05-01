@@ -43,7 +43,7 @@ export abstract class GenericRobot {
     get displayName(): string {
         switch (this.type) {
             case 'controlled':
-                return 'Main Robot'
+                return 'Robot'
             case 'sequential':
                 return 'Pami'
         }

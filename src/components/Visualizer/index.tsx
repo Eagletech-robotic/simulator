@@ -69,24 +69,6 @@ const Visualizer = ({
         return () => document.removeEventListener('keydown', handleKeyDown)
     }, [])
 
-    if (!game.robots.length) {
-        return (
-            <RightPanel>
-                <div
-                    style={{
-                        fontWeight: 'bold',
-                        color: 'red',
-                        fontSize: '2rem',
-                        textAlign: 'center',
-                        alignContent: 'center',
-                    }}
-                >
-                    No robots
-                </div>
-            </RightPanel>
-        )
-    }
-
     const robot = selectedRobotId ? game.getRobotById(selectedRobotId) : null
     const step = robot?.steps[playingStep]
 
@@ -95,7 +77,7 @@ const Visualizer = ({
             <Header ref={headerRef.current}>
                 <TopRow>
                     <PreviousRobotButton onClick={prevRobot}>{SwitchRobotIcon}</PreviousRobotButton>
-                    <RobotName>{robot && `${robot.displayName}: ${robot.id}`}</RobotName>
+                    <RobotName>{robot && `${robot.displayName}`}</RobotName>
                     <NextRobotButton onClick={nextRobot}>{SwitchRobotIcon}</NextRobotButton>
                 </TopRow>
 

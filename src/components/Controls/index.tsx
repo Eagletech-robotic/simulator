@@ -40,6 +40,11 @@ const Controls = ({
             <PlayButton
                 isPlaying={appState === 'playing'}
                 toggle={async () => {
+                    if (appState === 'editing' && game.nbRobots === 0) {
+                        alert('Please add a robot to the game before playing.')
+                        return
+                    }
+
                     const newState = appState === 'playing' ? 'paused' : 'playing'
                     setAppState(newState)
                     if (appState === 'editing') {
