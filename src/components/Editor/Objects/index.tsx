@@ -22,9 +22,9 @@ const Objects = ({ game, gameChanged }: ObjectsProps): JSX.Element => {
             <Button
                 disabled={game.nbBleachers === 0}
                 onClick={() => {
-                    game.messBleacher()
+                    game.breakBleacher()
                     gameChanged()
-                }}>Mess Bleacher</Button>
+                }}>Break Bleacher</Button>
 
             <Button
                 disabled={game.nbBleachers === 0}

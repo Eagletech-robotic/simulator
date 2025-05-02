@@ -55,7 +55,7 @@ export class Game {
         this._cans = []
     }
 
-    messBleacher(): void {
+    breakBleacher(): void {
         if (this._bleachers.length === 0) return
 
         const safeMargin = 0.2
