@@ -137,7 +137,7 @@ export class ControlledRobot extends GenericRobot {
             blue_button: 0,
             clock_ms: (this.steps.length * stepDuration) * 1000,
         }
-        const bluetoothInput = this.steps.length % 250 == 1 ? this.bluetoothBlock() : []
+        const bluetoothInput = this.steps.length % 250 == 1 ? this.bluetoothPacket() : []
         const { output, logs } = topStep(this.aiInstance!, input, bluetoothInput)
 
         const move = this.buildMove(
@@ -174,7 +174,29 @@ export class ControlledRobot extends GenericRobot {
 
     }
 
-    private bluetoothBlock(): Array<number> {
+    private padAndAddChecksum(packetString: string): Array<number> {
+        const PACKET_SIZE = 20
+        const STARTER_BYTE = 0xFF
+        const PADDING_CHAR = '-'
+
+        // Pad the packet string to the required size
+        const paddedPacket = packetString.padEnd(PACKET_SIZE, PADDING_CHAR)
+
+        // Convert the string to ASCII codes
+        const packetBytes = Array.from(paddedPacket).map(char => char.charCodeAt(0))
+
+        // Calculate the checksum
+        let checksum = 0
+        for (let i = 0; i < packetBytes.length; i++) {
+            checksum += packetBytes[i]
+        }
+        checksum = checksum & 0xFF
+
+        // Return the full packet: 0xFF + payload + checksum
+        return [STARTER_BYTE, ...packetBytes, checksum]
+    }
+
+    private bluetoothPacket(): Array<number> {
         const step = this.lastStep
 
         const formattedX = Math.round(step.x * 100).toString().padStart(3, '0')
@@ -188,9 +210,11 @@ export class ControlledRobot extends GenericRobot {
         }
         const formattedTheta = Math.round(orientationDeg).toString().padStart(3, '0')
 
-        const packetString = 'S' + formattedX + formattedY + formattedTheta // "S200100090"
-        console.log(`Bluetooth packet step ${this.steps.length}: ${packetString}`)
+        const payload = formattedX + formattedY + formattedTheta // "200100090"
 
-        return Array.from(packetString).map(char => char.charCodeAt(0))
+        const packet = this.padAndAddChecksum(payload)
+        console.log(`Bluetooth packet step ${this.steps.length}: ${payload}`)
+
+        return packet
     }
 }
