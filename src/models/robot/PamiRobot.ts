@@ -38,7 +38,12 @@ export class PamiRobot extends GenericRobot {
     }
 
     nextStep(_eaglePacket: number[] | null) {
-        const speed = 0.15 // meters per second
+        const PAMI_START_TIME = 90 // seconds
+        const PAMI_STOP_TIME = 94
+        const timesSinceStart = this.steps.length * stepDuration // seconds
+
+        const speed = timesSinceStart >= PAMI_START_TIME && timesSinceStart <= PAMI_STOP_TIME
+            ? 0.3 : 0 // meters per second
         this.steps.push(this.moveForward(stepDuration * speed))
     }
 }
