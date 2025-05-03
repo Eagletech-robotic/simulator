@@ -88,21 +88,21 @@ describe('Game.eaglePacket', () => {
         expect(objectCount).toBe(3)
 
         /* ---------- first object (bleacher) ---------- */
-        expect(read(2)).toBe(0)                  // type 0 = bleacher
-        expect(read(6)).toBe(30)                 // x 30 cm
-        expect(read(5)).toBe(20)                 // y 20 cm
-        expect(read(3)).toBe(0)                  // θ 0°
+        expect(read(2)).toBe(0)        // type 0
+        expect(read(6)).toBe(6)        // 30 cm  →  round(30*63/300)=6
+        expect(read(5)).toBe(3)        // 20 cm  →  round(20*31/200)=3
+        expect(read(3)).toBe(0)
 
         /* ---------- second object (plank) ---------- */
-        expect(read(2)).toBe(1)                  // type 1 = plank
-        expect(read(6)).toBe(40)
-        expect(read(5)).toBe(30)
-        expect(read(3)).toBe(2)                  // 60° / 30 = 2
+        expect(read(2)).toBe(1)
+        expect(read(6)).toBe(8)        // 40 cm → 8
+        expect(read(5)).toBe(5)        // 30 cm → 5
+        expect(read(3)).toBe(2)
 
         /* ---------- third object (can) ---------- */
-        expect(read(2)).toBe(2)                  // type 2 = can
-        expect(read(6)).toBe(10)
-        expect(read(5)).toBe(5)
-        expect(read(3)).toBe(0)                  // θ 0°
+        expect(read(2)).toBe(2)
+        expect(read(6)).toBe(2)        // 10 cm → 2
+        expect(read(5)).toBe(1)        //  5 cm → 1
+        expect(read(3)).toBe(0)
     })
 })

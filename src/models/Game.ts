@@ -281,8 +281,15 @@ export class Game {
 
         objs.slice(0, objectCount).forEach(o => {
             pushBits(o.type, 2)
-            pushBits(toCm(o.x) & 0x3F, 6)
-            pushBits(toCm(o.y) & 0x1F, 5)
+
+            // 0 – 300 cm  ⇒  0 – 63  (6 bits)
+            const rawX = Math.round(toCm(o.x) * 63 / 300)
+            pushBits(rawX & 0x3F, 6)
+
+            // 0 – 200 cm  ⇒  0 – 31  (5 bits)
+            const rawY = Math.round(toCm(o.y) * 31 / 200)
+            pushBits(rawY & 0x1F, 5)
+
             pushBits(Math.round(o.oDeg / 30) & 0x7, 3)
         })
 
