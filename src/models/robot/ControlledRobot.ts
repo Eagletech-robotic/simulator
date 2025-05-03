@@ -12,6 +12,7 @@ import {
 import { GenericRobot } from './GenericRobot'
 import { ControlledRobotStep, Log } from './RobotStep'
 import { radiansToDegrees } from '../../utils/maths'
+import { buildPacket } from '../../utils/bluetooth'
 
 type Move = Pick<
     ControlledRobotStep,
@@ -103,15 +104,15 @@ export class ControlledRobot extends GenericRobot {
         for (let i = 0; i < stepNb; i += 50) {
             const color = canvas.getDrawingColor(this.color)
             const opacity = Math.max(1 - (stepNb - i) / 6500, 0)
-            canvas.drawEllipse(this.steps[i].x, this.steps[i].y, 0.003, 0.003, color, 'filled', opacity)
+            canvas.drawEllipse(this.steps[i].x, this.steps[i].y, 0.003, 0.003, 0, color, 'filled', opacity)
         }
 
         const step = this.steps[stepNb]
-        canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, canvas.getDrawingColor(this.color), 'filled')
+        canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, step.orientation, canvas.getDrawingColor(this.color), 'filled')
         canvas.drawOrientationLine(step.x, step.y, step.orientation, this.height / 2)
 
         if (isSelected) {
-            canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, 'red', 'outlined')
+            canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, step.orientation, 'red', 'outlined')
         }
     }
 
@@ -174,28 +175,6 @@ export class ControlledRobot extends GenericRobot {
 
     }
 
-    private padAndAddChecksum(packetString: string): Array<number> {
-        const PACKET_SIZE = 20
-        const STARTER_BYTE = 0xFF
-        const PADDING_CHAR = '-'
-
-        // Pad the packet string to the required size
-        const paddedPacket = packetString.padEnd(PACKET_SIZE, PADDING_CHAR)
-
-        // Convert the string to ASCII codes
-        const packetBytes = Array.from(paddedPacket).map(char => char.charCodeAt(0))
-
-        // Calculate the checksum
-        let checksum = 0
-        for (let i = 0; i < packetBytes.length; i++) {
-            checksum += packetBytes[i]
-        }
-        checksum = checksum & 0xFF
-
-        // Return the full packet: 0xFF + payload + checksum
-        return [STARTER_BYTE, ...packetBytes, checksum]
-    }
-
     private bluetoothPacket(): Array<number> {
         const step = this.lastStep
 
@@ -212,7 +191,7 @@ export class ControlledRobot extends GenericRobot {
 
         const payload = formattedX + formattedY + formattedTheta // "200100090"
 
-        const packet = this.padAndAddChecksum(payload)
+        const packet = buildPacket(payload)
         console.log(`Bluetooth packet step ${this.steps.length}: ${payload}`)
 
         return packet

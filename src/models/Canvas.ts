@@ -48,7 +48,7 @@ export class Canvas {
         this.ctx.restore()
     }
 
-    drawEllipse(x: number, y: number, width: number, height: number, color: string, style: 'filled' | 'outlined' | 'dashed', opacity = 1): void {
+    drawEllipse(x: number, y: number, width: number, height: number, orientation: number, color: string, style: 'filled' | 'outlined' | 'dashed', opacity = 1): void {
         this.ctx.save()
 
         this.ctx.beginPath()
@@ -56,7 +56,7 @@ export class Canvas {
             ...toCanvasCoordinates(x, y),
             metricToCanvas(width),
             metricToCanvas(height),
-            0,
+            -orientation + Math.PI / 2,
             0,
             2 * Math.PI)
 
