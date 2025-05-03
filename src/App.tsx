@@ -81,6 +81,40 @@ const App = (): JSX.Element => {
         playingIntervalRef.current = null
     }
 
+    useEffect(() => {
+        const handleKeydown = async (event: KeyboardEvent) => {
+            if (event.key === ' ') {
+                event.preventDefault()
+
+                if (appState === 'playing') {
+                    setAppState('paused')
+                    pause()
+                } else if (appState === 'paused') {
+                    setAppState('playing')
+                    play()
+                } else if (appState === 'editing') {
+                    await game.restart()
+                    setAppState('playing')
+                    runSimulation()
+                    play()
+                }
+            }
+
+            if (event.key === 'Escape' && appState !== 'editing') {
+                event.preventDefault()
+                setAppState('editing')
+                await stopSimulation()
+                if (canvasRef.current) game.draw(canvasRef.current)
+            }
+        }
+
+        document.addEventListener('keydown', handleKeydown)
+
+        return () => {
+            document.removeEventListener('keydown', handleKeydown)
+        }
+    }, [appState]) 
+
     return (
         <>
             <GlobalStyles />
