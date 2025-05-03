@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
+import { useLayoutEffect, useReducer, useRef, useState } from 'react'
 import { BoardAndControls, Page } from './styles'
 import { GlobalStyles } from './styles/commonStyles'
 import GameBoard from './components/GameBoard'
@@ -81,39 +81,49 @@ const App = (): JSX.Element => {
         playingIntervalRef.current = null
     }
 
-    useEffect(() => {
+    const onPlayToggle = async () => {
+        if (appState === 'editing' && game.nbRobots === 0) {
+            alert('Please add a robot to the game before playing.')
+            return
+        }
+
+        const newState = appState === 'playing' ? 'paused' : 'playing'
+        setAppState(newState)
+
+        switch (appState) {
+            case 'playing':
+                pause()
+                break
+            case 'paused':
+                play()
+                break
+            case 'editing':
+                await game.restart()
+                runSimulation()
+                play()
+                break
+        }
+    }
+
+    const onStop = async () => {
+        setAppState('editing')
+        await stopSimulation()
+        if (canvasRef.current) game.draw(canvasRef.current)
+    }
+
+    useLayoutEffect(() => {
         const handleKeydown = async (event: KeyboardEvent) => {
             if (event.key === ' ') {
                 event.preventDefault()
-
-                if (appState === 'playing') {
-                    setAppState('paused')
-                    pause()
-                } else if (appState === 'paused') {
-                    setAppState('playing')
-                    play()
-                } else if (appState === 'editing') {
-                    await game.restart()
-                    setAppState('playing')
-                    runSimulation()
-                    play()
-                }
-            }
-
-            if (event.key === 'Escape' && appState !== 'editing') {
+                await onPlayToggle()
+            } else if (event.key === 'Escape') {
                 event.preventDefault()
-                setAppState('editing')
-                await stopSimulation()
-                if (canvasRef.current) game.draw(canvasRef.current)
+                await onStop()
             }
         }
-
         document.addEventListener('keydown', handleKeydown)
-
-        return () => {
-            document.removeEventListener('keydown', handleKeydown)
-        }
-    }, [appState]) 
+        return () => document.removeEventListener('keydown', handleKeydown)
+    }, [appState])
 
     return (
         <>
@@ -136,11 +146,8 @@ const App = (): JSX.Element => {
                             nbSimulationSteps,
                             playingStep,
                             game,
-                            canvasRef,
-                            play,
-                            pause,
-                            runSimulation,
-                            stopSimulation,
+                            onPlayToggle,
+                            onStop,
                         } satisfies ControlsProps}
                     />
                 </BoardAndControls>

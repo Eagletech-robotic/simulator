@@ -12,11 +12,8 @@ export interface ControlsProps {
     nbSimulationSteps: number
     playingStep: number
     game: any
-    canvasRef: any
-    play: () => void
-    pause: () => void
-    runSimulation: () => void
-    stopSimulation: () => Promise<void>
+    onPlayToggle: () => Promise<void>
+    onStop: () => Promise<void>
 }
 
 const Controls = ({
@@ -27,45 +24,22 @@ const Controls = ({
     nbSimulationSteps,
     playingStep,
     game,
-    canvasRef,
-    play,
-    pause,
-    runSimulation,
-    stopSimulation,
+    onPlayToggle,
+    onStop,
 }: ControlsProps): JSX.Element => {
     return (
         <StyledControls>
             <PlayButton
                 isPlaying={appState === 'playing'}
-                toggle={async () => {
-                    if (appState === 'editing' && game.nbRobots === 0) {
-                        alert('Please add a robot to the game before playing.')
-                        return
-                    }
-
-                    const newState = appState === 'playing' ? 'paused' : 'playing'
-                    setAppState(newState)
-
-                    switch (appState) {
-                        case 'playing':
-                            pause()
-                            break
-                        case 'paused':
-                            play()
-                            break
-                        case 'editing':
-                            await game.restart()
-                            runSimulation()
-                            play()
-                            break
-                    }
-                }}
+                toggle={onPlayToggle}
             />
+
             <GameDuration
                 gameDuration={gameDurationSeconds}
                 setGameDuration={setGameDurationSeconds}
                 isEditing={appState === 'editing'}
             />
+
             <PlaybackBar>
                 <ProgressBar
                     progressPercentage={(playingStep / nbSimulationSteps) * 100}
@@ -77,6 +51,7 @@ const Controls = ({
                     }
                 />
             </PlaybackBar>
+
             <SimulationBar>
                 <ProgressBar
                     progressPercentage={(game.lastStepNumber / nbSimulationSteps) * 100}
@@ -85,13 +60,8 @@ const Controls = ({
                     }
                 />
             </SimulationBar>
-            <StopButton
-                onClick={async () => {
-                    setAppState('editing')
-                    await stopSimulation()
-                    if (canvasRef.current) game.draw(canvasRef.current)
-                }}
-            />
+
+            <StopButton onClick={onStop} />
         </StyledControls>
     )
 }
