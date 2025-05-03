@@ -8,6 +8,7 @@ import { PamiRobot } from './robot/PamiRobot'
 import { randInRange, randAngle } from '../utils/maths'
 import { Circle, circlesOverlap, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap } from '../utils/geometry'
 import { bleacherHeight, bleacherWidth, canWidth, controlledRobotWidth } from './constants'
+import { buildPacket } from '../utils/bluetooth'
 
 export class Game {
     private _robots: Array<GenericRobot> = []
@@ -155,7 +156,15 @@ export class Game {
     }
 
     nextStep(): void {
-        this._robots.map((r) => r.nextStep())
+        const SEND_PACKET_EVERY = 100 // number of steps
+
+        this._robots.map((r) => {
+            let eaglePacket: number[] | null = null
+            if (r instanceof ControlledRobot && this.lastStepNumber % SEND_PACKET_EVERY === 0) {
+                eaglePacket = this.eaglePacket(r.color)
+            }
+            r.nextStep(eaglePacket)
+        })
         this._lastStepNumber++
     }
 
@@ -220,5 +229,69 @@ export class Game {
                 }),
             )
         )
+    }
+
+    /**
+     * Build an Eagle Bluetooth packet for the given color.
+     * Array content: [ 0xFF, <payload bytes…>, <8‑bit checksum> ].
+     */
+    private eaglePacket(color: 'blue' | 'yellow'): number[] | null {
+        // ───────── helpers ─────────
+        const bits: number[] = []
+        const pushBits = (v: number, n: number) => {
+            for (let i = 0; i < n; ++i) bits.push((v >> i) & 1)
+        }
+        const toCm = (m: number) => Math.round(m * 100)
+        const toDeg = (rad: number) => Math.round((rad * 180) / Math.PI)
+
+        // ───────── pick robots ─────
+        const myRobot =
+            this._robots.find(r => r instanceof ControlledRobot && r.color === color)
+        if (!myRobot) {
+            console.warn('Bluetooth requires a controlled robot')
+            return null
+        }
+
+        const opponentRobot =
+            this._robots.find(r => r instanceof ControlledRobot && r.color !== color)
+
+        // ───────── header ──────────
+        pushBits(myRobot.color === 'yellow' ? 1 : 0, 1)
+
+        pushBits(toCm(myRobot.lastStep.x), 9)
+        pushBits(toCm(myRobot.lastStep.y), 8)
+        pushBits((toDeg(myRobot.lastStep.orientation) + 180) & 0x1FF, 9)
+
+        if (opponentRobot) {
+            pushBits(toCm(opponentRobot.lastStep.x), 9)
+            pushBits(toCm(opponentRobot.lastStep.y), 8)
+            pushBits((toDeg(opponentRobot.lastStep.orientation) + 180) & 0x1FF, 9)
+        } else {
+            pushBits(0, 9 + 8 + 9)
+        }
+
+        // ───────── objects ─────────
+        const objs: { type: number; x: number; y: number; oDeg: number }[] = []
+        this._bleachers.forEach(b => objs.push({ type: 0, x: b.x, y: b.y, oDeg: toDeg(b.orientation) }))
+        this._planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, oDeg: toDeg(p.orientation) }))
+        this._cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, oDeg: 0 }))
+
+        const objectCount = Math.min(objs.length, 60)
+        pushBits(objectCount, 6)          // header ends here
+
+        objs.slice(0, objectCount).forEach(o => {
+            pushBits(o.type, 2)
+            pushBits(toCm(o.x) & 0x3F, 6)
+            pushBits(toCm(o.y) & 0x1F, 5)
+            pushBits(Math.round(o.oDeg / 30) & 0x7, 3)
+        })
+
+        // ───────── bits → bytes ────
+        const payload: number[] = Array(Math.ceil(bits.length / 8)).fill(0)
+        bits.forEach((bit, i) => { if (bit) payload[i >> 3] |= 1 << (i & 7) })
+
+        // ───────── build packet ────────
+        const payloadString = String.fromCharCode(...payload)
+        return buildPacket(payloadString)
     }
 }

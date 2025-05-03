@@ -8,7 +8,7 @@ export abstract class GenericRobot {
 
     abstract draw(canvas: Canvas, stepNb: number, isSelected: boolean): void
 
-    abstract nextStep(): void
+    abstract nextStep(eaglePacket: number[] | null): void
 
     abstract get lastStep(): GenericRobotStep
 

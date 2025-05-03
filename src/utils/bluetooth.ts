@@ -3,7 +3,7 @@
  * @param packetString
  */
 export const buildPacket = (payload: string): Array<number> => {
-    const PACKET_SIZE = 20
+    const PACKET_SIZE = 128
     const STARTER_BYTE = 0xFF
     const PADDING_CHAR = '-'
 

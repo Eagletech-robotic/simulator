@@ -12,7 +12,6 @@ import {
 import { GenericRobot } from './GenericRobot'
 import { ControlledRobotStep, Log } from './RobotStep'
 import { radiansToDegrees } from '../../utils/maths'
-import { buildPacket } from '../../utils/bluetooth'
 
 type Move = Pick<
     ControlledRobotStep,
@@ -116,7 +115,7 @@ export class ControlledRobot extends GenericRobot {
         }
     }
 
-    nextStep() {
+    nextStep(eaglePacket: number[] | null) {
         const step = this.lastStep
         const previousStep = this.steps[this.steps.length - 2] ?? step
 
@@ -138,8 +137,7 @@ export class ControlledRobot extends GenericRobot {
             blue_button: 0,
             clock_ms: (this.steps.length * stepDuration) * 1000,
         }
-        const bluetoothInput = this.steps.length % 250 == 1 ? this.bluetoothPacket() : []
-        const { output, logs } = topStep(this.aiInstance!, input, bluetoothInput)
+        const { output, logs } = topStep(this.aiInstance!, input, eaglePacket || [])
 
         const move = this.buildMove(
             output.motor_left_ratio * controlledRobotMaxSpeed * stepDuration,
@@ -173,27 +171,5 @@ export class ControlledRobot extends GenericRobot {
             console.table(renumberedLogs)
         }
 
-    }
-
-    private bluetoothPacket(): Array<number> {
-        const step = this.lastStep
-
-        const formattedX = Math.round(step.x * 100).toString().padStart(3, '0')
-        const formattedY = Math.round(step.y * 100).toString().padStart(3, '0')
-
-        let orientationDeg = radiansToDegrees(step.orientation)
-        if (orientationDeg < 0) {
-            orientationDeg += 360
-        } else if (orientationDeg > 360) {
-            orientationDeg -= 360
-        }
-        const formattedTheta = Math.round(orientationDeg).toString().padStart(3, '0')
-
-        const payload = formattedX + formattedY + formattedTheta // "200100090"
-
-        const packet = buildPacket(payload)
-        console.log(`Bluetooth packet step ${this.steps.length}: ${payload}`)
-
-        return packet
     }
 }
