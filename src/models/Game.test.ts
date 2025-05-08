@@ -4,6 +4,7 @@ import { ControlledRobot } from './robot/ControlledRobot'
 import { Plank } from './object/Plank'
 import { Can } from './object/Can'
 import { Bleacher } from './object/Bleacher'
+import { buildPacket } from '../utils/bluetooth'
 
 describe('Game.eaglePacket', () => {
     const callEaglePacket = (g: Game, colour: 'blue' | 'yellow' = 'blue') =>
@@ -33,7 +34,7 @@ describe('Game.eaglePacket', () => {
 
     it('returns null when no controlled robot of requested colour exists', () => {
         const game = new Game()
-        // remove every robot so the method can’t find a ControlledRobot
+        // remove every robot so the method can't find a ControlledRobot
         // @ts-ignore
         game._robots = []
 
@@ -76,16 +77,21 @@ describe('Game.eaglePacket', () => {
 
         /* ---------- header assertions ---------- */
         expect(read(1)).toBe(0)                  // robot colour (blue)
+        expect(read(1)).toBe(1)                  // robot detected
+
         expect(read(9)).toBe(150)                // robot x (cm)
         expect(read(8)).toBe(100)                // robot y
-        expect(read(9)).toBe(45 + 180)                    // robot θ + 180
+        expect(read(9)).toBe(45 + 180)           // robot θ + 180
 
+        expect(read(1)).toBe(1)                  // opponent detected
         expect(read(9)).toBe(200)                // opponent x
         expect(read(8)).toBe(50)                 // opponent y
-        expect(read(9)).toBe(-90 + 180)                   // opponent θ + 180
+        expect(read(9)).toBe(-90 + 180)          // opponent θ + 180
 
         const objectCount = read(6)
         expect(objectCount).toBe(3)
+
+        expect(read(3)).toBe(0)                  // padding bits
 
         /* ---------- first object (bleacher) ---------- */
         expect(read(2)).toBe(0)        // type 0
@@ -104,5 +110,48 @@ describe('Game.eaglePacket', () => {
         expect(read(6)).toBe(2)        // 10 cm → 2
         expect(read(5)).toBe(1)        //  5 cm → 1
         expect(read(3)).toBe(0)
+    })
+
+    it('encodes the exact same packet as test_eagle_packet.cpp (ManualBitPatternOneObject)', () => {
+        /* Build a world matching the decoded values used in the C++ test */
+
+        const game = new Game()
+
+        // Controlled robot (blue)
+        // @ts-ignore private access for tests
+        game._robots = [
+            new ControlledRobot('blue', 0.10, 0.20, Math.PI / 6),   // 10 cm, 20 cm, 30°
+            new ControlledRobot('yellow', 0.05, 0.06, -Math.PI / 2) // 5 cm, 6 cm, -90°
+        ]
+
+        // One bleacher object positioned so that raw_x=3 and raw_y=5, θ index = 2 (60°)
+        // @ts-ignore private access for tests
+        game._bleachers = [new Bleacher(0.14, 0.32, Math.PI / 3)]
+
+        // No other objects
+        // @ts-ignore
+        game._planks = []
+        // @ts-ignore
+        game._cans = []
+
+        const packet = callEaglePacket(game, 'blue')!
+
+        /* Expected payload taken from test_eagle_packet.cpp ManualBitPatternOneObject */
+        const expectedPayload = [
+            0b00101010,
+            0b10100000,
+            0b10010000,
+            0b10110110,
+            0b10000000,
+            0b10000001,
+            0b10010110,
+            0b00000000,
+            0b00001100,
+            0b01000101,
+        ]
+
+        const expectedFullPacket = buildPacket(String.fromCharCode(...expectedPayload))
+
+        expect(packet).toEqual(expectedFullPacket)
     })
 })

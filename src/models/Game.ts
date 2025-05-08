@@ -256,17 +256,28 @@ export class Game {
             this._robots.find(r => r instanceof ControlledRobot && r.color !== color)
 
         // ───────── header ──────────
+        // 0. robot colour (blue=0, yellow=1)
         pushBits(myRobot.color === 'yellow' ? 1 : 0, 1)
 
+        // 1. robot detected – in the simulation the controlled robot is always detected
+        pushBits(1, 1)
+
+        // 2-18. robot pose
         pushBits(toCm(myRobot.lastStep.x), 9)
         pushBits(toCm(myRobot.lastStep.y), 8)
         pushBits((toDeg(myRobot.lastStep.orientation) + 180) & 0x1FF, 9)
 
-        if (opponentRobot) {
+        // 28. opponent detected
+        const opponentDetected = !!opponentRobot
+        pushBits(opponentDetected ? 1 : 0, 1)
+
+        // 29-54. opponent pose (or zeros if not detected)
+        if (opponentDetected) {
             pushBits(toCm(opponentRobot.lastStep.x), 9)
             pushBits(toCm(opponentRobot.lastStep.y), 8)
             pushBits((toDeg(opponentRobot.lastStep.orientation) + 180) & 0x1FF, 9)
         } else {
+            // fill with zeros for the 9+8+9 bits
             pushBits(0, 9 + 8 + 9)
         }
 
@@ -277,7 +288,12 @@ export class Game {
         this._cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, oDeg: 0 }))
 
         const objectCount = Math.min(objs.length, 60)
-        pushBits(objectCount, 6)          // header ends here
+        pushBits(objectCount, 6)
+
+        // 3-bit padding so the header is exactly 64 bits (8 bytes)
+        pushBits(0, 3) // padding, must be zero
+
+        // header ends here
 
         objs.slice(0, objectCount).forEach(o => {
             pushBits(o.type, 2)
