@@ -242,7 +242,11 @@ export class Game {
             for (let i = 0; i < n; ++i) bits.push((v >> i) & 1)
         }
         const toCm = (m: number) => Math.round(m * 100)
-        const toDeg = (rad: number) => Math.round((rad * 180) / Math.PI)
+        const toDeg = (rad: number) => {
+            // Normalize to [0, 360)
+            const deg = Math.round((rad * 180) / Math.PI) % 360
+            return deg < 0 ? deg + 360 : deg
+        }
 
         // ───────── pick robots ─────
         const myRobot =
@@ -265,7 +269,7 @@ export class Game {
         // 2-18. robot pose
         pushBits(toCm(myRobot.lastStep.x), 9)
         pushBits(toCm(myRobot.lastStep.y), 8)
-        pushBits((toDeg(myRobot.lastStep.orientation) + 180) & 0x1FF, 9)
+        pushBits(toDeg(myRobot.lastStep.orientation) & 0x1FF, 9)
 
         // 28. opponent detected
         const opponentDetected = !!opponentRobot
@@ -275,7 +279,7 @@ export class Game {
         if (opponentDetected) {
             pushBits(toCm(opponentRobot.lastStep.x), 9)
             pushBits(toCm(opponentRobot.lastStep.y), 8)
-            pushBits((toDeg(opponentRobot.lastStep.orientation) + 180) & 0x1FF, 9)
+            pushBits(toDeg(opponentRobot.lastStep.orientation) & 0x1FF, 9)
         } else {
             // fill with zeros for the 9+8+9 bits
             pushBits(0, 9 + 8 + 9)

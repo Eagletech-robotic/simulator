@@ -81,12 +81,12 @@ describe('Game.eaglePacket', () => {
 
         expect(read(9)).toBe(150)                // robot x (cm)
         expect(read(8)).toBe(100)                // robot y
-        expect(read(9)).toBe(45 + 180)           // robot θ + 180
+        expect(read(9)).toBe(45)                 // robot θ
 
         expect(read(1)).toBe(1)                  // opponent detected
         expect(read(9)).toBe(200)                // opponent x
         expect(read(8)).toBe(50)                 // opponent y
-        expect(read(9)).toBe(-90 + 180)          // opponent θ + 180
+        expect(read(9)).toBe(270)                // opponent θ
 
         const objectCount = read(6)
         expect(objectCount).toBe(3)
@@ -120,8 +120,8 @@ describe('Game.eaglePacket', () => {
         // Controlled robot (blue)
         // @ts-ignore private access for tests
         game._robots = [
-            new ControlledRobot('blue', 0.10, 0.20, Math.PI / 6),   // 10 cm, 20 cm, 30°
-            new ControlledRobot('yellow', 0.05, 0.06, -Math.PI / 2) // 5 cm, 6 cm, -90°
+            new ControlledRobot('blue', 0.10, 0.20, Math.PI * 7 / 6),   // 10 cm, 20 cm, 210°
+            new ControlledRobot('yellow', 0.05, 0.06, Math.PI / 2), // 5 cm, 6 cm, 90°
         ]
 
         // One bleacher object positioned so that raw_x=3 and raw_y=5, θ index = 2 (60°)
