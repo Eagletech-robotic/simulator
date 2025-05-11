@@ -145,6 +145,7 @@ const App = (): JSX.Element => {
                             setGameDurationSeconds,
                             nbSimulationSteps,
                             playingStep,
+                            setPlayingStep,
                             game,
                             onPlayToggle,
                             onStop,

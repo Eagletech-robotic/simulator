@@ -7,12 +7,13 @@ export const Container = styled.div`
     width: 100%;
 `
 
-export const Bar = styled.div`
+export const Bar = styled.div<{ $clickable: boolean }>`
     height: 14px;
     background-color: ${colors.lightGrey};
     border-radius: 0.4rem;
     position: relative;
     overflow: hidden;
+    cursor: ${(props) => (props.$clickable ? 'pointer' : 'default')};
 `
 
 export const BarProgress = styled.div`

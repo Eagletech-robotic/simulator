@@ -11,6 +11,7 @@ export interface ControlsProps {
     setGameDurationSeconds: (gameDurationSeconds: number) => void
     nbSimulationSteps: number
     playingStep: number
+    setPlayingStep: (playingStep: number) => void
     game: any
     onPlayToggle: () => Promise<void>
     onStop: () => Promise<void>
@@ -23,6 +24,7 @@ const Controls = ({
     setGameDurationSeconds,
     nbSimulationSteps,
     playingStep,
+    setPlayingStep,
     game,
     onPlayToggle,
     onStop,
@@ -42,7 +44,8 @@ const Controls = ({
 
             <PlaybackBar>
                 <ProgressBar
-                    progressPercentage={(playingStep / nbSimulationSteps) * 100}
+                    percentage={(playingStep / nbSimulationSteps) * 100}
+                    setPercentage={(percentage: number) => setPlayingStep(Math.floor(percentage * nbSimulationSteps / 100))}
                     labelFunction={() =>
                         `Progress: ${(
                             (playingStep / nbSimulationSteps) *
@@ -54,7 +57,7 @@ const Controls = ({
 
             <SimulationBar>
                 <ProgressBar
-                    progressPercentage={(game.lastStepNumber / nbSimulationSteps) * 100}
+                    percentage={(game.lastStepNumber / nbSimulationSteps) * 100}
                     labelFunction={(progressPercentage: number) =>
                         progressPercentage == 100 ? 'Finished' : 'Simulating...'
                     }
