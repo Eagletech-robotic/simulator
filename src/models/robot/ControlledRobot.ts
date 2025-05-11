@@ -65,11 +65,11 @@ export class ControlledRobot extends GenericRobot {
             return {
                 ...this.moveForward(leftWheelDistance),
                 leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
-                rightWheelDistance: step.leftWheelDistance + rightWheelDistance,
+                rightWheelDistance: step.rightWheelDistance + rightWheelDistance,
             }
         }
 
-        const signMultiplier = Math.abs(rightWheelDistance) > Math.abs(leftWheelDistance) ? +1 : -1
+        const signMultiplier = Math.sign(rightWheelDistance - leftWheelDistance)
         const smallestDistance =
             Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
                 ? rightWheelDistance
@@ -80,7 +80,7 @@ export class ControlledRobot extends GenericRobot {
                 : rightWheelDistance
         const bigCircleRadius = controlledRobotWheelbase / (1 - smallestDistance / largestDistance)
 
-        const rotationAngle = (largestDistance / bigCircleRadius) * signMultiplier // definition of the radian
+        const rotationAngle = (rightWheelDistance - leftWheelDistance) / controlledRobotWheelbase
         const middleCircleRadius = bigCircleRadius - controlledRobotWheelbase / 2 // the circle described by the middle of the robot
 
         // Update robot position and orientation
