@@ -19,21 +19,22 @@ export type AiInstance = {
 export const topInit = async (): Promise<AiInstance> => {
     const logs: Array<Log> = []
     let wasmInstance: AiInstance['wasmInstance']
+    let wasmMemory: WebAssembly.Memory | null = null
 
     const importObject = {
         wasi_snapshot_preview1: {
             proc_exit: (code: number) => console.log(`Exit code: ${code}`),
             fd_write: (fd: number, iovs: number, iovs_len: number, nwritten: number) => {
                 try {
-                    const memory = wasmInstance.exports.memory
-                    const memoryView = new DataView(memory.buffer)
+                    if (!wasmMemory) return
+                    const memoryView = new DataView(wasmMemory.buffer)
 
                     let output = ''
                     for (let i = 0; i < iovs_len; i++) {
                         const iovPtr = iovs + i * 8
                         const ptr = memoryView.getUint32(iovPtr, true)
                         const len = memoryView.getUint32(iovPtr + 4, true)
-                        const bytes = new Uint8Array(memory.buffer, ptr, len)
+                        const bytes = new Uint8Array(wasmMemory.buffer, ptr, len)
                         output += textDecoder.decode(bytes)
                     }
 
@@ -49,6 +50,13 @@ export const topInit = async (): Promise<AiInstance> => {
             },
             fd_close: (fd: number) => console.log(`Close file descriptor: ${fd}`),
             fd_seek: (fd: number) => console.log(`Seek file descriptor: ${fd}`),
+            clock_time_get: (clk_id: number, precision: bigint, timePtr: number) => {
+                if (!wasmMemory) return
+                const memoryView = new DataView(wasmMemory.buffer)
+                const nowNs = BigInt(Math.round(performance.now() * 1_000_000));
+                memoryView.setBigUint64(timePtr, nowNs, true);
+            },
+
         },
     }
 
@@ -57,12 +65,13 @@ export const topInit = async (): Promise<AiInstance> => {
         importObject,
     )
     wasmInstance = obj.instance as AiInstance['wasmInstance']
+    wasmMemory = wasmInstance.exports.memory
     wasmInstance.exports.exported_top_init()
     return { wasmInstance, logs }
 }
 
 export interface StepInput {
-    is_jack_gone: number
+    jack_removed: number
     tof_m: number
     delta_yaw_deg: number
     delta_encoder_left: number
@@ -100,7 +109,7 @@ export const topStep = (
     const wasmMemory = wasmInstance.exports.memory
 
     const dataView = new DataView(wasmMemory.buffer, inputPtr)
-    dataView.setInt32(0, input.is_jack_gone, true)
+    dataView.setInt32(0, input.jack_removed, true)
     dataView.setFloat32(4, input.tof_m, true)
     dataView.setFloat32(8, input.delta_yaw_deg, true)
     dataView.setInt32(12, input.delta_encoder_left, true)
@@ -110,7 +119,7 @@ export const topStep = (
     dataView.setFloat32(28, input.imu_accel_y_mss, true)
     dataView.setFloat32(32, input.imu_accel_z_mss, true)
     dataView.setInt32(36, input.blue_button, true)
-    dataView.setInt32(40, 0, true)
+    dataView.setInt32(40, input.clock_ms, true)
 
     const bluetoothView = new Uint8Array(wasmMemory.buffer, bluetoothPtr, bluetooth.length)
     bluetoothView.set(bluetooth)

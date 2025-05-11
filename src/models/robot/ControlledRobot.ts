@@ -125,7 +125,7 @@ export class ControlledRobot extends GenericRobot {
         // console.log('step.rightWheelDistance ', step.rightWheelDistance, 'previousStep.rightWheelDistance ', previousStep.rightWheelDistance, 'delta_encoder_left ', (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance)
 
         const input: StepInput = {
-            is_jack_gone: 1,
+            jack_removed: 1,
             tof_m: 1,
             delta_yaw_deg: radiansToDegrees(step.orientation - previousStep.orientation),
             delta_encoder_left: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
@@ -153,7 +153,7 @@ export class ControlledRobot extends GenericRobot {
     }
 
     onSimulationEnd = () => {
-        const chunkSize = 1000
+        const chunkSize = 3000
 
         const logs = this.steps
             .slice(1) // The first step is the initial position and doesn't have logs
@@ -168,7 +168,7 @@ export class ControlledRobot extends GenericRobot {
             const renumberedLogs: Record<number, string> = {}
             sliceLogs.forEach((item, index) => renumberedLogs[startIndex + index] = item)
 
-            console.table(renumberedLogs)
+            console.log(renumberedLogs)
         }
 
     }
