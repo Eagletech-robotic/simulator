@@ -74,11 +74,13 @@ const App = (): JSX.Element => {
                 )
             })
         }, (stepDuration * NB_STEPS_PER_PLAYING_INTERVAL) * 1000)
+        setAppState("playing")
     }
 
     const pause = () => {
         clearInterval(playingIntervalRef.current || undefined)
         playingIntervalRef.current = null
+        setAppState("paused")
     }
 
     const onPlayToggle = async () => {
@@ -86,9 +88,6 @@ const App = (): JSX.Element => {
             alert('Please add a robot to the game before playing.')
             return
         }
-
-        const newState = appState === 'playing' ? 'paused' : 'playing'
-        setAppState(newState)
 
         switch (appState) {
             case 'playing':
@@ -145,7 +144,10 @@ const App = (): JSX.Element => {
                             setGameDurationSeconds,
                             nbSimulationSteps,
                             playingStep,
-                            setPlayingStep,
+                            setPlayingStep: (playingStep) => {
+                                setPlayingStep(playingStep)
+                                pause()
+                            },
                             game,
                             onPlayToggle,
                             onStop,
