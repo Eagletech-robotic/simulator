@@ -118,6 +118,12 @@ const App = (): JSX.Element => {
             } else if (event.key === 'Escape') {
                 event.preventDefault()
                 await onStop()
+            } else if (event.key === '<' && appState === 'paused') {
+                event.preventDefault()
+                setPlayingStep((prevPlayingStep) => Math.max(prevPlayingStep - 1, 0))
+            } else if (event.key === '>' && appState === 'paused') {
+                event.preventDefault()
+                setPlayingStep((prevPlayingStep) => Math.min(prevPlayingStep + 1, game.lastStepNumber))
             }
         }
         document.addEventListener('keydown', handleKeydown)
