@@ -106,13 +106,48 @@ export class ControlledRobot extends GenericRobot {
             canvas.drawEllipse(this.steps[i].x, this.steps[i].y, 0.003, 0.003, 0, color, 'filled', opacity)
         }
 
+        // Body and orientation
         const step = this.steps[stepNb]
         canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, step.orientation, canvas.getDrawingColor(this.color), 'filled')
         canvas.drawOrientationLine(step.x, step.y, step.orientation, this.height / 2)
 
+        // Shovel
+        const FULL_EXTENSION = 0.03 // meters
+        const SHOVEL_WIDTH = controlledRobotWidth * 0.9
+        const ratio = this.shovelRatio(step)
+        const extension = ratio * FULL_EXTENSION
+        const frontX = step.x + Math.cos(step.orientation) * (this.height / 2)
+        const frontY = step.y + Math.sin(step.orientation) * (this.height / 2)
+        const plateCenterX = frontX + Math.cos(step.orientation) * extension
+        const plateCenterY = frontY + Math.sin(step.orientation) * extension
+
+        const halfPlate = SHOVEL_WIDTH / 2
+        const perpendicular = step.orientation + Math.PI / 2
+        const startX = plateCenterX - Math.cos(perpendicular) * halfPlate
+        const startY = plateCenterY - Math.sin(perpendicular) * halfPlate
+        const endX = plateCenterX + Math.cos(perpendicular) * halfPlate
+        const endY = plateCenterY + Math.sin(perpendicular) * halfPlate
+
+        const opacity = 0.3 + 0.7 * ratio
+        const colorWithOpacity = `rgba(0, 0, 0, ${opacity})`
+        canvas.drawLine(startX, startY, endX, endY, colorWithOpacity, 0.01)
+
+        // Selection circle
         if (isSelected) {
             canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, step.orientation, 'red', 'outlined')
         }
+    }
+
+    /**
+     * Returns the shovel extension based on the servo ratio, which is a value between 0 and 1.
+     * @param step
+     * @private
+     */
+    private shovelRatio(step: ControlledRobotStep) {
+        const MIN_VALUE = 0.05
+        const MAX_VALUE = 0.105
+        const servoRatio = step.output?.servo_pelle_ratio ?? MIN_VALUE
+        return (Math.min(Math.max(servoRatio, MIN_VALUE), MAX_VALUE) - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)
     }
 
     nextStep(eaglePacket: number[] | null) {

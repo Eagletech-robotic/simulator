@@ -27,7 +27,7 @@ export class Canvas {
 
         this.ctx.beginPath()
         this.ctx.translate(...toCanvasCoordinates(x, y))
-        this.ctx.rotate(-orientation)
+        this.ctx.rotate(orientation - Math.PI / 2)
         const coordinates = [
             metricToCanvas(-width / 2),
             metricToCanvas(-height / 2),
@@ -78,20 +78,30 @@ export class Canvas {
         this.ctx.restore()
     }
 
-    drawOrientationLine(x: number, y: number, orientation: number, length: number): void {
+    drawLine(
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number,
+        color: string,
+        thickness: number = 0.01,
+    ): void {
         this.ctx.save()
 
         this.ctx.beginPath()
-        const orientationLineX = x + length * Math.cos(orientation)
-        const orientationLineY = y + length * Math.sin(orientation)
-        this.ctx.strokeStyle = 'black'
-        this.ctx.lineWidth = 8
-        this.ctx.beginPath()
-        this.ctx.moveTo(...toCanvasCoordinates(x, y))
-        this.ctx.lineTo(...toCanvasCoordinates(orientationLineX, orientationLineY))
+        this.ctx.strokeStyle = color
+        this.ctx.lineWidth = metricToCanvas(thickness)
+        this.ctx.moveTo(...toCanvasCoordinates(x1, y1))
+        this.ctx.lineTo(...toCanvasCoordinates(x2, y2))
         this.ctx.stroke()
 
         this.ctx.restore()
+    }
+
+    drawOrientationLine(x: number, y: number, orientation: number, length: number): void {
+        const endLineX = x + length * Math.cos(orientation)
+        const endLineY = y + length * Math.sin(orientation)
+        this.drawLine(x, y, endLineX, endLineY, 'black', 0.01)
     }
 
     getDrawingColor(robotColor: color): string {

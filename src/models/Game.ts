@@ -34,17 +34,17 @@ export class Game {
 
     resetObjects(): void {
         this._bleachers = [
-            new Bleacher(0.075, 0.4, Math.PI / 2),
-            new Bleacher(0.075, 1.325, Math.PI / 2),
-            new Bleacher(0.775, 0.25, 0),
-            new Bleacher(0.825, 1.725, 0),
-            new Bleacher(1.1, 0.95, 0),
+            new Bleacher(0.075, 0.4, 0),
+            new Bleacher(0.075, 1.325, 0),
+            new Bleacher(0.775, 0.25, Math.PI / 2),
+            new Bleacher(0.825, 1.725, Math.PI / 2),
+            new Bleacher(1.1, 0.95, Math.PI / 2),
 
-            new Bleacher(3 - 0.075, 0.4, Math.PI / 2),
-            new Bleacher(3 - 0.075, 1.325, Math.PI / 2),
-            new Bleacher(3 - 0.775, 0.25, 0),
-            new Bleacher(3 - 0.825, 1.725, 0),
-            new Bleacher(3 - 1.1, 0.95, 0),
+            new Bleacher(3 - 0.075, 0.4, 0),
+            new Bleacher(3 - 0.075, 1.325, 0),
+            new Bleacher(3 - 0.775, 0.25, Math.PI / 2),
+            new Bleacher(3 - 0.825, 1.725, Math.PI / 2),
+            new Bleacher(3 - 1.1, 0.95, Math.PI / 2),
         ]
         this._planks = []
         this._cans = []
