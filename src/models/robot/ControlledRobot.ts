@@ -11,7 +11,6 @@ import {
 } from '../constants'
 import { GenericRobot } from './GenericRobot'
 import { ControlledRobotStep, Log } from './RobotStep'
-import { radiansToDegrees } from '../../utils/maths'
 
 type Move = Pick<
     ControlledRobotStep,
@@ -162,10 +161,10 @@ export class ControlledRobot extends GenericRobot {
         const input: StepInput = {
             jack_removed: 1,
             tof_m: 1,
-            delta_yaw_deg: radiansToDegrees(step.orientation - previousStep.orientation),
+            delta_yaw: step.orientation - previousStep.orientation,
             delta_encoder_left: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
             delta_encoder_right: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
-            imu_yaw_deg: radiansToDegrees(step.orientation),
+            imu_yaw: step.orientation,
             imu_accel_x_mss: 0,
             imu_accel_y_mss: 0,
             imu_accel_z_mss: 0,

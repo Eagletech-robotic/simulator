@@ -73,10 +73,10 @@ export const topInit = async (): Promise<AiInstance> => {
 export interface StepInput {
     jack_removed: number
     tof_m: number
-    delta_yaw_deg: number
+    delta_yaw: number
     delta_encoder_left: number
     delta_encoder_right: number
-    imu_yaw_deg: number
+    imu_yaw: number
     imu_accel_x_mss: number
     imu_accel_y_mss: number
     imu_accel_z_mss: number
@@ -111,10 +111,10 @@ export const topStep = (
     const dataView = new DataView(wasmMemory.buffer, inputPtr)
     dataView.setInt32(0, input.jack_removed, true)
     dataView.setFloat32(4, input.tof_m, true)
-    dataView.setFloat32(8, input.delta_yaw_deg, true)
+    dataView.setFloat32(8, input.delta_yaw, true)
     dataView.setInt32(12, input.delta_encoder_left, true)
     dataView.setInt32(16, input.delta_encoder_right, true)
-    dataView.setFloat32(20, input.imu_yaw_deg, true)
+    dataView.setFloat32(20, input.imu_yaw, true)
     dataView.setFloat32(24, input.imu_accel_x_mss, true)
     dataView.setFloat32(28, input.imu_accel_y_mss, true)
     dataView.setFloat32(32, input.imu_accel_z_mss, true)
