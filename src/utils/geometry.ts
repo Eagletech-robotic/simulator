@@ -16,8 +16,9 @@ export const rectangleCircleOverlap = (
     rectangle: Rectangle,
     circle: Circle,
 ) => {
-    const cos = Math.cos(-rectangle.orientation),
-        sin = Math.sin(-rectangle.orientation)
+    const mainOrientation = rectangle.orientation + Math.PI / 2
+    const cos = Math.cos(-mainOrientation),
+        sin = Math.sin(-mainOrientation)
     const dx = cos * (circle.x - rectangle.x) + sin * (circle.y - rectangle.y)
     const dy = sin * (circle.x - rectangle.x) - cos * (circle.y - rectangle.y)
 
@@ -35,8 +36,9 @@ const project = ({ x, y, width, height, orientation }: Rectangle, ax: number, ay
         [-width / 2, -height / 2],
         [width / 2, -height / 2],
     ].map(([cx, cy]) => {
-        const rx = x + Math.cos(orientation) * cx - Math.sin(orientation) * cy
-        const ry = y + Math.sin(orientation) * cx + Math.cos(orientation) * cy
+        const mainOrientation = orientation + Math.PI / 2
+        const rx = x + Math.cos(mainOrientation) * cx - Math.sin(mainOrientation) * cy
+        const ry = y + Math.sin(mainOrientation) * cx + Math.cos(mainOrientation) * cy
         return rx * ax + ry * ay
     })
     return { min: Math.min(...corners), max: Math.max(...corners) }
@@ -47,11 +49,14 @@ export const rectangleRectangleOverlap = (a: Rectangle, b: Rectangle) => {
         rb = Math.hypot(b.width, b.height) / 2
     if (!circlesOverlap({ x: a.x, y: a.y, radius: ra }, { x: b.x, y: b.y, radius: rb })) return false
 
+    const aMainOrientation = a.orientation + Math.PI / 2
+    const bMainOrientation = b.orientation + Math.PI / 2
+
     const axes = [
-        [Math.cos(a.orientation), Math.sin(a.orientation)],
-        [-Math.sin(a.orientation), Math.cos(a.orientation)],
-        [Math.cos(b.orientation), Math.sin(b.orientation)],
-        [-Math.sin(b.orientation), Math.cos(b.orientation)],
+        [Math.cos(aMainOrientation), Math.sin(aMainOrientation)],
+        [-Math.sin(aMainOrientation), Math.cos(aMainOrientation)],
+        [Math.cos(bMainOrientation), Math.sin(bMainOrientation)],
+        [-Math.sin(bMainOrientation), Math.cos(bMainOrientation)],
     ] as [number, number][]
 
     for (const [ax, ay] of axes) {
