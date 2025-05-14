@@ -92,18 +92,18 @@ export class Game {
         if (this._bleachers.length === 0) return
 
         const finalPositions = [
-            [0.1, 0.875, Math.PI / 2],
-            [0.3, 0.875, Math.PI / 2],
-            [0.225, 0.075, 0],
-            [0.775, 0.075, 0],
-            [1.225, 0.1, 0],
-            [1.225, 0.3, 0],
-            [3 - 0.1, 0.875, Math.PI / 2],
-            [3 - 0.3, 0.875, Math.PI / 2],
-            [3 - 0.225, 0.075, 0],
-            [3 - 0.775, 0.075, 0],
-            [3 - 1.225, 0.1, 0],
-            [3 - 1.225, 0.3, 0],
+            [0.1, 0.875, 0],
+            [0.3, 0.875, 0],
+            [0.225, 0.075, Math.PI / 2],
+            [0.775, 0.075, Math.PI / 2],
+            [1.225, 0.1, Math.PI / 2],
+            [1.225, 0.3, Math.PI / 2],
+            [3 - 0.1, 0.875, 0],
+            [3 - 0.3, 0.875, 0],
+            [3 - 0.225, 0.075, Math.PI / 2],
+            [3 - 0.775, 0.075, Math.PI / 2],
+            [3 - 1.225, 0.1, Math.PI / 2],
+            [3 - 1.225, 0.3, Math.PI / 2],
         ]
 
         const randomIndex = Math.floor(Math.random() * this._bleachers.length)
@@ -267,6 +267,7 @@ export class Game {
         pushBits(1, 1)
 
         // 2-18. robot pose
+        // TODO: send the position with a random delay (50-200ms?)
         pushBits(toCm(myRobot.lastStep.x), 9)
         pushBits(toCm(myRobot.lastStep.y), 8)
         pushBits(toDeg(myRobot.lastStep.orientation) & 0x1FF, 9)
@@ -277,6 +278,7 @@ export class Game {
 
         // 29-54. opponent pose (or zeros if not detected)
         if (opponentDetected) {
+            // TODO: Add a random delay (50-200ms?)
             pushBits(toCm(opponentRobot.lastStep.x), 9)
             pushBits(toCm(opponentRobot.lastStep.y), 8)
             pushBits(toDeg(opponentRobot.lastStep.orientation) & 0x1FF, 9)
