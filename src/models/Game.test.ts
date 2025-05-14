@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { Game } from './Game'
-import { ControlledRobot } from './robot/ControlledRobot'
+import { Robot } from './robot/Robot'
 import { Plank } from './object/Plank'
 import { Can } from './object/Can'
 import { Bleacher } from './object/Bleacher'
@@ -48,8 +48,8 @@ describe('Game.eaglePacket', () => {
         /* ---------- build a minimal world ---------- */
         // @ts-ignore
         game._robots = [
-            new ControlledRobot('blue', 1.50, 1.00, Math.PI / 4),
-            new ControlledRobot('yellow', 2.00, 0.50, -Math.PI / 2),
+            new Robot('blue', 1.50, 1.00, Math.PI / 4),
+            new Robot('yellow', 2.00, 0.50, -Math.PI / 2),
         ]
 
         // @ts-ignore
@@ -120,8 +120,8 @@ describe('Game.eaglePacket', () => {
         // Controlled robot (blue)
         // @ts-ignore private access for tests
         game._robots = [
-            new ControlledRobot('blue', 0.10, 0.20, Math.PI * 7 / 6),   // 10 cm, 20 cm, 210°
-            new ControlledRobot('yellow', 0.05, 0.06, Math.PI / 2), // 5 cm, 6 cm, 90°
+            new Robot('blue', 0.10, 0.20, Math.PI * 7 / 6),   // 10 cm, 20 cm, 210°
+            new Robot('yellow', 0.05, 0.06, Math.PI / 2), // 5 cm, 6 cm, 90°
         ]
 
         // One bleacher object positioned so that raw_x=3 and raw_y=5, θ index = 2 (60°)

@@ -8,7 +8,7 @@ export interface GenericRobotStep {
 
 export type Log = { log: string; level: 'info' | 'error' }
 
-export interface ControlledRobotStep extends GenericRobotStep {
+export interface RobotStep extends GenericRobotStep {
     leftWheelDistance: number
     rightWheelDistance: number
     input: StepInput | null

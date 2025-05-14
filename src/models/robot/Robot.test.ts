@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ControlledRobot } from './ControlledRobot';
-import { controlledRobotWheelbase, fieldHeight, fieldWidth } from '../constants';
+import { Robot } from './Robot';
+import { robotWheelbase, fieldHeight, fieldWidth } from '../constants';
 
-describe('ControlledRobot.buildMove', () => {
-    let robot: ControlledRobot;
+describe('Robot.buildMove', () => {
+    let robot: Robot;
 
     beforeEach(() => {
         // Initial position: x=0, y=0, orientation=0
-        robot = new ControlledRobot('blue', 0, 0, 0);
+        robot = new Robot('blue', 0, 0, 0);
     });
 
     // Helper function for arc movement calculations
     const calculateExpectedArcMove = (initialX: number, initialY: number, initialOrientation: number, leftWheelInput: number, rightWheelInput: number) => {
-        const W = controlledRobotWheelbase;
+        const W = robotWheelbase;
 
         const d_orientation = (rightWheelInput - leftWheelInput) / W;
         const expectedOrientation = initialOrientation + d_orientation;
@@ -47,7 +47,7 @@ describe('ControlledRobot.buildMove', () => {
     });
 
     it('should move backward correctly', () => {
-        robot = new ControlledRobot('blue', 0, 0, Math.PI);
+        robot = new Robot('blue', 0, 0, Math.PI);
         const move = robot.buildMove(-1, -1);
         expect(move.x).toBeCloseTo(1); // Moving backward from PI orientation
         expect(move.y).toBeCloseTo(0, 5); // y should be close to 0
@@ -94,7 +94,7 @@ describe('ControlledRobot.buildMove', () => {
         const wheelDistance = 0.5;
         const move = robot.buildMove(wheelDistance, -wheelDistance);
 
-        const rotationAngle = (-wheelDistance - wheelDistance) / controlledRobotWheelbase;
+        const rotationAngle = (-wheelDistance - wheelDistance) / robotWheelbase;
 
         expect(move.x).toBeCloseTo(0);
         expect(move.y).toBeCloseTo(0); 
@@ -107,7 +107,7 @@ describe('ControlledRobot.buildMove', () => {
         const wheelDistance = 0.5;
         const move = robot.buildMove(-wheelDistance, wheelDistance);
 
-        const rotationAngle = (wheelDistance - (-wheelDistance)) / controlledRobotWheelbase;
+        const rotationAngle = (wheelDistance - (-wheelDistance)) / robotWheelbase;
         
         expect(move.x).toBeCloseTo(0);
         expect(move.y).toBeCloseTo(0);

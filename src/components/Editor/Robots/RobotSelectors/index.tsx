@@ -4,8 +4,8 @@ import PamiIcon from 'src/assets/pami-icon.svg'
 import RobotSelector from '../RobotSelector'
 import { Game } from 'src/models/Game'
 import { GenericRobot } from 'src/models/robot/GenericRobot'
-import { ControlledRobot } from 'src/models/robot/ControlledRobot'
-import { PamiRobot } from 'src/models/robot/PamiRobot'
+import { Robot } from 'src/models/robot/Robot'
+import { Pami } from 'src/models/robot/Pami'
 
 interface RobotSelectorsProps {
     color: 'blue' | 'yellow'
@@ -13,8 +13,6 @@ interface RobotSelectorsProps {
     gameChanged: () => void
     editorElRef: React.RefObject<HTMLDivElement>
 }
-
-const robotTypes: Array<GenericRobot['type']> = ['controlled', 'sequential']
 
 const RobotSelectors = ({
     color,
@@ -24,27 +22,22 @@ const RobotSelectors = ({
 }: RobotSelectorsProps): JSX.Element => {
     return (
         <ColorContainer>
-            {robotTypes.map((type, index) => (
-                <RobotSelector
-                    key={index}
-                    robotIconSrc={type === 'controlled' ? MainRobotIcon : PamiIcon}
-                    onClick={() => {
-                        let robot: GenericRobot
-                        if (type === 'controlled') robot = new ControlledRobot(color, 1.5, 1.0, 0)
-                        else robot = new PamiRobot(color, 1.5, 1.0, 0)
+            <RobotSelector
+                robotIconSrc={MainRobotIcon}
+                onClick={() => {
+                    const robot = new Robot(color, 1.5, 1.0, 0)
 
-                        game.appendRobot(robot)
-                        gameChanged()
+                    game.appendRobot(robot)
+                    gameChanged()
 
-                        setTimeout(() => {
-                            editorElRef.current?.scrollTo({
-                                top: editorElRef.current.scrollHeight,
-                                behavior: 'smooth',
-                            })
-                        }, 0)
-                    }}
-                />
-            ))}
+                    setTimeout(() => {
+                        editorElRef.current?.scrollTo({
+                            top: editorElRef.current.scrollHeight,
+                            behavior: 'smooth',
+                        })
+                    }, 0)
+                }}
+            />
             <ColorIndicator color={color} />
         </ColorContainer>
     )

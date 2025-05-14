@@ -1,30 +1,30 @@
 import { AiInstance, StepInput, topInit, topStep } from 'src/utils/wasm-connector'
 import { Canvas } from '../Canvas'
 import {
-    controlledRobotWidth,
-    controlledRobotHeight,
-    controlledRobotWheelbase,
-    controlledRobotWheelDiameter,
+    robotWidth,
+    robotHeight,
+    robotWheelbase,
+    robotWheelDiameter,
     encoderImpulsesPerWheelTurn,
-    controlledRobotMaxSpeed,
+    robotMaxSpeed,
     stepDuration, fieldWidth, fieldHeight,
 } from '../constants'
 import { GenericRobot } from './GenericRobot'
-import { ControlledRobotStep, Log } from './RobotStep'
+import { RobotStep, Log } from './RobotStep'
 
 type Move = Pick<
-    ControlledRobotStep,
+    RobotStep,
     'x' | 'y' | 'orientation' | 'leftWheelDistance' | 'rightWheelDistance'
 >
 
-export class ControlledRobot extends GenericRobot {
+export class Robot extends GenericRobot {
     readonly type = 'controlled'
     aiInstance: AiInstance | undefined
 
-    readonly width = controlledRobotWidth
-    readonly height = controlledRobotHeight
+    readonly width = robotWidth
+    readonly height = robotHeight
 
-    steps: Array<ControlledRobotStep>
+    steps: Array<RobotStep>
 
     constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
         super(color)
@@ -52,7 +52,7 @@ export class ControlledRobot extends GenericRobot {
         console.log(`Top init logs for ${this.color} robot ${this.id}:`, [...this.aiInstance.logs])
     }
 
-    get lastStep(): ControlledRobotStep {
+    get lastStep(): RobotStep {
         return this.steps[this.steps.length - 1]
     }
 
@@ -77,10 +77,10 @@ export class ControlledRobot extends GenericRobot {
             Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
                 ? leftWheelDistance
                 : rightWheelDistance
-        const bigCircleRadius = controlledRobotWheelbase / (1 - smallestDistance / largestDistance)
+        const bigCircleRadius = robotWheelbase / (1 - smallestDistance / largestDistance)
 
-        const rotationAngle = (rightWheelDistance - leftWheelDistance) / controlledRobotWheelbase
-        const middleCircleRadius = bigCircleRadius - controlledRobotWheelbase / 2 // the circle described by the middle of the robot
+        const rotationAngle = (rightWheelDistance - leftWheelDistance) / robotWheelbase
+        const middleCircleRadius = bigCircleRadius - robotWheelbase / 2 // the circle described by the middle of the robot
 
         // Update robot position and orientation
         const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
@@ -112,7 +112,7 @@ export class ControlledRobot extends GenericRobot {
 
         // Shovel
         const FULL_EXTENSION = 0.03 // meters
-        const SHOVEL_WIDTH = controlledRobotWidth * 0.9
+        const SHOVEL_WIDTH = robotWidth * 0.9
         const ratio = this.shovelRatio(step)
         const extension = ratio * FULL_EXTENSION
         const frontX = step.x + Math.cos(step.orientation) * (this.height / 2)
@@ -142,7 +142,7 @@ export class ControlledRobot extends GenericRobot {
      * @param step
      * @private
      */
-    private shovelRatio(step: ControlledRobotStep) {
+    private shovelRatio(step: RobotStep) {
         const MIN_VALUE = 0.05
         const MAX_VALUE = 0.105
         const servoRatio = step.output?.servo_pelle_ratio ?? MIN_VALUE
@@ -153,7 +153,7 @@ export class ControlledRobot extends GenericRobot {
         const step = this.lastStep
         const previousStep = this.steps[this.steps.length - 2] ?? step
 
-        const wheelCircumference = Math.PI * controlledRobotWheelDiameter // meters
+        const wheelCircumference = Math.PI * robotWheelDiameter // meters
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // meters
 
         // console.log('step.rightWheelDistance ', step.rightWheelDistance, 'previousStep.rightWheelDistance ', previousStep.rightWheelDistance, 'delta_encoder_left ', (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance)
@@ -174,8 +174,8 @@ export class ControlledRobot extends GenericRobot {
         const { output, logs } = topStep(this.aiInstance!, input, eaglePacket || [])
 
         const move = this.buildMove(
-            output.motor_left_ratio * controlledRobotMaxSpeed * stepDuration,
-            output.motor_right_ratio * controlledRobotMaxSpeed * stepDuration,
+            output.motor_left_ratio * robotMaxSpeed * stepDuration,
+            output.motor_right_ratio * robotMaxSpeed * stepDuration,
         )
 
         if (move.x < 0 || move.x > fieldWidth || move.y < 0 || move.y > fieldHeight) {

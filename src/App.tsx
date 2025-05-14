@@ -38,7 +38,7 @@ const App = (): JSX.Element => {
 
     const runSimulation = () => {
         clearInterval(simulationIntervalRef.current || undefined)
-        setSelectedRobotId(game.firstRobotId)
+        setSelectedRobotId(game.robots[0].id)
         simulationIntervalRef.current = setInterval(() => {
             for (let i = 0; i < 500; i++) {
                 game.nextStep()
@@ -84,7 +84,7 @@ const App = (): JSX.Element => {
     }
 
     const onPlayToggle = async () => {
-        if (appState === 'editing' && game.nbRobots === 0) {
+        if (appState === 'editing' && game.robots.length === 0) {
             alert('Please add a robot to the game before playing.')
             return
         }

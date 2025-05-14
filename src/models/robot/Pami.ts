@@ -3,7 +3,7 @@ import { GenericRobot } from './GenericRobot'
 import { GenericRobotStep } from './RobotStep'
 import { stepDuration } from '../constants'
 
-export class PamiRobot extends GenericRobot {
+export class Pami extends GenericRobot {
     readonly type = 'sequential'
 
     readonly width = 0.15 // meters
@@ -20,7 +20,7 @@ export class PamiRobot extends GenericRobot {
         this.steps = [this.steps[0]]
     }
 
-    draw(canvas: Canvas, stepNb: number, isSelected: boolean) {
+    draw(canvas: Canvas, stepNb: number) {
         const step = this.steps[stepNb]
 
         const { x, y, orientation } = step
@@ -29,15 +29,13 @@ export class PamiRobot extends GenericRobot {
 
         canvas.drawRectangle(x, y, width, height, orientation, color, 'filled')
         canvas.drawOrientationLine(x, y, orientation, width / 2)
-
-        if (isSelected) canvas.drawRectangle(x, y, width, height, orientation, 'red', 'outlined')
     }
 
     get lastStep(): GenericRobotStep {
         return this.steps[this.steps.length - 1]
     }
 
-    nextStep(_eaglePacket: number[] | null) {
+    nextStep() {
         const PAMI_START_TIME = 90 // seconds
         const PAMI_STOP_TIME = 94
         const timesSinceStart = this.steps.length * stepDuration // seconds
