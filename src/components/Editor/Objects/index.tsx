@@ -15,14 +15,14 @@ const Objects = ({ game, gameChanged }: ObjectsProps): JSX.Element => {
             }}>Reset</Button>
 
             <Button
-                disabled={game.bleachers.length === 0}
+                disabled={game.editorStep.bleachers.length === 0}
                 onClick={() => {
                     game.breakBleacher()
                     gameChanged()
                 }}>Break Bleacher</Button>
 
             <Button
-                disabled={game.bleachers.length === 0}
+                disabled={game.editorStep.bleachers.length === 0}
                 onClick={() => {
                     game.moveBleacherToFinalPosition()
                     gameChanged()

@@ -5,18 +5,22 @@ import { Bleacher } from './object/Bleacher'
 import { GenericRobot } from './robot/GenericRobot'
 import { Robot } from './robot/Robot'
 import { Pami } from './robot/Pami'
-import { randInRange, randAngle } from '../utils/maths'
+import { randInRange, randAngle, radiansToDegrees } from '../utils/maths'
 import { Circle, circlesOverlap, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap } from '../utils/geometry'
 import { bleacherHeight, bleacherWidth, canWidth, robotWidth } from './constants'
 import { buildPacket } from '../utils/bluetooth'
 
+type GameStep = {
+    bleachers: Array<Bleacher>
+    planks: Array<Plank>
+    cans: Array<Can>
+}
+
 export class Game {
     public robots: Array<Robot> = []
     public pamis: Array<Pami> = []
-    public bleachers: Array<Bleacher> = []
-    public planks: Array<Plank> = []
-    public cans: Array<Can> = []
 
+    public steps: Array<GameStep> = []
     private _lastStepNumber = 0
 
     constructor() {
@@ -36,25 +40,32 @@ export class Game {
             new Pami('yellow', .075, 1.875, 0),
             new Pami('yellow', .075, 1.675, 0),
         ]
-        this.bleachers = [
-            new Bleacher(0.075, 0.4, 0),
-            new Bleacher(0.075, 1.325, 0),
-            new Bleacher(0.775, 0.25, Math.PI / 2),
-            new Bleacher(0.825, 1.725, Math.PI / 2),
-            new Bleacher(1.1, 0.95, Math.PI / 2),
+        this.steps = [{
+            bleachers: [
+                new Bleacher(0.075, 0.4, 0),
+                new Bleacher(0.075, 1.325, 0),
+                new Bleacher(0.775, 0.25, Math.PI / 2),
+                new Bleacher(0.825, 1.725, Math.PI / 2),
+                new Bleacher(1.1, 0.95, Math.PI / 2),
 
-            new Bleacher(3 - 0.075, 0.4, 0),
-            new Bleacher(3 - 0.075, 1.325, 0),
-            new Bleacher(3 - 0.775, 0.25, Math.PI / 2),
-            new Bleacher(3 - 0.825, 1.725, Math.PI / 2),
-            new Bleacher(3 - 1.1, 0.95, Math.PI / 2),
-        ]
-        this.planks = []
-        this.cans = []
+                new Bleacher(3 - 0.075, 0.4, 0),
+                new Bleacher(3 - 0.075, 1.325, 0),
+                new Bleacher(3 - 0.775, 0.25, Math.PI / 2),
+                new Bleacher(3 - 0.825, 1.725, Math.PI / 2),
+                new Bleacher(3 - 1.1, 0.95, Math.PI / 2),
+            ],
+            planks: [],
+            cans: [],
+        }]
+    }
+
+    get editorStep(): GameStep {
+        return this.steps[0]
     }
 
     breakBleacher(): void {
-        if (this.bleachers.length === 0) return
+        const { bleachers, planks, cans } = this.editorStep
+        if (bleachers.length === 0) return
 
         const safeMargin = 0.2
         const minX = safeMargin
@@ -62,15 +73,15 @@ export class Game {
         const minY = safeMargin
         const maxY = 1.5 - safeMargin
 
-        const randomIndex = Math.floor(Math.random() * this.bleachers.length)
-        this.bleachers.splice(randomIndex, 1)
+        const randomIndex = Math.floor(Math.random() * bleachers.length)
+        bleachers.splice(randomIndex, 1)
 
         let MAX = 25
         let placed = 0
         while (placed < 2 && --MAX) {
             const p = { x: randInRange(minX, maxX), y: randInRange(minY, maxY), orientation: randAngle() }
-            if (this.isRectFree({ ...p, width: bleacherWidth, height: bleacherHeight })) {
-                this.planks.push(new Plank(p.x, p.y, p.orientation))
+            if (this.isRectangleFree({ ...p, width: bleacherWidth, height: bleacherHeight })) {
+                planks.push(new Plank(p.x, p.y, p.orientation))
                 placed++
             }
         }
@@ -79,14 +90,15 @@ export class Game {
         while (placed < 4 && --MAX) {
             const c: Circle = { x: randInRange(minX, maxX), y: randInRange(minY, maxY), radius: canWidth / 2 }
             if (this.isCircleFree(c)) {
-                this.cans.push(new Can(c.x, c.y))
+                cans.push(new Can(c.x, c.y))
                 placed++
             }
         }
     }
 
     moveBleacherToFinalPosition(): void {
-        if (this.bleachers.length === 0) return
+        const { bleachers } = this.editorStep
+        if (bleachers.length === 0) return
 
         const finalPositions = [
             [0.1, 0.875, 0],
@@ -103,14 +115,20 @@ export class Game {
             [3 - 1.225, 0.3, Math.PI / 2],
         ]
 
-        const randomIndex = Math.floor(Math.random() * this.bleachers.length)
+        const randomIndex = Math.floor(Math.random() * bleachers.length)
         const freePositions = finalPositions.filter(([x, y, orientation]) =>
-            this.isRectFree({ x, y, width: bleacherWidth, height: bleacherHeight, orientation }),
+            this.isRectangleFree({
+                x,
+                y,
+                width: bleacherWidth,
+                height: bleacherHeight,
+                orientation,
+            }),
         )
         if (freePositions.length) {
             const [x, y, orientation] = freePositions[Math.floor(Math.random() * freePositions.length)]
-            this.bleachers.splice(randomIndex, 1)
-            this.bleachers.push(new Bleacher(x, y, orientation))
+            bleachers.splice(randomIndex, 1)
+            bleachers.push(new Bleacher(x, y, orientation))
         }
     }
 
@@ -121,7 +139,8 @@ export class Game {
     draw(canvas: Canvas, selectedRobotId: number | null = null, stepNb = this._lastStepNumber) {
         canvas.clearCanvas()
 
-        const objects: Array<Bleacher | Plank | Can> = [...this.bleachers, ...this.planks, ...this.cans]
+        const step = this.steps[stepNb]
+        const objects: Array<Bleacher | Plank | Can> = [...step.bleachers, ...step.planks, ...step.cans]
         objects.forEach((object) => object.draw(canvas))
 
         this.robots.forEach((robot) => robot.draw(canvas, stepNb, robot.id === selectedRobotId))
@@ -136,15 +155,35 @@ export class Game {
 
     nextStep(): void {
         const SEND_PACKET_EVERY = 100 // number of steps
+        const lastStep = this.steps[this._lastStepNumber]
 
+        // Advance robots
         this.robots.map((r) => {
             let eaglePacket: number[] | null = null
             if (this.lastStepNumber % SEND_PACKET_EVERY === 0) {
-                eaglePacket = this.eaglePacket(r.color)
+                eaglePacket = this.eaglePacket(r.color, this.lastStepNumber)
             }
             r.nextStep(eaglePacket)
         })
+
+        // Advance PAMIs
         this.pamis.map((p) => p.nextStep())
+
+        // Build mutable copies for the next step
+        let bleachers = lastStep.bleachers.map(b => b.clone())
+        let planks = lastStep.planks.map(p => p.clone())
+        let cans = lastStep.cans.map(c => c.clone())
+
+        // Make each robot interact with the objects
+        this.robots.forEach(robot => {
+            const step = this.interactWithRobot(robot, { bleachers, planks, cans })
+            bleachers = step.bleachers
+            planks = step.planks
+            cans = step.cans
+        })
+
+        // Commit the step
+        this.steps.push({ bleachers, planks, cans })
         this._lastStepNumber++
     }
 
@@ -153,7 +192,7 @@ export class Game {
     }
 
     appendRobot(robot: Robot) {
-          this.robots.push(robot)
+        this.robots.push(robot)
     }
 
     updateRobot(id: number, newRobot: Robot) {
@@ -174,32 +213,73 @@ export class Game {
         return this.robots.find((robot) => robot.id === id) || null
     }
 
-    private isCircleFree = (circle: Circle) =>
-        !this.robots.some(robot => circlesOverlap(circle, {
-            x: robot.lastStep.x,
-            y: robot.lastStep.y,
-            radius: robotWidth / 2,
-        })) &&
-        !this.cans.some(c => circlesOverlap(circle, { x: c.x, y: c.y, radius: canWidth / 2 })) &&
-        ![...this.planks, ...this.bleachers].some(rect =>
-            rectangleCircleOverlap({
-                x: rect.x,
-                y: rect.y,
-                width: bleacherWidth,
-                height: bleacherHeight,
-                orientation: rect.orientation,
-            }, circle),
-        )
+    private interactWithRobot(robot: Robot, { bleachers, planks, cans }: GameStep): GameStep {
+        // Return if the game has not yet started
+        const robotStep = robot.lastStep
+        if (!robotStep.output) return { bleachers, planks, cans }
 
-    private isRectFree = (rectangle: Rectangle) => {
-        return (
-            !this.robots.some(robot => rectangleCircleOverlap(rectangle, {
-                x: robot.lastStep.x,
-                y: robot.lastStep.y,
+        // Drop and pick up bleachers
+        const ratio = robot.shovelRatio(robotStep)
+        const extended = ratio > 0.5
+        const { shovelCenterX, shovelCenterY } = robot.shovelCenter(robotStep)
+
+        if (!robotStep.carriedBleacher && extended) {
+            // Try to pick up a bleacher
+            const PICK_RADIUS = 0.15
+            const index = bleachers.findIndex(b => Math.hypot(b.x - shovelCenterX, b.y - shovelCenterY) < PICK_RADIUS)
+            if (index !== -1) {
+                const bleacher = bleachers.splice(index, 1)[0]
+                robot.lastStep.carriedBleacher = bleacher
+            }
+        } else if (robotStep.carriedBleacher && !extended) {
+            // Drop bleacher
+            const bleacher = robotStep.carriedBleacher
+            bleacher.x = shovelCenterX
+            bleacher.y = shovelCenterY
+            bleacher.orientation = robotStep.orientation
+            bleachers.push(bleacher)
+            robot.lastStep.carriedBleacher = null
+        }
+
+        // Return the updated objects
+        return { bleachers, planks, cans }
+    }
+
+    private isCircleFree = (circle: Circle) => {
+        const { bleachers, planks, cans } = this.editorStep
+
+        return !this.robots.some(robot => circlesOverlap(circle, {
+                x: robot.editorStep.x,
+                y: robot.editorStep.y,
                 radius: robotWidth / 2,
             })) &&
-            !this.cans.some(c => rectangleCircleOverlap(rectangle, { x: c.x, y: c.y, radius: canWidth / 2 })) &&
-            ![...this.planks, ...this.bleachers].some(other =>
+            !cans.some(c => circlesOverlap(circle, { x: c.x, y: c.y, radius: canWidth / 2 })) &&
+            ![...planks, ...bleachers].some(rect =>
+                rectangleCircleOverlap({
+                    x: rect.x,
+                    y: rect.y,
+                    width: bleacherWidth,
+                    height: bleacherHeight,
+                    orientation: rect.orientation,
+                }, circle),
+            )
+    }
+
+    private isRectangleFree = (rectangle: Rectangle) => {
+        const { bleachers, planks, cans } = this.editorStep
+
+        return (
+            !this.robots.some(robot => rectangleCircleOverlap(rectangle, {
+                x: robot.editorStep.x,
+                y: robot.editorStep.y,
+                radius: robotWidth / 2,
+            })) &&
+            !cans.some(c => rectangleCircleOverlap(rectangle, {
+                x: c.x,
+                y: c.y,
+                radius: canWidth / 2,
+            })) &&
+            ![...planks, ...bleachers].some(other =>
                 rectangleRectangleOverlap(rectangle, {
                     x: other.x,
                     y: other.y,
@@ -215,8 +295,8 @@ export class Game {
      * Build an Eagle Bluetooth packet for the given color.
      * Array content: [ 0xFF, <payload bytes…>, <8‑bit checksum> ].
      */
-    private eaglePacket(color: 'blue' | 'yellow'): number[] | null {
-        // ───────── helpers ─────────
+    private eaglePacket(color: 'blue' | 'yellow', stepNumber: number): number[] | null {
+        // Helpers
         const bits: number[] = []
         const pushBits = (v: number, n: number) => {
             for (let i = 0; i < n; ++i) bits.push((v >> i) & 1)
@@ -228,18 +308,22 @@ export class Game {
             return deg < 0 ? deg + 360 : deg
         }
 
-        // ───────── pick robots ─────
-        const myRobot =
-            this.robots.find(r => r instanceof Robot && r.color === color)
+        // Select robots
+        const myRobot = this.robots.find(robot => robot.color === color)
         if (!myRobot) {
-            console.warn('Bluetooth requires a controlled robot')
+            console.warn('Bluetooth requires a robot')
             return null
         }
+        const opponentRobot = this.robots.find(r => r.color !== color)
 
-        const opponentRobot =
-            this.robots.find(r => r instanceof Robot && r.color !== color)
+        // Prepare objects
+        const objs: { type: number; x: number; y: number; oDeg: number }[] = []
+        const { bleachers, planks, cans } = this.steps[stepNumber]
+        bleachers.forEach(b => objs.push({ type: 0, x: b.x, y: b.y, oDeg: toDeg(b.orientation) }))
+        planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, oDeg: toDeg(p.orientation) }))
+        cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, oDeg: 0 }))
 
-        // ───────── header ──────────
+        // HEADER
         // 0. robot colour (blue=0, yellow=1)
         pushBits(myRobot.color === 'yellow' ? 1 : 0, 1)
 
@@ -267,20 +351,13 @@ export class Game {
             pushBits(0, 9 + 8 + 9)
         }
 
-        // ───────── objects ─────────
-        const objs: { type: number; x: number; y: number; oDeg: number }[] = []
-        this.bleachers.forEach(b => objs.push({ type: 0, x: b.x, y: b.y, oDeg: toDeg(b.orientation) }))
-        this.planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, oDeg: toDeg(p.orientation) }))
-        this.cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, oDeg: 0 }))
-
         const objectCount = Math.min(objs.length, 60)
         pushBits(objectCount, 6)
 
         // 3-bit padding so the header is exactly 64 bits (8 bytes)
         pushBits(0, 3) // padding, must be zero
 
-        // header ends here
-
+        // OBJECTS
         objs.slice(0, objectCount).forEach(o => {
             pushBits(o.type, 2)
 
@@ -295,11 +372,10 @@ export class Game {
             pushBits(Math.round(o.oDeg / 30) & 0x7, 3)
         })
 
-        // ───────── bits → bytes ────
+        // Encapsulate the payload in a packet
         const payload: number[] = Array(Math.ceil(bits.length / 8)).fill(0)
         bits.forEach((bit, i) => { if (bit) payload[i >> 3] |= 1 << (i & 7) })
 
-        // ───────── build packet ────────
         const payloadString = String.fromCharCode(...payload)
         return buildPacket(payloadString)
     }

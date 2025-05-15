@@ -27,7 +27,7 @@ export class Canvas {
 
         this.ctx.beginPath()
         this.ctx.translate(...toCanvasCoordinates(x, y))
-        this.ctx.rotate(orientation - Math.PI / 2)
+        this.ctx.rotate(-orientation + Math.PI / 2)
         const coordinates = [
             metricToCanvas(-width / 2),
             metricToCanvas(-height / 2),
@@ -102,6 +102,15 @@ export class Canvas {
         const endLineX = x + length * Math.cos(orientation)
         const endLineY = y + length * Math.sin(orientation)
         this.drawLine(x, y, endLineX, endLineY, 'black', 0.01)
+    }
+
+    drawLineFromCenter(x: number, y: number, orientation: number, length: number, color: string): void {
+        const halfLength = length / 2
+        const startLineX = x - halfLength * Math.cos(orientation)
+        const startLineY = y - halfLength * Math.sin(orientation)
+        const endLineX = x + halfLength * Math.cos(orientation)
+        const endLineY = y + halfLength * Math.sin(orientation)
+        this.drawLine(startLineX, startLineY, endLineX, endLineY, color)
     }
 
     getDrawingColor(robotColor: color): string {

@@ -1,4 +1,5 @@
 import { StepInput, StepOutput } from 'src/utils/wasm-connector'
+import { Bleacher } from '../object/Bleacher'
 
 export interface GenericRobotStep {
     x: number // millimeters, 0 is left
@@ -14,4 +15,5 @@ export interface RobotStep extends GenericRobotStep {
     input: StepInput | null
     logs: Array<Log> | null
     output: StepOutput | null
+    carriedBleacher: Bleacher | null
 }

@@ -33,6 +33,7 @@ export class Robot extends GenericRobot {
                 x,
                 y,
                 orientation,
+                carriedBleacher: null,
                 leftWheelDistance: 0,
                 rightWheelDistance: 0,
                 input: null,
@@ -50,6 +51,10 @@ export class Robot extends GenericRobot {
     private async resetAiInstance() {
         this.aiInstance = await topInit()
         console.log(`Top init logs for ${this.color} robot ${this.id}:`, [...this.aiInstance.logs])
+    }
+
+    get editorStep(): RobotStep {
+        return this.steps[0]
     }
 
     get lastStep(): RobotStep {
@@ -99,37 +104,26 @@ export class Robot extends GenericRobot {
     }
 
     draw(canvas: Canvas, stepNb: number, isSelected: boolean) {
+        const step = this.steps[stepNb]
+
         for (let i = 0; i < stepNb; i += 50) {
             const color = canvas.getDrawingColor(this.color)
             const opacity = Math.max(1 - (stepNb - i) / 6500, 0)
             canvas.drawEllipse(this.steps[i].x, this.steps[i].y, 0.003, 0.003, 0, color, 'filled', opacity)
         }
 
+        // Carried bleacher
+        if (step.carriedBleacher) step.carriedBleacher.draw(canvas)
+
         // Body and orientation
-        const step = this.steps[stepNb]
         canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, step.orientation, canvas.getDrawingColor(this.color), 'filled')
         canvas.drawOrientationLine(step.x, step.y, step.orientation, this.height / 2)
 
         // Shovel
-        const FULL_EXTENSION = 0.03 // meters
-        const SHOVEL_WIDTH = robotWidth * 0.9
-        const ratio = this.shovelRatio(step)
-        const extension = ratio * FULL_EXTENSION
-        const frontX = step.x + Math.cos(step.orientation) * (this.height / 2)
-        const frontY = step.y + Math.sin(step.orientation) * (this.height / 2)
-        const plateCenterX = frontX + Math.cos(step.orientation) * extension
-        const plateCenterY = frontY + Math.sin(step.orientation) * extension
-
-        const halfPlate = SHOVEL_WIDTH / 2
-        const perpendicular = step.orientation + Math.PI / 2
-        const startX = plateCenterX - Math.cos(perpendicular) * halfPlate
-        const startY = plateCenterY - Math.sin(perpendicular) * halfPlate
-        const endX = plateCenterX + Math.cos(perpendicular) * halfPlate
-        const endY = plateCenterY + Math.sin(perpendicular) * halfPlate
-
-        const opacity = 0.3 + 0.7 * ratio
+        const { shovelCenterX, shovelCenterY } = this.shovelCenter(step)
+        const opacity = 0.3 + 0.7 * this.shovelRatio(step)
         const colorWithOpacity = `rgba(0, 0, 0, ${opacity})`
-        canvas.drawLine(startX, startY, endX, endY, colorWithOpacity, 0.01)
+        canvas.drawLineFromCenter(shovelCenterX, shovelCenterY, step.orientation + Math.PI / 2, robotWidth * 0.9, colorWithOpacity)
 
         // Selection circle
         if (isSelected) {
@@ -137,15 +131,21 @@ export class Robot extends GenericRobot {
         }
     }
 
-    /**
-     * Returns the shovel extension based on the servo ratio, which is a value between 0 and 1.
-     * @param step
-     * @private
-     */
-    private shovelRatio(step: RobotStep) {
+    shovelCenter(step: RobotStep) {
+        const FULL_EXTENSION = 0.03 // meters
+        const extension = this.shovelRatio(step) * FULL_EXTENSION
+        const frontX = step.x + Math.cos(step.orientation) * (this.height / 2)
+        const frontY = step.y + Math.sin(step.orientation) * (this.height / 2)
+        const shovelCenterX = frontX + Math.cos(step.orientation) * extension
+        const shovelCenterY = frontY + Math.sin(step.orientation) * extension
+        return { shovelCenterX, shovelCenterY }
+    }
+
+    // Returns the shovel extension based on the servo ratio, which is a value between 0 and 1.
+    shovelRatio(step: RobotStep) {
         const MIN_VALUE = 0.05
         const MAX_VALUE = 0.105
-        const servoRatio = step.output?.servo_pelle_ratio ?? MIN_VALUE
+        const servoRatio = step.output?.servo_pelle_ratio ?? 0
         return (Math.min(Math.max(servoRatio, MIN_VALUE), MAX_VALUE) - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)
     }
 
@@ -173,6 +173,7 @@ export class Robot extends GenericRobot {
         }
         const { output, logs } = topStep(this.aiInstance!, input, eaglePacket || [])
 
+        // Calculate the new position of the robot
         const move = this.buildMove(
             output.motor_left_ratio * robotMaxSpeed * stepDuration,
             output.motor_right_ratio * robotMaxSpeed * stepDuration,
@@ -183,7 +184,18 @@ export class Robot extends GenericRobot {
             return
         }
 
-        this.steps.push({ ...move, input, logs, output })
+        // If the robot carries a bleacher, clone and move it along wih the robot
+        let carriedBleacher = step.carriedBleacher
+        if (carriedBleacher) {
+            carriedBleacher = carriedBleacher.clone()
+            const { shovelCenterX, shovelCenterY } = this.shovelCenter(step)
+            carriedBleacher.x = shovelCenterX
+            carriedBleacher.y = shovelCenterY
+            carriedBleacher.orientation = step.orientation
+        }
+
+        // Commit the new step
+        this.steps.push({ ...move, carriedBleacher, input, logs, output })
     }
 
     onSimulationEnd = () => {
