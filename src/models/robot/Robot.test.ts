@@ -7,7 +7,7 @@ describe('Robot.buildMove', () => {
 
     beforeEach(() => {
         // Initial position: x=0, y=0, orientation=0
-        robot = new Robot('blue', 0, 0, 0);
+        robot = new Robot('blue', 1, 1, 0);
     });
 
     // Helper function for arc movement calculations
@@ -39,8 +39,8 @@ describe('Robot.buildMove', () => {
 
     it('should move forward correctly', () => {
         const move = robot.buildMove(1, 1);
-        expect(move.x).toBeCloseTo(1);
-        expect(move.y).toBeCloseTo(0);
+        expect(move.x).toBeCloseTo(2);
+        expect(move.y).toBeCloseTo(1);
         expect(move.orientation).toBeCloseTo(0);
         expect(move.leftWheelDistance).toBe(1);
         expect(move.rightWheelDistance).toBe(1);
@@ -96,8 +96,8 @@ describe('Robot.buildMove', () => {
 
         const rotationAngle = (-wheelDistance - wheelDistance) / robotWheelbase;
 
-        expect(move.x).toBeCloseTo(0);
-        expect(move.y).toBeCloseTo(0); 
+        expect(move.x).toBeCloseTo(1);
+        expect(move.y).toBeCloseTo(1);
         expect(move.orientation).toBeCloseTo(rotationAngle);
         expect(move.leftWheelDistance).toBe(wheelDistance);
         expect(move.rightWheelDistance).toBe(-wheelDistance);
@@ -109,8 +109,8 @@ describe('Robot.buildMove', () => {
 
         const rotationAngle = (wheelDistance - (-wheelDistance)) / robotWheelbase;
         
-        expect(move.x).toBeCloseTo(0);
-        expect(move.y).toBeCloseTo(0);
+        expect(move.x).toBeCloseTo(1);
+        expect(move.y).toBeCloseTo(1);
         expect(move.orientation).toBeCloseTo(rotationAngle);
         expect(move.leftWheelDistance).toBe(-wheelDistance);
         expect(move.rightWheelDistance).toBe(wheelDistance);
@@ -131,8 +131,8 @@ describe('Robot.buildMove', () => {
 
      it('should handle zero movement', () => {
         const move = robot.buildMove(0, 0);
-        expect(move.x).toBe(0);
-        expect(move.y).toBe(0);
+        expect(move.x).toBe(1);
+        expect(move.y).toBe(1);
         expect(move.orientation).toBe(0);
         expect(move.leftWheelDistance).toBe(0);
         expect(move.rightWheelDistance).toBe(0);

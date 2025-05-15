@@ -66,3 +66,43 @@ export const rectangleRectangleOverlap = (a: Rectangle, b: Rectangle) => {
     }
     return true
 }
+
+export const distanceSegmentSegment = (
+    ax: number, ay: number, bx: number, by: number,
+    cx: number, cy: number, dx: number, dy: number,
+): number | null => {
+    const rX = bx - ax
+    const rY = by - ay
+    const sX = dx - cx
+    const sY = dy - cy
+    const denominator = rX * sY - rY * sX
+    if (denominator === 0) return null         // parallel
+
+    const t = ((cx - ax) * sY - (cy - ay) * sX) / denominator
+    const u = ((cx - ax) * rY - (cy - ay) * rX) / denominator
+    if (t < 0 || t > 1 || u < 0 || u > 1) return null   // outside segments
+
+    return t * Math.hypot(rX, rY)
+}
+
+export const distanceSegmentCircle = (
+    ax: number, ay: number, bx: number, by: number,
+    cx: number, cy: number, radius: number,
+): number | null => {
+    const dX = bx - ax
+    const dY = by - ay
+    const fX = ax - cx
+    const fY = ay - cy
+    const a = dX * dX + dY * dY
+    const b = 2 * (fX * dX + fY * dY)
+    const c = fX * fX + fY * fY - radius * radius
+    const disc = b * b - 4 * a * c
+    if (disc < 0) return null            // no intersection
+
+    const sqrtDisc = Math.sqrt(disc)
+    const t1 = (-b - sqrtDisc) / (2 * a)
+    const t2 = (-b + sqrtDisc) / (2 * a)
+    const t = t1 >= 0 && t1 <= 1 ? t1 : t2 >= 0 && t2 <= 1 ? t2 : null
+
+    return t === null ? null : t * Math.hypot(dX, dY)
+}

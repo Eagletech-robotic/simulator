@@ -1,12 +1,11 @@
 import { Canvas } from '../Canvas'
-import { bleacherHeight, bleacherWidth, canWidth } from '../constants'
-import { radiansToDegrees } from '../../utils/maths'
+import { bleacherWidth, bleacherLength, canWidth } from '../constants'
 
 export class Bleacher {
     constructor(public x: number, public y: number, public orientation: number) {}
 
     draw(canvas: Canvas): void {
-        canvas.drawRectangle(this.x, this.y, bleacherWidth, bleacherHeight, this.orientation, '#DEB887', 'filled')
+        canvas.drawRectangle(this.x, this.y, bleacherLength, bleacherWidth, this.orientation, '#DEB887', 'filled')
 
         const offsets = [-0.15, -0.05, 0.05, 0.15]
 

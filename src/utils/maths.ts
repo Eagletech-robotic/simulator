@@ -13,3 +13,5 @@ export function randInRange(min: number, max: number): number {
 export function randAngle(): number {
     return Math.random() * 2 * Math.PI
 }
+
+export const clamp = (v: number, min: number, max: number): number => Math.min(max, Math.max(min, v))

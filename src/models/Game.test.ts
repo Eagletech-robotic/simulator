@@ -9,7 +9,7 @@ import { buildPacket } from '../utils/bluetooth'
 describe('Game.eaglePacket', () => {
     const callEaglePacket = (g: Game, colour: 'blue' | 'yellow' = 'blue') =>
         // @ts-ignore private field, test only
-        (g as any).eaglePacket(colour) as number[] | null
+        (g as any).eaglePacket(colour, 0) as number[] | null
 
     it('returns a framed packet with valid starter byte, size and checksum', () => {
         const game = new Game()
@@ -35,8 +35,7 @@ describe('Game.eaglePacket', () => {
     it('returns null when no controlled robot of requested colour exists', () => {
         const game = new Game()
         // remove every robot so the method can't find a ControlledRobot
-        // @ts-ignore
-        game._robots = []
+        game.robots = []
 
         const packet = callEaglePacket(game, 'blue')
         expect(packet).toBeNull()
@@ -46,18 +45,15 @@ describe('Game.eaglePacket', () => {
         const game = new Game()
 
         /* ---------- build a minimal world ---------- */
-        // @ts-ignore
-        game._robots = [
+        game.robots = [
             new Robot('blue', 1.50, 1.00, Math.PI / 4),
             new Robot('yellow', 2.00, 0.50, -Math.PI / 2),
         ]
 
-        // @ts-ignore
-        game._bleachers = [new Bleacher(0.30, 0.20, 0)]
-        // @ts-ignore
-        game._planks = [new Plank(0.40, 0.30, Math.PI / 3)]
-        // @ts-ignore
-        game._cans = [new Can(0.10, 0.05)]
+        const step = game.editorStep
+        step.bleachers = [new Bleacher(0.30, 0.20, 0)]
+        step.planks = [new Plank(0.40, 0.30, Math.PI / 3)]
+        step.cans = [new Can(0.10, 0.05)]
 
         const packet = callEaglePacket(game, 'blue')!
         expect(packet).not.toBeNull()
@@ -118,21 +114,16 @@ describe('Game.eaglePacket', () => {
         const game = new Game()
 
         // Controlled robot (blue)
-        // @ts-ignore private access for tests
-        game._robots = [
+        game.robots = [
             new Robot('blue', 0.10, 0.20, Math.PI * 7 / 6),   // 10 cm, 20 cm, 210°
             new Robot('yellow', 0.05, 0.06, Math.PI / 2), // 5 cm, 6 cm, 90°
         ]
 
         // One bleacher object positioned so that raw_x=3 and raw_y=5, θ index = 2 (60°)
-        // @ts-ignore private access for tests
-        game._bleachers = [new Bleacher(0.14, 0.32, Math.PI / 3)]
-
-        // No other objects
-        // @ts-ignore
-        game._planks = []
-        // @ts-ignore
-        game._cans = []
+        const step = game.editorStep
+        step.bleachers = [new Bleacher(0.14, 0.32, Math.PI / 3)]
+        step.planks = []
+        step.cans = []
 
         const packet = callEaglePacket(game, 'blue')!
 

@@ -1,5 +1,5 @@
 import { Canvas } from '../Canvas'
-import { bleacherWidth, canWidth } from '../constants'
+import { canWidth } from '../constants'
 
 export class Can {
     constructor(public x: number, public y: number) {}

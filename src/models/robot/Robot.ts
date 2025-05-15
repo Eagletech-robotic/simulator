@@ -1,3 +1,4 @@
+import { clamp, degreesToRadians } from 'src/utils/maths'
 import { AiInstance, StepInput, topInit, topStep } from 'src/utils/wasm-connector'
 import { Canvas } from '../Canvas'
 import {
@@ -91,12 +92,15 @@ export class Robot extends GenericRobot {
         const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
 
         return {
-            x:
+            x: clamp(
                 step.x +
                 middleCircleRadius * (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle)),
-            y:
+                0, fieldWidth),
+
+            y: clamp(
                 step.y +
                 middleCircleRadius * (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle)),
+                0, fieldHeight),
             orientation: step.orientation + rotationAngle,
             leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
             rightWheelDistance: step.rightWheelDistance + rightWheelDistance,
@@ -141,6 +145,16 @@ export class Robot extends GenericRobot {
         return { shovelCenterX, shovelCenterY }
     }
 
+    tofPosition(step: RobotStep) {
+        const TOF_HEIGHT = 0.3
+        const TOF_ANGLE = degreesToRadians(20)
+        const tofX = step.x + Math.cos(step.orientation) * (this.height / 2)
+        const tofY = step.y + Math.sin(step.orientation) * (this.height / 2)
+        return {
+            tofX, tofY, tofZ: TOF_HEIGHT, tofOrientation: step.orientation, tofAngle: TOF_ANGLE
+        }
+    }
+
     // Returns the shovel extension based on the servo ratio, which is a value between 0 and 1.
     shovelRatio(step: RobotStep) {
         const MIN_VALUE = 0.05
@@ -149,7 +163,7 @@ export class Robot extends GenericRobot {
         return (Math.min(Math.max(servoRatio, MIN_VALUE), MAX_VALUE) - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)
     }
 
-    nextStep(eaglePacket: number[] | null) {
+    nextStep(eaglePacket: number[] | null, tof: number) {
         const step = this.lastStep
         const previousStep = this.steps[this.steps.length - 2] ?? step
 
@@ -160,7 +174,7 @@ export class Robot extends GenericRobot {
 
         const input: StepInput = {
             jack_removed: 1,
-            tof_m: 1,
+            tof_m: tof,
             delta_yaw: step.orientation - previousStep.orientation,
             delta_encoder_left: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
             delta_encoder_right: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
@@ -178,11 +192,6 @@ export class Robot extends GenericRobot {
             output.motor_left_ratio * robotMaxSpeed * stepDuration,
             output.motor_right_ratio * robotMaxSpeed * stepDuration,
         )
-
-        if (move.x < 0 || move.x > fieldWidth || move.y < 0 || move.y > fieldHeight) {
-            // console.error('Robot out of bounds', move)
-            return
-        }
 
         // If the robot carries a bleacher, clone and move it along wih the robot
         let carriedBleacher = step.carriedBleacher

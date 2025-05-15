@@ -6,8 +6,11 @@ import { GenericRobot } from './robot/GenericRobot'
 import { Robot } from './robot/Robot'
 import { Pami } from './robot/Pami'
 import { randInRange, randAngle, radiansToDegrees } from '../utils/maths'
-import { Circle, circlesOverlap, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap } from '../utils/geometry'
-import { bleacherHeight, bleacherWidth, canWidth, robotWidth } from './constants'
+import {
+    Circle, circlesOverlap, distanceSegmentCircle,
+    distanceSegmentSegment, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap,
+} from '../utils/geometry'
+import { bleacherWidth, bleacherLength, canWidth, robotWidth, bleacherHeight } from './constants'
 import { buildPacket } from '../utils/bluetooth'
 
 type GameStep = {
@@ -80,7 +83,7 @@ export class Game {
         let placed = 0
         while (placed < 2 && --MAX) {
             const p = { x: randInRange(minX, maxX), y: randInRange(minY, maxY), orientation: randAngle() }
-            if (this.isRectangleFree({ ...p, width: bleacherWidth, height: bleacherHeight })) {
+            if (this.isRectangleFree({ ...p, width: bleacherLength, height: bleacherWidth })) {
                 planks.push(new Plank(p.x, p.y, p.orientation))
                 placed++
             }
@@ -120,8 +123,8 @@ export class Game {
             this.isRectangleFree({
                 x,
                 y,
-                width: bleacherWidth,
-                height: bleacherHeight,
+                width: bleacherLength,
+                height: bleacherWidth,
                 orientation,
             }),
         )
@@ -158,12 +161,12 @@ export class Game {
         const lastStep = this.steps[this._lastStepNumber]
 
         // Advance robots
-        this.robots.map((r) => {
+        this.robots.map((robot) => {
             let eaglePacket: number[] | null = null
             if (this.lastStepNumber % SEND_PACKET_EVERY === 0) {
-                eaglePacket = this.eaglePacket(r.color, this.lastStepNumber)
+                eaglePacket = this.eaglePacket(robot.color, this.lastStepNumber)
             }
-            r.nextStep(eaglePacket)
+            robot.nextStep(eaglePacket, this.tof(robot))
         })
 
         // Advance PAMIs
@@ -233,16 +236,90 @@ export class Game {
             }
         } else if (robotStep.carriedBleacher && !extended) {
             // Drop bleacher
-            const bleacher = robotStep.carriedBleacher
-            bleacher.x = shovelCenterX
-            bleacher.y = shovelCenterY
-            bleacher.orientation = robotStep.orientation
-            bleachers.push(bleacher)
+            bleachers.push(robotStep.carriedBleacher)
             robot.lastStep.carriedBleacher = null
         }
 
         // Return the updated objects
         return { bleachers, planks, cans }
+    }
+
+    private tof(robot: Robot): number {
+        const TOF_MAX_DETECTION = 0.5
+        const TOF_CARRYING_BLEACHER = 0.25
+
+        const robotStep = robot.lastStep
+        const { tofX, tofY, tofZ, tofOrientation, tofAngle } = robot.tofPosition(robotStep)
+        const maximumRange = robotStep.carriedBleacher ? TOF_CARRYING_BLEACHER : TOF_MAX_DETECTION
+
+        const leftRayAngle = tofOrientation - tofAngle / 2
+        const rightRayAngle = tofOrientation + tofAngle / 2
+
+        const rayEnds = [
+            [tofX + Math.cos(leftRayAngle) * maximumRange,
+                tofY + Math.sin(leftRayAngle) * maximumRange],
+            [tofX + Math.cos(rightRayAngle) * maximumRange,
+                tofY + Math.sin(rightRayAngle) * maximumRange],
+        ] as const
+
+        let minDistance = maximumRange
+
+        const robotRadius = robotWidth / 2
+
+        // bleachers (rectangles)
+        const hx = bleacherLength / 2
+        const hy = bleacherWidth / 2
+
+        for (const bleacher of this.editorStep.bleachers) {
+            const cos = Math.cos(bleacher.orientation + Math.PI / 2)
+            const sin = Math.sin(bleacher.orientation + Math.PI / 2)
+
+            const corners = [
+                [bleacher.x + hx * cos - hy * sin, bleacher.y + hx * sin + hy * cos],
+                [bleacher.x - hx * cos - hy * sin, bleacher.y - hx * sin + hy * cos],
+                [bleacher.x - hx * cos + hy * sin, bleacher.y - hx * sin - hy * cos],
+                [bleacher.x + hx * cos + hy * sin, bleacher.y + hx * sin - hy * cos],
+            ] as const
+
+            const segments: [number, number, number, number][] = [
+                [...corners[0], ...corners[1]],
+                [...corners[1], ...corners[2]],
+                [...corners[2], ...corners[3]],
+                [...corners[3], ...corners[0]],
+            ]
+
+            for (const [endX, endY] of rayEnds) {
+                for (const [sx1, sy1, sx2, sy2] of segments) {
+                    const distance2d = distanceSegmentSegment(
+                        tofX, tofY, endX, endY, sx1, sy1, sx2, sy2,
+                    )
+                    if (distance2d === null) continue
+
+                    const dz = Math.abs(tofZ - bleacherHeight)
+                    const distance = Math.sqrt(distance2d * distance2d + dz * dz)
+                    if (distance < minDistance) minDistance = distance
+
+                }
+            }
+        }
+
+        // robots (circles)
+        for (const other of this.robots) {
+            if (other.id === robot.id) continue
+            for (const [endX, endY] of rayEnds) {
+                const distance = distanceSegmentCircle(
+                    tofX, tofY, endX, endY,
+                    other.lastStep.x, other.lastStep.y, robotRadius,
+                )
+                if (distance !== null && distance < minDistance) {
+                    minDistance = distance
+                    console.log(this.steps.length, 'robot at position ', other.lastStep.x, other.lastStep.y, 'distance', distance)
+                }
+            }
+        }
+
+        // Return the distance to the nearest object
+        return minDistance
     }
 
     private isCircleFree = (circle: Circle) => {
@@ -258,8 +335,8 @@ export class Game {
                 rectangleCircleOverlap({
                     x: rect.x,
                     y: rect.y,
-                    width: bleacherWidth,
-                    height: bleacherHeight,
+                    width: bleacherLength,
+                    height: bleacherWidth,
                     orientation: rect.orientation,
                 }, circle),
             )
@@ -283,8 +360,8 @@ export class Game {
                 rectangleRectangleOverlap(rectangle, {
                     x: other.x,
                     y: other.y,
-                    width: bleacherWidth,
-                    height: bleacherHeight,
+                    width: bleacherLength,
+                    height: bleacherWidth,
                     orientation: other.orientation,
                 }),
             )
