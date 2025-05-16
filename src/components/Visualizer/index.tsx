@@ -1,12 +1,14 @@
 import {
+    Body,
     BottomRow,
-    Header,
+    Header, Info, InfoLabel, InfoValue,
     NextRobotButton,
     PreviousRobotButton,
     RobotColorIndicator,
     RobotIcon,
     RobotName,
     RobotTypeIndicator,
+    SliderInput,
     TopRow,
 } from './styles'
 import { Game } from 'src/models/Game'
@@ -14,7 +16,7 @@ import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
 import { RightPanel } from 'src/styles/commonStyles'
 import { useLayoutEffect, useRef } from 'react'
-import { radiansToDegrees } from '../../utils/maths'
+import { radiansToDegrees } from 'src/utils/maths'
 
 const SwitchRobotIcon = (
     <svg
@@ -35,6 +37,8 @@ interface VisualizerProps {
     selectedRobotId: number | null
     setSelectedRobotId: React.Dispatch<React.SetStateAction<number | null>>
     playingStep: number
+    fieldOpacity: number
+    setFieldOpacity: React.Dispatch<React.SetStateAction<number>>
 }
 
 const Visualizer = ({
@@ -42,6 +46,8 @@ const Visualizer = ({
     selectedRobotId,
     setSelectedRobotId,
     playingStep,
+    fieldOpacity,
+    setFieldOpacity,
 }: VisualizerProps): JSX.Element => {
     const headerRef = useRef(null)
 
@@ -92,20 +98,35 @@ const Visualizer = ({
                     </BottomRow>
                 )}
             </Header>
-            <br />
-            <center>
-                Playing step:
-                <h1>{playingStep}</h1>
+
+            <Body>
+                <Info>
+                    <InfoLabel>Playing step:</InfoLabel>
+                    <InfoValue>{playingStep}</InfoValue>
+                </Info>
+
                 {step && (
-                    <>
-                        Position:
-                        <h1>
+                    <Info>
+                        <InfoLabel>Position:</InfoLabel>
+                        <InfoValue>
                             {step.x.toFixed(3)}m x {step.y.toFixed(3)}m
                             x {radiansToDegrees(step.orientation).toFixed(3)}°
-                        </h1>
-                    </>
+                        </InfoValue>
+                    </Info>
                 )}
-            </center>
+
+                <Info>
+                    <InfoLabel>Field opacity:</InfoLabel>
+                    <SliderInput
+                        type="range"
+                        min={0}
+                        max={3}
+                        step={1}
+                        value={fieldOpacity}
+                        onChange={e => setFieldOpacity(Number(e.currentTarget.value))}
+                    />
+                </Info>
+            </Body>
         </RightPanel>
     )
 }

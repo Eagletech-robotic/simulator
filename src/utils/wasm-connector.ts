@@ -14,6 +14,9 @@ export type AiInstance = {
         }
     }
     logs: Array<Log>
+    inputPtr: number
+    outputPtr: number
+    bluetoothPtr: number
 }
 
 export const topInit = async (): Promise<AiInstance> => {
@@ -53,8 +56,8 @@ export const topInit = async (): Promise<AiInstance> => {
             clock_time_get: (clk_id: number, precision: bigint, timePtr: number) => {
                 if (!wasmMemory) return
                 const memoryView = new DataView(wasmMemory.buffer)
-                const nowNs = BigInt(Math.round(performance.now() * 1_000_000));
-                memoryView.setBigUint64(timePtr, nowNs, true);
+                const nowNs = BigInt(Math.round(performance.now() * 1_000_000))
+                memoryView.setBigUint64(timePtr, nowNs, true)
             },
 
         },
@@ -67,7 +70,16 @@ export const topInit = async (): Promise<AiInstance> => {
     wasmInstance = obj.instance as AiInstance['wasmInstance']
     wasmMemory = wasmInstance.exports.memory
     wasmInstance.exports.exported_top_init()
-    return { wasmInstance, logs }
+
+    // Allocate buffers for input, output, and bluetooth
+    const inputPtr = wasmInstance.exports.create_input()
+    const outputPtr = wasmInstance.exports.create_output()
+    const bluetoothPtr = wasmInstance.exports.create_bluetooth()
+    if (!inputPtr || !outputPtr) {
+        throw new Error('WebAssembly memory allocation failed: inputPtr or outputPtr is null')
+    }
+
+    return { wasmInstance, logs, inputPtr, outputPtr, bluetoothPtr }
 }
 
 export interface StepInput {
@@ -84,28 +96,25 @@ export interface StepInput {
     clock_ms: number
 }
 
+export const potentialFieldWidth = 75
+export const potentialFieldHeight = 50
+
 export interface StepOutput {
     motor_left_ratio: number
     motor_right_ratio: number
     servo_pelle_ratio: number
     servo_extra_ratio: number
     led_ratio: number
+    potential_field: number[][] | null // null means no change from previous step
 }
 
 export const topStep = (
     aiInstance: AiInstance,
     input: StepInput,
     bluetooth: Array<number>,
+    prevPotentialField: number[][] | null,
 ): { output: StepOutput; logs: Array<Log> } => {
-    const { wasmInstance, logs } = aiInstance
-    const inputPtr = wasmInstance.exports.create_input()
-    const outputPtr = wasmInstance.exports.create_output()
-    const bluetoothPtr = wasmInstance.exports.create_bluetooth()
-
-    if (!inputPtr || !outputPtr) {
-        throw new Error('WebAssembly memory allocation failed: inputPtr or outputPtr is null')
-    }
-
+    const { wasmInstance, logs, inputPtr, outputPtr, bluetoothPtr } = aiInstance
     const wasmMemory = wasmInstance.exports.memory
 
     const dataView = new DataView(wasmMemory.buffer, inputPtr)
@@ -124,17 +133,46 @@ export const topStep = (
     const bluetoothView = new Uint8Array(wasmMemory.buffer, bluetoothPtr, bluetooth.length)
     bluetoothView.set(bluetooth)
 
-    logs.length = 0
+    logs.length = 0 // Empty logs
     wasmInstance.exports.exported_top_step(inputPtr, outputPtr, bluetoothPtr, bluetooth.length)
 
-    const floatViewOutput = new Float32Array(wasmMemory.buffer, outputPtr, 5)
+    const HEADER_FLOATS = 5
+    const flat = new Float32Array(wasmMemory.buffer, outputPtr, HEADER_FLOATS + potentialFieldWidth * potentialFieldHeight)
+
+    // Check if the potential field has changed
+    let potentialFieldChanged = true
+    if (prevPotentialField) {
+        potentialFieldChanged = false
+        for (let x = 0; x < potentialFieldWidth && !potentialFieldChanged; ++x) {
+            const row = prevPotentialField[x]
+            const base = HEADER_FLOATS + x * potentialFieldHeight
+            for (let y = 0; y < potentialFieldHeight; ++y) {
+                if (flat[base + y] !== row[y]) {
+                    potentialFieldChanged = true
+                    break
+                }
+            }
+        }
+    }
+
+    // Fill the potential field if it's different (this is costly because of the memory allocations)
+    let potential_field: StepOutput["potential_field"] = null
+    if (potentialFieldChanged) {
+        potential_field = []
+        for (let x = 0; x < potentialFieldWidth; ++x) {
+            const start = HEADER_FLOATS + x * potentialFieldHeight
+            potential_field.push(Array.from(flat.subarray(start, start + potentialFieldHeight)))
+        }
+    }
+
     return {
         output: {
-            motor_left_ratio: floatViewOutput[0],
-            motor_right_ratio: floatViewOutput[1],
-            servo_pelle_ratio: floatViewOutput[2],
-            servo_extra_ratio: floatViewOutput[3],
-            led_ratio: floatViewOutput[4],
+            motor_left_ratio: flat[0],
+            motor_right_ratio: flat[1],
+            servo_pelle_ratio: flat[2],
+            servo_extra_ratio: flat[3],
+            led_ratio: flat[4],
+            potential_field,
         },
         logs: [...logs],
     }

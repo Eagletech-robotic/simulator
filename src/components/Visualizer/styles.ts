@@ -3,10 +3,19 @@ import styled, { css } from 'styled-components'
 
 export const Header = styled.div`
     padding: 1rem;
+    margin-bottom: 1rem;
     display: grid;
     grid-template-rows: auto auto;
     grid-template-columns: 1fr;
     background-color: ${colors.lightGrey};
+`
+
+export const Body = styled.div`
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
 `
 
 export const TopRow = styled.div`
@@ -68,4 +77,24 @@ export const PreviousRobotButton = styled.button`
 
 export const NextRobotButton = styled.button`
     ${switchRobotButton}
+`
+
+export const Info = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+`
+
+export const InfoLabel = styled.div`
+`
+
+export const InfoValue = styled.div`
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #212529;
+    margin: 0;
+`
+
+export const SliderInput = styled.input`
 `

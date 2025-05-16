@@ -30,9 +30,11 @@ const App = (): JSX.Element => {
     const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null)
     const playingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+    const [fieldOpacity, setFieldOpacity] = useState(1)
+
     useLayoutEffect(() => {
-        if (canvasRef.current) game.draw(canvasRef.current, selectedRobotId, playingStep)
-    }, [selectedRobotId, playingStep, redrawStep])
+        if (canvasRef.current) game.draw(canvasRef.current, selectedRobotId, playingStep, fieldOpacity)
+    }, [selectedRobotId, playingStep, redrawStep, fieldOpacity])
 
     const nbSimulationSteps = gameDurationSeconds / stepDuration
 
@@ -170,6 +172,8 @@ const App = (): JSX.Element => {
                                 selectedRobotId,
                                 setSelectedRobotId,
                                 playingStep,
+                                fieldOpacity,
+                                setFieldOpacity,
                             }}
                         />
                     ))}

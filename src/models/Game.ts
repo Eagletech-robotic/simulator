@@ -147,7 +147,7 @@ export class Game {
         return this._lastStepNumber
     }
 
-    draw(canvas: Canvas, selectedRobotId: number | null = null, stepNb = this._lastStepNumber) {
+    draw(canvas: Canvas, selectedRobotId: number | null = null, stepNb = this._lastStepNumber, fieldOpacity = 1) {
         canvas.clearCanvas()
 
         const step = this.steps[stepNb]
@@ -157,6 +157,11 @@ export class Game {
         this.robots.forEach((robot) => robot.draw(canvas, stepNb, robot.id === selectedRobotId))
 
         this.pamis.forEach((pami) => pami.draw(canvas, stepNb))
+
+        if (selectedRobotId !== null) {
+            const robot = this.getRobotById(selectedRobotId)!
+            robot.drawPotentialField(canvas, stepNb, fieldOpacity)
+        }
     }
 
     async restart() {
@@ -220,7 +225,7 @@ export class Game {
         }
     }
 
-    getRobotById(id: number): GenericRobot | null {
+    getRobotById(id: number): Robot | null {
         return this.robots.find((robot) => robot.id === id) || null
     }
 

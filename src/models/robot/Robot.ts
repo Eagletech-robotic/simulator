@@ -1,5 +1,12 @@
 import { clamp, degreesToRadians } from 'src/utils/maths'
-import { AiInstance, StepInput, topInit, topStep } from 'src/utils/wasm-connector'
+import {
+    AiInstance,
+    potentialFieldHeight,
+    potentialFieldWidth,
+    StepInput,
+    topInit,
+    topStep,
+} from 'src/utils/wasm-connector'
 import { Canvas } from '../Canvas'
 import {
     robotWidth,
@@ -135,6 +142,55 @@ export class Robot extends GenericRobot {
         }
     }
 
+    drawPotentialField(canvas: Canvas, stepNb: number, fieldOpacity: number): void {
+        if (fieldOpacity === 0) return
+
+        const field = this.potentialField(stepNb)
+        if (!field) return
+
+        const cellW = fieldWidth / potentialFieldWidth
+        const cellH = fieldHeight / potentialFieldHeight
+
+        // find the highest value to scale opacity
+        let max = 0
+        for (const row of field) for (const v of row) if (v > max) max = v
+        if (max === 0) return
+
+        const TURBO: string[] = [
+            '#30123b', '#47135a', '#5d176e', '#731d7d', '#882785', '#9e3389', '#b24488', '#c65581',
+            '#d86675', '#e67866', '#f38b55', '#fca244', '#ffba2f', '#ffd521', '#f5ef16', '#d7ff1c',
+            '#b4ff34', '#8bff55', '#5cff7b', '#22ffa5',
+        ]
+        const opacityFactor = fieldOpacity / 3
+
+        for (let ix = 0; ix < potentialFieldWidth; ++ix) {
+            for (let iy = 0; iy < potentialFieldHeight; ++iy) {
+                const v = field[ix][iy]
+                if (v === 0) continue
+
+                const norm = v / max
+                const idx = Math.floor(norm * (TURBO.length - 1))
+                const globalAlpha = Math.round((fieldOpacity / 3) * 255)
+                const hexA = globalAlpha.toString(16).padStart(2, '0')
+                const colour = `${TURBO[idx]}${hexA}`
+
+                // draw a rectangle centred in the cell
+                const cx = (ix + 0.5) * cellW
+                const cy = (iy + 0.5) * cellH
+                canvas.drawRectangle(cx, cy, cellW, cellH, 0, colour, 'filled')
+            }
+        }
+    }
+
+    potentialField(stepNb: number): number[][] | null {
+        for (let index = stepNb; index >= 0; --index) {
+            const step = this.steps[index]
+            const field = step.output?.potential_field
+            if (field !== null && field !== undefined) return field
+        }
+        return null
+    }
+
     shovelCenter(step: RobotStep) {
         const extension = this.shovelRatio(step) * shovelExtension
         const shovelCenterX = step.x + Math.cos(step.orientation) * (this.length / 2 + extension)
@@ -159,8 +215,9 @@ export class Robot extends GenericRobot {
     }
 
     nextStep(eaglePacket: number[] | null, tof: number) {
-        const step = this.lastStep
-        const previousStep = this.steps[this.steps.length - 2] ?? step
+        const lastStepNb = this.steps.length - 1
+        const lastStep = this.lastStep
+        const previousStep = this.steps[lastStepNb - 1] ?? lastStep
 
         const wheelCircumference = Math.PI * robotWheelDiameter // meters
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // meters
@@ -170,17 +227,17 @@ export class Robot extends GenericRobot {
         const input: StepInput = {
             jack_removed: 1,
             tof_m: tof,
-            delta_yaw: step.orientation - previousStep.orientation,
-            delta_encoder_left: (step.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
-            delta_encoder_right: (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
-            imu_yaw: step.orientation,
+            delta_yaw: lastStep.orientation - previousStep.orientation,
+            delta_encoder_left: (lastStep.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
+            delta_encoder_right: (lastStep.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
+            imu_yaw: lastStep.orientation,
             imu_accel_x_mss: 0,
             imu_accel_y_mss: 0,
             imu_accel_z_mss: 0,
             blue_button: 0,
             clock_ms: (this.steps.length * stepDuration) * 1000,
         }
-        const { output, logs } = topStep(this.aiInstance!, input, eaglePacket || [])
+        const { output, logs } = topStep(this.aiInstance!, input, eaglePacket || [], this.potentialField(lastStepNb))
 
         // Calculate the new position of the robot
         const move = this.buildMove(
@@ -189,13 +246,13 @@ export class Robot extends GenericRobot {
         )
 
         // If the robot carries a bleacher, clone and move it along wih the robot
-        let carriedBleacher = step.carriedBleacher
+        let carriedBleacher = lastStep.carriedBleacher
         if (carriedBleacher) {
             carriedBleacher = carriedBleacher.clone()
-            const { shovelCenterX, shovelCenterY } = this.shovelCenter(step)
+            const { shovelCenterX, shovelCenterY } = this.shovelCenter(lastStep)
             carriedBleacher.x = shovelCenterX
             carriedBleacher.y = shovelCenterY
-            carriedBleacher.orientation = step.orientation
+            carriedBleacher.orientation = lastStep.orientation
         }
 
         // Commit the new step
