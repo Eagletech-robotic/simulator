@@ -3,12 +3,12 @@ import { AiInstance, StepInput, topInit, topStep } from 'src/utils/wasm-connecto
 import { Canvas } from '../Canvas'
 import {
     robotWidth,
-    robotHeight,
+    robotLength,
     robotWheelbase,
     robotWheelDiameter,
     encoderImpulsesPerWheelTurn,
     robotMaxSpeed,
-    stepDuration, fieldWidth, fieldHeight,
+    stepDuration, fieldWidth, fieldHeight, tofToCenter, shovelExtension, shovelWidth,
 } from '../constants'
 import { GenericRobot } from './GenericRobot'
 import { RobotStep, Log } from './RobotStep'
@@ -23,7 +23,7 @@ export class Robot extends GenericRobot {
     aiInstance: AiInstance | undefined
 
     readonly width = robotWidth
-    readonly height = robotHeight
+    readonly length = robotLength
 
     steps: Array<RobotStep>
 
@@ -120,38 +120,33 @@ export class Robot extends GenericRobot {
         if (step.carriedBleacher) step.carriedBleacher.draw(canvas)
 
         // Body and orientation
-        canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, step.orientation, canvas.getDrawingColor(this.color), 'filled')
-        canvas.drawOrientationLine(step.x, step.y, step.orientation, this.height / 2)
+        canvas.drawEllipse(step.x, step.y, this.width / 2, this.length / 2, step.orientation, canvas.getDrawingColor(this.color), 'filled')
+        canvas.drawOrientationLine(step.x, step.y, step.orientation, this.length / 2)
 
         // Shovel
         const { shovelCenterX, shovelCenterY } = this.shovelCenter(step)
         const opacity = 0.3 + 0.7 * this.shovelRatio(step)
         const colorWithOpacity = `rgba(0, 0, 0, ${opacity})`
-        canvas.drawLineFromCenter(shovelCenterX, shovelCenterY, step.orientation + Math.PI / 2, robotWidth * 0.9, colorWithOpacity)
+        canvas.drawLineFromCenter(shovelCenterX, shovelCenterY, step.orientation + Math.PI / 2, shovelWidth, colorWithOpacity)
 
         // Selection circle
         if (isSelected) {
-            canvas.drawEllipse(step.x, step.y, this.width / 2, this.height / 2, step.orientation, 'red', 'outlined')
+            canvas.drawEllipse(step.x, step.y, this.width / 2, this.length / 2, step.orientation, 'red', 'outlined')
         }
     }
 
     shovelCenter(step: RobotStep) {
-        const FULL_EXTENSION = 0.03 // meters
-        const extension = this.shovelRatio(step) * FULL_EXTENSION
-        const frontX = step.x + Math.cos(step.orientation) * (this.height / 2)
-        const frontY = step.y + Math.sin(step.orientation) * (this.height / 2)
-        const shovelCenterX = frontX + Math.cos(step.orientation) * extension
-        const shovelCenterY = frontY + Math.sin(step.orientation) * extension
+        const extension = this.shovelRatio(step) * shovelExtension
+        const shovelCenterX = step.x + Math.cos(step.orientation) * (this.length / 2 + extension)
+        const shovelCenterY = step.y + Math.sin(step.orientation) * (this.length / 2 + extension)
         return { shovelCenterX, shovelCenterY }
     }
 
     tofPosition(step: RobotStep) {
-        const TOF_HEIGHT = 0.3
-        const TOF_ANGLE = degreesToRadians(20)
-        const tofX = step.x + Math.cos(step.orientation) * (this.height / 2)
-        const tofY = step.y + Math.sin(step.orientation) * (this.height / 2)
+        const tofX = step.x + Math.cos(step.orientation) * tofToCenter
+        const tofY = step.y + Math.sin(step.orientation) * tofToCenter
         return {
-            tofX, tofY, tofZ: TOF_HEIGHT, tofOrientation: step.orientation, tofAngle: TOF_ANGLE
+            tofX, tofY, tofOrientation: step.orientation,
         }
     }
 

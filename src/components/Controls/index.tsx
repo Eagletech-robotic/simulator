@@ -6,7 +6,6 @@ import { PlaybackBar, SimulationBar, StyledControls } from './styles'
 
 export interface ControlsProps {
     appState: 'playing' | 'paused' | 'editing'
-    setAppState: (appState: 'playing' | 'paused' | 'editing') => void
     gameDurationSeconds: number
     setGameDurationSeconds: (gameDurationSeconds: number) => void
     nbSimulationSteps: number
@@ -19,7 +18,6 @@ export interface ControlsProps {
 
 const Controls = ({
     appState,
-    setAppState,
     gameDurationSeconds,
     setGameDurationSeconds,
     nbSimulationSteps,

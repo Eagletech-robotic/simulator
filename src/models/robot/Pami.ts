@@ -1,13 +1,13 @@
 import { Canvas } from '../Canvas'
 import { GenericRobot } from './GenericRobot'
 import { GenericRobotStep } from './RobotStep'
-import { stepDuration } from '../constants'
+import { pamiWidth, stepDuration } from '../constants'
 
 export class Pami extends GenericRobot {
     readonly type = 'sequential'
 
-    readonly width = 0.15 // meters
-    readonly height = 0.15
+    readonly width = pamiWidth
+    readonly length = pamiWidth
 
     steps: Array<GenericRobotStep>
 
@@ -24,10 +24,10 @@ export class Pami extends GenericRobot {
         const step = this.steps[stepNb]
 
         const { x, y, orientation } = step
-        const { width, height } = this
+        const { width, length } = this
         const color = canvas.getDrawingColor(this.color)
 
-        canvas.drawRectangle(x, y, width, height, orientation, color, 'filled')
+        canvas.drawRectangle(x, y, width, length, orientation, color, 'filled')
         canvas.drawOrientationLine(x, y, orientation, width / 2)
     }
 

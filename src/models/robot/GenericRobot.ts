@@ -1,10 +1,9 @@
-import { Canvas } from '../Canvas'
 import { GenericRobotStep } from './RobotStep'
 
 export abstract class GenericRobot {
     abstract readonly type: 'controlled' | 'sequential'
     abstract readonly width: number
-    abstract readonly height: number
+    abstract readonly length: number
 
     abstract get lastStep(): GenericRobotStep
 

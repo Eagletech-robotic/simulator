@@ -10,7 +10,15 @@ import {
     Circle, circlesOverlap, distanceSegmentCircle,
     distanceSegmentSegment, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap,
 } from '../utils/geometry'
-import { bleacherWidth, bleacherLength, canWidth, robotWidth, bleacherHeight } from './constants'
+import {
+    bleacherWidth,
+    bleacherLength,
+    canWidth,
+    robotWidth,
+    bleacherHeight,
+    tofHalfAngle,
+    tofHeight,
+} from './constants'
 import { buildPacket } from '../utils/bluetooth'
 
 type GameStep = {
@@ -245,24 +253,25 @@ export class Game {
     }
 
     private tof(robot: Robot): number {
-        const TOF_MAX_DETECTION = 0.5
-        const TOF_CARRYING_BLEACHER = 0.25
+        const TOF_MAX_DETECTION = 1.0
+        const TOF_CARRYING_BLEACHER = 0.40
+        const TOF_MIN_FOR_BLEACHER = 0.26
 
         const robotStep = robot.lastStep
-        const { tofX, tofY, tofZ, tofOrientation, tofAngle } = robot.tofPosition(robotStep)
-        const maximumRange = robotStep.carriedBleacher ? TOF_CARRYING_BLEACHER : TOF_MAX_DETECTION
+        if (robotStep.carriedBleacher) return TOF_CARRYING_BLEACHER
 
-        const leftRayAngle = tofOrientation - tofAngle / 2
-        const rightRayAngle = tofOrientation + tofAngle / 2
+        const { tofX, tofY, tofOrientation } = robot.tofPosition(robotStep)
+        const leftRayAngle = tofOrientation - tofHalfAngle
+        const rightRayAngle = tofOrientation + tofHalfAngle
 
         const rayEnds = [
-            [tofX + Math.cos(leftRayAngle) * maximumRange,
-                tofY + Math.sin(leftRayAngle) * maximumRange],
-            [tofX + Math.cos(rightRayAngle) * maximumRange,
-                tofY + Math.sin(rightRayAngle) * maximumRange],
+            [tofX + Math.cos(leftRayAngle) * TOF_MAX_DETECTION,
+                tofY + Math.sin(leftRayAngle) * TOF_MAX_DETECTION],
+            [tofX + Math.cos(rightRayAngle) * TOF_MAX_DETECTION,
+                tofY + Math.sin(rightRayAngle) * TOF_MAX_DETECTION],
         ] as const
 
-        let minDistance = maximumRange
+        let minDistance = TOF_MAX_DETECTION
 
         const robotRadius = robotWidth / 2
 
@@ -295,10 +304,10 @@ export class Game {
                     )
                     if (distance2d === null) continue
 
-                    const dz = Math.abs(tofZ - bleacherHeight)
-                    const distance = Math.sqrt(distance2d * distance2d + dz * dz)
+                    const dz = Math.abs(tofHeight - bleacherHeight)
+                    let distance = Math.sqrt(distance2d * distance2d + dz * dz)
+                    if (distance < TOF_MIN_FOR_BLEACHER) distance = TOF_CARRYING_BLEACHER
                     if (distance < minDistance) minDistance = distance
-
                 }
             }
         }
@@ -313,7 +322,6 @@ export class Game {
                 )
                 if (distance !== null && distance < minDistance) {
                     minDistance = distance
-                    console.log(this.steps.length, 'robot at position ', other.lastStep.x, other.lastStep.y, 'distance', distance)
                 }
             }
         }

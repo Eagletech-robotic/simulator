@@ -74,13 +74,13 @@ const App = (): JSX.Element => {
                 )
             })
         }, (stepDuration * NB_STEPS_PER_PLAYING_INTERVAL) * 1000)
-        setAppState("playing")
+        setAppState('playing')
     }
 
     const pause = () => {
         clearInterval(playingIntervalRef.current || undefined)
         playingIntervalRef.current = null
-        setAppState("paused")
+        setAppState('paused')
     }
 
     const onPlayToggle = async () => {
@@ -145,7 +145,6 @@ const App = (): JSX.Element => {
                     <Controls
                         {...{
                             appState,
-                            setAppState,
                             gameDurationSeconds,
                             setGameDurationSeconds,
                             nbSimulationSteps,
