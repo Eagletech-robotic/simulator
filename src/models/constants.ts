@@ -17,7 +17,8 @@ export const encoderImpulsesPerWheelTurn = 500 * 36 * 4
 export const robotMaxSpeed = 1.0 // meters per second
 
 // Shovel
-export const shovelWidth = 0.35 // meters
+export const shovelWidth = 0.28 // meters
+export const shovelToCenter = 0.10 // meters
 export const shovelExtension = 0.02 // meters
 
 // TOF

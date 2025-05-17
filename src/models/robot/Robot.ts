@@ -15,7 +15,7 @@ import {
     robotWheelDiameter,
     encoderImpulsesPerWheelTurn,
     robotMaxSpeed,
-    stepDuration, fieldWidth, fieldHeight, tofToCenter, shovelExtension, shovelWidth,
+    stepDuration, fieldWidth, fieldHeight, tofToCenter, shovelExtension, shovelWidth, shovelToCenter, bleacherWidth,
 } from '../constants'
 import { GenericRobot } from './GenericRobot'
 import { RobotStep, Log } from './RobotStep'
@@ -193,8 +193,8 @@ export class Robot extends GenericRobot {
 
     shovelCenter(step: RobotStep) {
         const extension = this.shovelRatio(step) * shovelExtension
-        const shovelCenterX = step.x + Math.cos(step.orientation) * (this.length / 2 + extension)
-        const shovelCenterY = step.y + Math.sin(step.orientation) * (this.length / 2 + extension)
+        const shovelCenterX = step.x + Math.cos(step.orientation) * (shovelToCenter + extension)
+        const shovelCenterY = step.y + Math.sin(step.orientation) * (shovelToCenter + extension)
         return { shovelCenterX, shovelCenterY }
     }
 
@@ -250,8 +250,8 @@ export class Robot extends GenericRobot {
         if (carriedBleacher) {
             carriedBleacher = carriedBleacher.clone()
             const { shovelCenterX, shovelCenterY } = this.shovelCenter(lastStep)
-            carriedBleacher.x = shovelCenterX
-            carriedBleacher.y = shovelCenterY
+            carriedBleacher.x = shovelCenterX + Math.cos(lastStep.orientation) * (bleacherWidth / 2)
+            carriedBleacher.y = shovelCenterY + Math.sin(lastStep.orientation) * (bleacherWidth / 2)
             carriedBleacher.orientation = lastStep.orientation
         }
 
