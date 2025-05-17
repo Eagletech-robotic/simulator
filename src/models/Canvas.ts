@@ -98,6 +98,25 @@ export class Canvas {
         this.ctx.restore()
     }
 
+    drawText(
+        x: number,
+        y: number,
+        text: string,
+        color: string = 'black',
+        font: string = '40px sans-serif',
+        align: CanvasTextAlign = 'center',
+    ): void {
+        this.ctx.save()
+        this.ctx.fillStyle = color
+        this.ctx.font = font
+        this.ctx.textAlign = align
+
+        const [cx, cy] = toCanvasCoordinates(x, y)
+        // invert y because canvas coords origin is top‐left
+        this.ctx.fillText(text, cx, cy)
+        this.ctx.restore()
+    }
+
     drawOrientationLine(x: number, y: number, orientation: number, length: number): void {
         const endLineX = x + length * Math.cos(orientation)
         const endLineY = y + length * Math.sin(orientation)
@@ -111,6 +130,44 @@ export class Canvas {
         const endLineX = x + halfLength * Math.cos(orientation)
         const endLineY = y + halfLength * Math.sin(orientation)
         this.drawLine(startLineX, startLineY, endLineX, endLineY, color)
+    }
+
+    /** Draws a TOF cone and its numeric reading */
+    drawTofCone(
+        x: number,
+        y: number,
+        orientation: number,
+        range: number,
+        halfAngle: number,
+        reading: number,
+    ): void {
+        const startA = orientation - halfAngle
+        const endA = orientation + halfAngle
+
+        // boundary points of the cone
+        const x1 = x + range * Math.cos(startA)
+        const y1 = y + range * Math.sin(startA)
+        const x2 = x + range * Math.cos(endA)
+        const y2 = y + range * Math.sin(endA)
+
+        // draw the two edges
+        const color = '#c0404080'
+        this.drawLine(x, y, x1, y1, color, 0.005)
+        this.drawLine(x, y, x2, y2, color, 0.005)
+
+        // draw an arc between edges
+        this.ctx.beginPath()
+        this.ctx.strokeStyle = color
+        this.ctx.lineWidth = metricToCanvas(0.005)
+        const [cx, cy] = toCanvasCoordinates(x, y)
+        this.ctx.arc(cx, cy, metricToCanvas(range), -endA, -startA)
+        this.ctx.stroke()
+
+        // draw the reading just beyond the tip
+        const textToSensor = range * 0.75
+        const tx = x + textToSensor * Math.cos(orientation)
+        const ty = y + textToSensor * Math.sin(orientation)
+        this.drawText(tx, ty, `${reading.toFixed(2)} m`, '#c04040')
     }
 
     getDrawingColor(robotColor: color): string {

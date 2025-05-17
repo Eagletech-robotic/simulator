@@ -1,4 +1,4 @@
-import { clamp, degreesToRadians } from 'src/utils/maths'
+import { clamp } from 'src/utils/maths'
 import {
     AiInstance,
     potentialFieldHeight,
@@ -16,6 +16,7 @@ import {
     encoderImpulsesPerWheelTurn,
     robotMaxSpeed,
     stepDuration, fieldWidth, fieldHeight, tofToCenter, shovelExtension, shovelWidth, shovelToCenter, bleacherWidth,
+    tofHalfAngle,
 } from '../constants'
 import { GenericRobot } from './GenericRobot'
 import { RobotStep, Log } from './RobotStep'
@@ -139,6 +140,13 @@ export class Robot extends GenericRobot {
         // Selection circle
         if (isSelected) {
             canvas.drawEllipse(step.x, step.y, this.width / 2, this.length / 2, step.orientation, 'red', 'outlined')
+        }
+
+        // TOF cone
+        if (step.input?.tof_m != null) {
+            const { tofX, tofY, tofOrientation } = this.tofPosition(step)
+            const rangeClamped = step.input.tof_m
+            canvas.drawTofCone(tofX, tofY, tofOrientation, rangeClamped, tofHalfAngle, step.input.tof_m)
         }
     }
 
