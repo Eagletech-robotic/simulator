@@ -2,10 +2,9 @@ import { Canvas } from './Canvas'
 import { Plank } from './object/Plank'
 import { Can } from './object/Can'
 import { Bleacher } from './object/Bleacher'
-import { GenericRobot } from './robot/GenericRobot'
 import { Robot } from './robot/Robot'
 import { Pami } from './robot/Pami'
-import { randInRange, randAngle, radiansToDegrees } from '../utils/maths'
+import { randInRange, randAngle } from '../utils/maths'
 import {
     Circle, circlesOverlap, distanceSegmentCircle,
     distanceSegmentSegment, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap,
@@ -407,11 +406,11 @@ export class Game {
         const opponentRobot = this.robots.find(r => r.color !== color)
 
         // Prepare objects
-        const objs: { type: number; x: number; y: number; oDeg: number }[] = []
+        const objs: { type: number; x: number; y: number; orientationDeg: number }[] = []
         const { bleachers, planks, cans } = this.steps[stepNumber]
-        bleachers.forEach(b => objs.push({ type: 0, x: b.x, y: b.y, oDeg: toDeg(b.orientation) }))
-        planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, oDeg: toDeg(p.orientation) }))
-        cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, oDeg: 0 }))
+        bleachers.forEach(b => objs.push({ type: 0, x: b.x, y: b.y, orientationDeg: toDeg(b.orientation) % 180 }))
+        planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, orientationDeg: toDeg(p.orientation) % 180 }))
+        cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, orientationDeg: 0 }))
 
         // HEADER
         // 0. robot colour (blue=0, yellow=1)
@@ -459,12 +458,14 @@ export class Game {
             const rawY = Math.round(toCm(o.y) * 31 / 200)
             pushBits(rawY & 0x1F, 5)
 
-            pushBits(Math.round(o.oDeg / 30) & 0x7, 3)
+            pushBits(Math.round(o.orientationDeg / 30) & 0x7, 3)
         })
 
         // Encapsulate the payload in a packet
         const payload: number[] = Array(Math.ceil(bits.length / 8)).fill(0)
-        bits.forEach((bit, i) => { if (bit) payload[i >> 3] |= 1 << (i & 7) })
+        bits.forEach((bit, i) => {
+            if (bit) payload[i >> 3] |= 1 << (i & 7)
+        })
 
         const payloadString = String.fromCharCode(...payload)
         return buildPacket(payloadString)
