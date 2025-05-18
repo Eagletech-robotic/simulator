@@ -19,7 +19,7 @@ import {
     tofHalfAngle,
 } from '../constants'
 import { GenericRobot } from './GenericRobot'
-import { RobotStep, Log } from './RobotStep'
+import { RobotStep } from './RobotStep'
 
 type Move = Pick<
     RobotStep,
@@ -42,7 +42,7 @@ export class Robot extends GenericRobot {
                 x,
                 y,
                 orientation,
-                carriedBleacher: null,
+                carriedBleacherIndex: null,
                 leftWheelDistance: 0,
                 rightWheelDistance: 0,
                 input: null,
@@ -123,9 +123,6 @@ export class Robot extends GenericRobot {
             const opacity = Math.max(1 - (stepNb - i) / 6500, 0)
             canvas.drawEllipse(this.steps[i].x, this.steps[i].y, 0.003, 0.003, 0, color, 'filled', opacity)
         }
-
-        // Carried bleacher
-        if (step.carriedBleacher) step.carriedBleacher.draw(canvas)
 
         // Body and orientation
         canvas.drawEllipse(step.x, step.y, this.width / 2, this.length / 2, step.orientation, canvas.getDrawingColor(this.color), 'filled')
@@ -253,18 +250,9 @@ export class Robot extends GenericRobot {
             output.motor_right_ratio * robotMaxSpeed * stepDuration,
         )
 
-        // If the robot carries a bleacher, clone and move it along wih the robot
-        let carriedBleacher = lastStep.carriedBleacher
-        if (carriedBleacher) {
-            carriedBleacher = carriedBleacher.clone()
-            const { shovelCenterX, shovelCenterY } = this.shovelCenter(lastStep)
-            carriedBleacher.x = shovelCenterX + Math.cos(lastStep.orientation) * (bleacherWidth / 2)
-            carriedBleacher.y = shovelCenterY + Math.sin(lastStep.orientation) * (bleacherWidth / 2)
-            carriedBleacher.orientation = lastStep.orientation
-        }
-
         // Commit the new step
-        this.steps.push({ ...move, carriedBleacher, input, logs, output })
+        const { carriedBleacherIndex } = lastStep
+        this.steps.push({ ...move, input, logs, output, carriedBleacherIndex })
     }
 
     onSimulationEnd = () => {

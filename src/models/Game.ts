@@ -4,17 +4,22 @@ import { Can } from './object/Can'
 import { Bleacher } from './object/Bleacher'
 import { Robot } from './robot/Robot'
 import { Pami } from './robot/Pami'
-import { randInRange, randAngle } from '../utils/maths'
+import { randAngle, randInRange } from '../utils/maths'
 import {
-    Circle, circlesOverlap, distanceSegmentCircle,
-    distanceSegmentSegment, Rectangle, rectangleCircleOverlap, rectangleRectangleOverlap,
+    Circle,
+    circlesOverlap,
+    distanceSegmentCircle,
+    distanceSegmentSegment,
+    Rectangle,
+    rectangleCircleOverlap,
+    rectangleRectangleOverlap,
 } from '../utils/geometry'
 import {
-    bleacherWidth,
+    bleacherHeight,
     bleacherLength,
+    bleacherWidth,
     canWidth,
     robotWidth,
-    bleacherHeight,
     tofHalfAngle,
     tofHeight,
 } from './constants'
@@ -238,18 +243,23 @@ export class Game {
         const extended = ratio > 0.5
         const { shovelCenterX, shovelCenterY } = robot.shovelCenter(robotStep)
 
-        if (!robotStep.carriedBleacher && extended) {
-            // Try to pick up a bleacher
+        if (!robotStep.carriedBleacherIndex && extended) {
+            // Pick up a bleacher if there is any in the shovel area
             const PICK_RADIUS = 0.15
             const index = bleachers.findIndex(b => Math.hypot(b.x - shovelCenterX, b.y - shovelCenterY) < PICK_RADIUS)
             if (index !== -1) {
-                const bleacher = bleachers.splice(index, 1)[0]
-                robot.lastStep.carriedBleacher = bleacher
+                robot.lastStep.carriedBleacherIndex = index
             }
-        } else if (robotStep.carriedBleacher && !extended) {
+        } else if (robotStep.carriedBleacherIndex && !extended) {
             // Drop bleacher
-            bleachers.push(robotStep.carriedBleacher)
-            robot.lastStep.carriedBleacher = null
+            robot.lastStep.carriedBleacherIndex = null
+        } else if (robotStep.carriedBleacherIndex) {
+            // If the robot carries a bleacher, move it with the robot
+            const { shovelCenterX, shovelCenterY } = robot.shovelCenter(robot.lastStep)
+            const carriedBleacher = bleachers[robotStep.carriedBleacherIndex]
+            carriedBleacher.x = shovelCenterX + Math.cos(robot.lastStep.orientation) * (bleacherWidth / 2)
+            carriedBleacher.y = shovelCenterY + Math.sin(robot.lastStep.orientation) * (bleacherWidth / 2)
+            carriedBleacher.orientation = robot.lastStep.orientation
         }
 
         // Return the updated objects
@@ -262,7 +272,7 @@ export class Game {
         const TOF_MIN_FOR_BLEACHER = 0.26
 
         const robotStep = robot.lastStep
-        if (robotStep.carriedBleacher) return TOF_CARRYING_BLEACHER
+        if (robotStep.carriedBleacherIndex) return TOF_CARRYING_BLEACHER
 
         const { tofX, tofY, tofOrientation } = robot.tofPosition(robotStep)
         const leftRayAngle = tofOrientation - tofHalfAngle

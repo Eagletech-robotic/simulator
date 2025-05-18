@@ -15,5 +15,5 @@ export interface RobotStep extends GenericRobotStep {
     input: StepInput | null
     logs: Array<Log> | null
     output: StepOutput | null
-    carriedBleacher: Bleacher | null
+    carriedBleacherIndex: number | null
 }
