@@ -273,7 +273,10 @@ export class Robot extends GenericRobot {
         const logs = this.steps
             .slice(1) // The first step is the initial position and doesn't have logs
             .map(step => {
-                return step.logs!.map(({ log, level }) => `[${level}] ${log}`).join('')
+                return step.logs!.map(({ log, level }) => {
+                    const cleansedLog = log.replace(/(\n)/gm, '')
+                    return level === 'error' ? `[ERROR] ${cleansedLog}` : cleansedLog
+                }).join(' -- ')
             })
 
         console.log(`Logs for ${this.color} robot`)
