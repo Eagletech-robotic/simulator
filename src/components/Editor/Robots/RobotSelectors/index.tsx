@@ -1,6 +1,5 @@
-import { ColorContainer, ColorIndicator } from './styles'
+import { ColorContainer, ColorIndicator, RobotIcon, StyledRobotSelector } from './styles'
 import MainRobotIcon from 'src/assets/main-robot-icon.svg'
-import RobotSelector from '../RobotSelector'
 import { Game } from 'src/models/Game'
 import { Robot } from 'src/models/robot/Robot'
 
@@ -19,8 +18,7 @@ const RobotSelectors = ({
 }: RobotSelectorsProps): JSX.Element => {
     return (
         <ColorContainer>
-            <RobotSelector
-                robotIconSrc={MainRobotIcon}
+            <StyledRobotSelector
                 onClick={() => {
                     const robot = new Robot(color, 1.5, 1.0, 0)
 
@@ -33,8 +31,9 @@ const RobotSelectors = ({
                             behavior: 'smooth',
                         })
                     }, 0)
-                }}
-            />
+                }}>
+                <RobotIcon src={MainRobotIcon} />
+            </StyledRobotSelector>
             <ColorIndicator color={color} />
         </ColorContainer>
     )

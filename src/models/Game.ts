@@ -182,7 +182,7 @@ export class Game {
         const lastStep = this.steps[this._lastStepNumber]
 
         // Advance robots
-        this.robots.map((robot) => {
+        this.robots.forEach((robot) => {
             let eaglePacket: number[] | null = null
             if (this.lastStepNumber % SEND_PACKET_EVERY === 0) {
                 eaglePacket = this.eaglePacket(robot.color, this.lastStepNumber)
@@ -191,7 +191,7 @@ export class Game {
         })
 
         // Advance PAMIs
-        this.pamis.map((p) => p.nextStep())
+        this.pamis.forEach((p) => p.nextStep())
 
         // Build mutable copies for the next step
         let bleachers = lastStep.bleachers.map(b => b.clone())

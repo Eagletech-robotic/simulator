@@ -33,3 +33,22 @@ export const Input = styled.input`
     width: 5rem;
     height: 1.5rem;
 `
+
+export const StyledDeleteButton = styled.button`
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    padding: 1.5rem;
+    border: none;
+    background-color: ${colors.lightGrey};
+
+    &:hover {
+        background-color: ${colors.lightGreyHover};
+    }
+`
+
+export const CrossIcon = styled.img`
+    height: 1rem;
+    width: 1rem;
+`

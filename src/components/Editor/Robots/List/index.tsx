@@ -1,8 +1,8 @@
-import { EditRobot, Input, RobotAttribute, RobotType, StyledList } from './styles'
+import { CrossIcon, EditRobot, Input, RobotAttribute, RobotType, StyledDeleteButton, StyledList } from './styles'
 import React from 'react'
-import DeleteButton from '../DeleteButton'
 import { Game } from 'src/models/Game'
 import { Robot } from 'src/models/robot/Robot'
+import crossIcon from '../../../../assets/cross-icon.svg'
 
 interface EditorProps {
     game: Game
@@ -32,13 +32,13 @@ const List = React.forwardRef<HTMLDivElement, EditorProps>(
                             />
                         </RobotAttribute>
 
-                        <DeleteButton
-                            doDeletion={() => {
-                                game.deleteRobot(robot.id)
-                                setSelectedRobotId(robotId => robotId === robot.id ? null : robotId)
-                                setTimeout(() => gameChanged(), 0)
-                            }}
-                        />
+                        <StyledDeleteButton onClick={() => {
+                            game.deleteRobot(robot.id)
+                            setSelectedRobotId(robotId => robotId === robot.id ? null : robotId)
+                            setTimeout(() => gameChanged(), 0)
+                        }}>
+                            <CrossIcon src={crossIcon} alt="Delete" />
+                        </StyledDeleteButton>
                     </EditRobot>
                 ))}
             </StyledList>
