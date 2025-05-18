@@ -78,6 +78,10 @@ export class Game {
         return this.steps[0]
     }
 
+    get lastStep(): GameStep {
+        return this.steps[this._lastStepNumber]
+    }
+
     breakBleacher(): void {
         const { bleachers, planks, cans } = this.editorStep
         if (bleachers.length === 0) return
@@ -293,7 +297,7 @@ export class Game {
         const hx = bleacherLength / 2
         const hy = bleacherWidth / 2
 
-        for (const bleacher of this.editorStep.bleachers) {
+        for (const bleacher of this.lastStep.bleachers) {
             const cos = Math.cos(bleacher.orientation + Math.PI / 2)
             const sin = Math.sin(bleacher.orientation + Math.PI / 2)
 
