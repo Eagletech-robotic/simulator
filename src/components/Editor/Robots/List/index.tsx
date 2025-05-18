@@ -7,10 +7,11 @@ import { Robot } from 'src/models/robot/Robot'
 interface EditorProps {
     game: Game
     gameChanged: () => void
+    setSelectedRobotId: React.Dispatch<React.SetStateAction<number | null>>
 }
 
 const List = React.forwardRef<HTMLDivElement, EditorProps>(
-    ({ game, gameChanged }, ref): JSX.Element => {
+    ({ game, gameChanged, setSelectedRobotId }, ref): JSX.Element => {
         return (
             <StyledList ref={ref}>
                 {game.robots.map((robot) => (
@@ -34,6 +35,7 @@ const List = React.forwardRef<HTMLDivElement, EditorProps>(
                         <DeleteButton
                             doDeletion={() => {
                                 game.deleteRobot(robot.id)
+                                setSelectedRobotId(robotId => robotId === robot.id ? null : robotId)
                                 setTimeout(() => gameChanged(), 0)
                             }}
                         />

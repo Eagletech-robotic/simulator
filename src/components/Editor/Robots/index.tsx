@@ -7,9 +7,10 @@ interface RobotsProps {
     game: Game
     editorElRef: React.RefObject<HTMLDivElement>
     gameChanged: () => void
+    setSelectedRobotId: React.Dispatch<React.SetStateAction<number | null>>
 }
 
-const Robots = ({ game, editorElRef, gameChanged }: RobotsProps): JSX.Element => {
+const Robots = ({ game, editorElRef, gameChanged, setSelectedRobotId }: RobotsProps): JSX.Element => {
     return (
         <>
             <RobotChooser>
@@ -17,7 +18,7 @@ const Robots = ({ game, editorElRef, gameChanged }: RobotsProps): JSX.Element =>
                 <RobotSelectors color="yellow" {...{ game, editorElRef, gameChanged }} />
             </RobotChooser>
 
-            <List {...{ game, gameChanged }} ref={editorElRef} />
+            <List {...{ game, gameChanged, setSelectedRobotId }} ref={editorElRef} />
         </>
     )
 }

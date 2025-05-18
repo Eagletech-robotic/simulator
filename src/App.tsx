@@ -164,7 +164,7 @@ const App = (): JSX.Element => {
 
                 {game &&
                     (appState === 'editing' ? (
-                        <Editor {...{ game, editorElRef, gameChanged: redrawCanvas }} />
+                        <Editor {...{ game, editorElRef, gameChanged: redrawCanvas, setSelectedRobotId }} />
                     ) : (
                         <Visualizer
                             {...{

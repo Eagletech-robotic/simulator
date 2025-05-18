@@ -7,12 +7,13 @@ interface EditorProps {
     game: Game
     editorElRef: React.RefObject<HTMLDivElement>
     gameChanged: () => void
+    setSelectedRobotId: React.Dispatch<React.SetStateAction<number | null>>
 }
 
-const Editor = ({ game, editorElRef, gameChanged }: EditorProps): JSX.Element => {
+const Editor = ({ game, editorElRef, gameChanged, setSelectedRobotId }: EditorProps): JSX.Element => {
     return (
         <RightPanel>
-            <Robots {...{ game, editorElRef, gameChanged }} />
+            <Robots {...{ game, editorElRef, gameChanged, setSelectedRobotId }} />
             <Objects {...{ game, gameChanged }} />
         </RightPanel>
     )
