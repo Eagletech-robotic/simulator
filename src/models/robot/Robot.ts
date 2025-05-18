@@ -157,27 +157,34 @@ export class Robot extends GenericRobot {
         const cellH = fieldHeight / potentialFieldHeight
 
         // find the highest value to scale opacity
+        const INF_THRESHOLD = 10_000
         let max = 0
-        for (const row of field) for (const v of row) if (v > max) max = v
+        for (const row of field)
+            for (const v of row)
+                if (v < INF_THRESHOLD && v > max)
+                    max = v
+
         if (max === 0) return
+
+        const alphaByte = Math.round((fieldOpacity / 3) * 255)
+            .toString(16)
+            .padStart(2, '0')
 
         const TURBO: string[] = [
             '#30123b', '#47135a', '#5d176e', '#731d7d', '#882785', '#9e3389', '#b24488', '#c65581',
             '#d86675', '#e67866', '#f38b55', '#fca244', '#ffba2f', '#ffd521', '#f5ef16', '#d7ff1c',
             '#b4ff34', '#8bff55', '#5cff7b', '#22ffa5',
         ]
-        const opacityFactor = fieldOpacity / 3
+        const INFINITY_COLOR = '#333333'
 
         for (let ix = 0; ix < potentialFieldWidth; ++ix) {
             for (let iy = 0; iy < potentialFieldHeight; ++iy) {
                 const v = field[ix][iy]
                 if (v === 0) continue
 
-                const norm = v / max
-                const idx = Math.floor(norm * (TURBO.length - 1))
-                const globalAlpha = Math.round((fieldOpacity / 3) * 255)
-                const hexA = globalAlpha.toString(16).padStart(2, '0')
-                const colour = `${TURBO[idx]}${hexA}`
+                const colour = (v > INF_THRESHOLD)
+                    ? `${INFINITY_COLOR}${alphaByte}`
+                    : `${TURBO[Math.floor((v / max) * (TURBO.length - 1))]}${alphaByte}`
 
                 // draw a rectangle centred in the cell
                 const cx = (ix + 0.5) * cellW
