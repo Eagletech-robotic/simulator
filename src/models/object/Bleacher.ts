@@ -2,10 +2,11 @@ import { Canvas } from '../Canvas'
 import { bleacherWidth, bleacherLength, canWidth } from '../constants'
 
 export class Bleacher {
-    constructor(public x: number, public y: number, public orientation: number) {}
+    constructor(public x: number, public y: number, public orientation: number) {
+    }
 
     draw(canvas: Canvas): void {
-        canvas.drawRectangle(this.x, this.y, bleacherLength, bleacherWidth, this.orientation, '#DEB887', 'filled')
+        canvas.drawCenteredRectangle(this.x, this.y, bleacherLength, bleacherWidth, this.orientation, '#DEB887', 'filled')
 
         const offsets = [-0.15, -0.05, 0.05, 0.15]
 

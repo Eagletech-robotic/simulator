@@ -27,7 +27,7 @@ export class Pami extends GenericRobot {
         const { width, length } = this
         const color = canvas.getDrawingColor(this.color)
 
-        canvas.drawRectangle(x, y, width, length, orientation, color, 'filled')
+        canvas.drawCenteredRectangle(x, y, width, length, orientation, color, 'filled')
         canvas.drawOrientationLine(x, y, orientation, width / 2)
     }
 

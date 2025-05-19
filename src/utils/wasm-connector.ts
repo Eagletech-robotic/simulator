@@ -136,7 +136,7 @@ export const topStep = (
     logs.length = 0 // Empty logs
     wasmInstance.exports.exported_top_step(inputPtr, outputPtr, bluetoothPtr, bluetooth.length)
 
-    const HEADER_FLOATS = 5
+    const HEADER_FLOATS = 4
     const flat = new Float32Array(wasmMemory.buffer, outputPtr, HEADER_FLOATS + potentialFieldWidth * potentialFieldHeight)
 
     // Check if the potential field has changed
@@ -155,7 +155,7 @@ export const topStep = (
         }
     }
 
-    // Fill the potential field if it's different (this is costly because of the memory allocations)
+    // Only save the potential field if it's different, to save memory
     let potential_field: StepOutput["potential_field"] = null
     if (potentialFieldChanged) {
         potential_field = []

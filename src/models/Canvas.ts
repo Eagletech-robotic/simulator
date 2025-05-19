@@ -14,9 +14,17 @@ export class Canvas {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
 
-    drawRectangle(
-        x: number,
-        y: number,
+    drawRectangle(x: number, y: number, width: number, height: number, color: string): void {
+        this.ctx.save()
+        this.ctx.beginPath()
+        this.ctx.fillStyle = color
+        this.ctx.fillRect(...toCanvasCoordinates(x, y), metricToCanvas(width), metricToCanvas(height))
+        this.ctx.restore()
+    }
+
+    drawCenteredRectangle(
+        centerX: number,
+        centerY: number,
         width: number,
         height: number,
         orientation: number,
@@ -26,7 +34,7 @@ export class Canvas {
         this.ctx.save()
 
         this.ctx.beginPath()
-        this.ctx.translate(...toCanvasCoordinates(x, y))
+        this.ctx.translate(...toCanvasCoordinates(centerX, centerY))
         this.ctx.rotate(-orientation + Math.PI / 2)
         const coordinates = [
             metricToCanvas(-width / 2),
@@ -123,7 +131,7 @@ export class Canvas {
         this.drawLine(x, y, endLineX, endLineY, 'black', 0.01)
     }
 
-    drawLineFromCenter(x: number, y: number, orientation: number, length: number, color: string): void {
+    drawCenteredLine(x: number, y: number, orientation: number, length: number, color: string): void {
         const halfLength = length / 2
         const startLineX = x - halfLength * Math.cos(orientation)
         const startLineY = y - halfLength * Math.sin(orientation)

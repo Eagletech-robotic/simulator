@@ -132,7 +132,7 @@ export class Robot extends GenericRobot {
         const { shovelCenterX, shovelCenterY } = this.shovelCenter(step)
         const opacity = 0.3 + 0.7 * this.shovelRatio(step)
         const colorWithOpacity = `rgba(0, 0, 0, ${opacity})`
-        canvas.drawLineFromCenter(shovelCenterX, shovelCenterY, step.orientation + Math.PI / 2, shovelWidth, colorWithOpacity)
+        canvas.drawCenteredLine(shovelCenterX, shovelCenterY, step.orientation + Math.PI / 2, shovelWidth, colorWithOpacity)
 
         // Selection circle
         if (isSelected) {
@@ -152,9 +152,6 @@ export class Robot extends GenericRobot {
 
         const field = this.potentialField(stepNb)
         if (!field) return
-
-        const cellW = fieldWidth / potentialFieldWidth
-        const cellH = fieldHeight / potentialFieldHeight
 
         // find the highest value to scale opacity
         const INF_THRESHOLD = 10_000
@@ -177,19 +174,20 @@ export class Robot extends GenericRobot {
         ]
         const INFINITY_COLOR = '#333333'
 
+        const cellW = fieldWidth / potentialFieldWidth
+        const cellH = fieldHeight / potentialFieldHeight
+
         for (let ix = 0; ix < potentialFieldWidth; ++ix) {
-            for (let iy = 0; iy < potentialFieldHeight; ++iy) {
+            for (let iy = potentialFieldHeight - 1; iy >= 0; --iy) {
                 const v = field[ix][iy]
                 if (v === 0) continue
 
                 const colour = (v > INF_THRESHOLD)
                     ? `${INFINITY_COLOR}${alphaByte}`
                     : `${TURBO[Math.floor((v / max) * (TURBO.length - 1))]}${alphaByte}`
-
-                // draw a rectangle centred in the cell
-                const cx = (ix + 0.5) * cellW
-                const cy = (iy + 0.5) * cellH
-                canvas.drawRectangle(cx, cy, cellW, cellH, 0, colour, 'filled')
+                const cx = ix * cellW
+                const cy = (iy + 1) * cellH
+                canvas.drawRectangle(cx, cy, cellW, cellH, colour)
             }
         }
     }
