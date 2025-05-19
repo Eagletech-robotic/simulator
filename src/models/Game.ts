@@ -174,6 +174,7 @@ export class Game {
 
     async restart() {
         await Promise.all([...this.robots, ...this.pamis].map((robot) => robot.reset()))
+        this.steps = [this.steps[0]]
         this._lastStepNumber = 0
     }
 
