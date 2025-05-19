@@ -172,22 +172,20 @@ export class Robot extends GenericRobot {
             '#d86675', '#e67866', '#f38b55', '#fca244', '#ffba2f', '#ffd521', '#f5ef16', '#d7ff1c',
             '#b4ff34', '#8bff55', '#5cff7b', '#22ffa5',
         ]
-        const INFINITY_COLOR = '#333333'
+        const INFINITY_COLOR = '#883333'
 
         const cellW = fieldWidth / potentialFieldWidth
         const cellH = fieldHeight / potentialFieldHeight
 
-        for (let ix = 0; ix < potentialFieldWidth; ++ix) {
-            for (let iy = potentialFieldHeight - 1; iy >= 0; --iy) {
-                const v = field[ix][iy]
-                if (v === 0) continue
+        for (let iy = 0; iy < potentialFieldHeight; ++iy) {
+            for (let ix = 0; ix < potentialFieldWidth; ++ix) {
+                const value = field[ix][iy]
+                if (value === 0) continue
 
-                const colour = (v > INF_THRESHOLD)
+                const colour = (value > INF_THRESHOLD)
                     ? `${INFINITY_COLOR}${alphaByte}`
-                    : `${TURBO[Math.floor((v / max) * (TURBO.length - 1))]}${alphaByte}`
-                const cx = ix * cellW
-                const cy = (iy + 1) * cellH
-                canvas.drawRectangle(cx, cy, cellW, cellH, colour)
+                    : `${TURBO[Math.floor((value / max) * (TURBO.length - 1))]}${alphaByte}`
+                canvas.drawRectangle(ix * cellW, iy * cellH, cellW, cellH, colour)
             }
         }
     }

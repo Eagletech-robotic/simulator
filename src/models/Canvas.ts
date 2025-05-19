@@ -18,7 +18,11 @@ export class Canvas {
         this.ctx.save()
         this.ctx.beginPath()
         this.ctx.fillStyle = color
-        this.ctx.fillRect(...toCanvasCoordinates(x, y), metricToCanvas(width), metricToCanvas(height))
+        this.ctx.fillRect(
+            ...toCanvasCoordinates(x, y),
+            metricToCanvas(width),
+            -metricToCanvas(height) // Invert height because canvas coords origin is top‐left
+        )
         this.ctx.restore()
     }
 
