@@ -31,6 +31,20 @@ type GameStep = {
     cans: Array<Can>
 }
 
+// Clockwise order from the center right. Same coordinates & orientation as the C++ kDefaultBleachers table.
+export const DEFAULT_BLEACHERS: ReadonlyArray<{ x: number; y: number; orientation: number }> = [
+    { x: 3 - 1.100, y: 0.950, orientation: Math.PI / 2 },
+    { x: 3 - 0.825, y: 1.725, orientation: Math.PI / 2 },
+    { x: 3 - 0.075, y: 1.325, orientation: 0 },
+    { x: 3 - 0.075, y: 0.400, orientation: 0 },
+    { x: 3 - 0.775, y: 0.250, orientation: Math.PI / 2 },
+    { x: 0.775, y: 0.250, orientation: Math.PI / 2 },
+    { x: 0.075, y: 0.400, orientation: 0 },
+    { x: 0.075, y: 1.325, orientation: 0 },
+    { x: 0.825, y: 1.725, orientation: Math.PI / 2 },
+    { x: 1.100, y: 0.950, orientation: Math.PI / 2 },
+] as const
+
 export class Game {
     public robots: Array<Robot> = []
     public pamis: Array<Pami> = []
@@ -56,19 +70,7 @@ export class Game {
             new Pami('yellow', .075, 1.675, 0),
         ]
         this.steps = [{
-            bleachers: [
-                new Bleacher(0.075, 0.4, 0),
-                new Bleacher(0.075, 1.325, 0),
-                new Bleacher(0.775, 0.25, Math.PI / 2),
-                new Bleacher(0.825, 1.725, Math.PI / 2),
-                new Bleacher(1.1, 0.95, Math.PI / 2),
-
-                new Bleacher(3 - 0.075, 0.4, 0),
-                new Bleacher(3 - 0.075, 1.325, 0),
-                new Bleacher(3 - 0.775, 0.25, Math.PI / 2),
-                new Bleacher(3 - 0.825, 1.725, Math.PI / 2),
-                new Bleacher(3 - 1.1, 0.95, Math.PI / 2),
-            ],
+            bleachers: DEFAULT_BLEACHERS.map(({ x, y, orientation }) => new Bleacher(x, y, orientation)),
             planks: [],
             cans: [],
         }]
@@ -185,6 +187,7 @@ export class Game {
         // Advance robots
         this.robots.forEach((robot) => {
             let eaglePacket: number[] | null = null
+            //             if (this.lastStepNumber <= 1) {
             if (this.lastStepNumber % SEND_PACKET_EVERY === 0) {
                 eaglePacket = this.eaglePacket(robot.color, this.lastStepNumber)
             }
@@ -248,17 +251,17 @@ export class Game {
         const extended = ratio > 0.5
         const { shovelCenterX, shovelCenterY } = robot.shovelCenter(robotStep)
 
-        if (!robotStep.carriedBleacherIndex && extended) {
+        if (robotStep.carriedBleacherIndex === null && extended) {
             // Pick up a bleacher if there is any in the shovel area
             const PICK_RADIUS = 0.15
             const index = bleachers.findIndex(b => Math.hypot(b.x - shovelCenterX, b.y - shovelCenterY) < PICK_RADIUS)
             if (index !== -1) {
                 robot.lastStep.carriedBleacherIndex = index
             }
-        } else if (robotStep.carriedBleacherIndex && !extended) {
+        } else if (robotStep.carriedBleacherIndex !== null && !extended) {
             // Drop bleacher
             robot.lastStep.carriedBleacherIndex = null
-        } else if (robotStep.carriedBleacherIndex) {
+        } else if (robotStep.carriedBleacherIndex !== null) {
             // If the robot carries a bleacher, move it with the robot
             const { shovelCenterX, shovelCenterY } = robot.shovelCenter(robot.lastStep)
             const carriedBleacher = bleachers[robotStep.carriedBleacherIndex]
@@ -277,7 +280,7 @@ export class Game {
         const TOF_MIN_FOR_BLEACHER = 0.26
 
         const robotStep = robot.lastStep
-        if (robotStep.carriedBleacherIndex) return TOF_CARRYING_BLEACHER
+        if (robotStep.carriedBleacherIndex !== null) return TOF_CARRYING_BLEACHER
 
         const { tofX, tofY, tofOrientation } = robot.tofPosition(robotStep)
         const leftRayAngle = tofOrientation - tofHalfAngle
@@ -423,7 +426,19 @@ export class Game {
         // Prepare objects
         const objs: { type: number; x: number; y: number; orientationDeg: number }[] = []
         const { bleachers, planks, cans } = this.steps[stepNumber]
-        bleachers.forEach(b => objs.push({ type: 0, x: b.x, y: b.y, orientationDeg: toDeg(b.orientation) % 180 }))
+
+        const initialBleachersBits: number[] = Array(10).fill(0)
+        bleachers.forEach(bleacher => {
+            const idx = DEFAULT_BLEACHERS.findIndex(d =>
+                Math.abs(bleacher.x - d.x) < 0.01 && Math.abs(bleacher.y - d.y) < 0.01 &&
+                Math.abs(((bleacher.orientation - d.orientation + Math.PI * 2) % (Math.PI * 2))) < 0.01)
+
+            if (idx >= 0) {
+                initialBleachersBits[idx] = 1
+            } else {
+                objs.push({ type: 0, x: bleacher.x, y: bleacher.y, orientationDeg: toDeg(bleacher.orientation) % 180 })
+            }
+        })
         planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, orientationDeg: toDeg(p.orientation) % 180 }))
         cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, orientationDeg: 0 }))
 
@@ -455,34 +470,32 @@ export class Game {
             pushBits(0, 9 + 8 + 9)
         }
 
-        const objectCount = Math.min(objs.length, 60)
+        // 55-64. initial bleachers
+        initialBleachersBits.forEach(bit => pushBits(bit, 1))
+
+        // 65-70. object count
+        const objectCount = Math.min(objs.length, 40)
         pushBits(objectCount, 6)
 
-        // 3-bit padding so the header is exactly 64 bits (8 bytes)
-        pushBits(0, 3) // padding, must be zero
+        // 1-bit padding
+        pushBits(0, 1)
 
         // OBJECTS
         objs.slice(0, objectCount).forEach(o => {
             pushBits(o.type, 2)
 
             // 0 – 300 cm  ⇒  0 – 63  (6 bits)
-            const rawX = Math.round(toCm(o.x) * 63 / 300)
-            pushBits(rawX & 0x3F, 6)
+            const rawX = Math.round(toCm(o.x) * 255 / 300)
+            pushBits(rawX & 0xFF, 8)
 
             // 0 – 200 cm  ⇒  0 – 31  (5 bits)
-            const rawY = Math.round(toCm(o.y) * 31 / 200)
-            pushBits(rawY & 0x1F, 5)
+            const rawY = Math.round(toCm(o.y) * 127 / 200)
+            pushBits(rawY & 0x7F, 7)
 
             pushBits(Math.round(o.orientationDeg / 30) & 0x7, 3)
         })
 
         // Encapsulate the payload in a packet
-        const payload: number[] = Array(Math.ceil(bits.length / 8)).fill(0)
-        bits.forEach((bit, i) => {
-            if (bit) payload[i >> 3] |= 1 << (i & 7)
-        })
-
-        const payloadString = String.fromCharCode(...payload)
-        return buildPacket(payloadString)
+        return buildPacket(bits)
     }
 }
