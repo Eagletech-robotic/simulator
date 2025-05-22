@@ -180,8 +180,6 @@ export class Robot extends GenericRobot {
         for (let iy = 0; iy < potentialFieldHeight; ++iy) {
             for (let ix = 0; ix < potentialFieldWidth; ++ix) {
                 const value = field[ix][iy]
-                if (value === 0) continue
-
                 const colour = (value > INF_THRESHOLD)
                     ? `${INFINITY_COLOR}${alphaByte}`
                     : `${TURBO[Math.floor((value / max) * (TURBO.length - 1))]}${alphaByte}`
