@@ -19,6 +19,7 @@ import {
     bleacherLength,
     bleacherWidth,
     canWidth,
+    robotLength,
     robotWidth,
     tofHalfAngle,
     tofHeight,
@@ -58,10 +59,10 @@ export class Game {
 
     reset(): void {
         this.robots = [
-            new Robot('blue', 1.775, 0.225, Math.PI / 2),
-            // new Robot('blue', .225, 0.875, 0),
-            new Robot('yellow', 1.225, 0.225, Math.PI / 2),
-            // new Robot('yellow', 2.775, 0.875, Math.PI),
+            new Robot('blue', 1.775, robotLength / 2, Math.PI / 2),
+            // new Robot('blue', robotLength / 2, 0.875, 0),
+            new Robot('yellow', 1.225, robotLength / 2, Math.PI / 2),
+            // new Robot('yellow', 3 - robotLength / 2, 0.875, -Math.PI),
         ]
         this.pamis = [
             new Pami('blue', 2.925, 1.875, Math.PI),
