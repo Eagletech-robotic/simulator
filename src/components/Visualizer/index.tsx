@@ -1,7 +1,7 @@
 import {
     Body,
     BottomRow,
-    Header, Info, InfoLabel, InfoValue,
+    Header, Info, InfoLabel, InfoValue, Log, Logs,
     NextRobotButton,
     PreviousRobotButton,
     RobotColorIndicator,
@@ -42,13 +42,13 @@ interface VisualizerProps {
 }
 
 const Visualizer = ({
-    game,
-    selectedRobotId,
-    setSelectedRobotId,
-    playingStep,
-    fieldOpacity,
-    setFieldOpacity,
-}: VisualizerProps): JSX.Element => {
+                        game,
+                        selectedRobotId,
+                        setSelectedRobotId,
+                        playingStep,
+                        fieldOpacity,
+                        setFieldOpacity,
+                    }: VisualizerProps): JSX.Element => {
     const headerRef = useRef(null)
 
     const prevRobot = () => {
@@ -77,6 +77,11 @@ const Visualizer = ({
 
     const robot = selectedRobotId ? game.getRobotById(selectedRobotId) : null
     const step = robot?.steps[playingStep]
+    const logs = robot?.steps?.[playingStep]?.logs?.map((log, index) => (
+        <Log key={index} $level={log.level}>
+            [{log.level}] {log.log}
+        </Log>
+    ))
 
     return (
         <RightPanel>
@@ -126,6 +131,10 @@ const Visualizer = ({
                         onChange={e => setFieldOpacity(Number(e.currentTarget.value))}
                     />
                 </Info>
+
+                <Logs>
+                    {logs}
+                </Logs>
             </Body>
         </RightPanel>
     )
