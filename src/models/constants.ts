@@ -27,8 +27,8 @@ export const tofToCenter = 0.08 // meters
 export const tofHalfAngle = degreesToRadians(25) / 2 // radians
 
 // Sensor errors
-export const encoderError = 0.2
-export const imuOrientationError = degreesToRadians(10)
+export const encoderError = 0.02 // 1.0 = 100%
+export const imuOrientationError = degreesToRadians(2)
 export const bluetoothMinStepLatency = 60 // Min latency in number of steps
 export const bluetoothMaxStepLatency = 100
 

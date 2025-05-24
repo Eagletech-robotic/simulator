@@ -1,4 +1,5 @@
-import { clamp } from 'src/utils/maths'
+import { clamp, cryptoRandom } from 'src/utils/maths'
+import { encoderError, imuOrientationError } from 'src/models/constants'
 import {
     AiInstance,
     potentialFieldHeight,
@@ -35,6 +36,11 @@ export class Robot extends GenericRobot {
 
     steps: Array<RobotStep>
 
+    // Error model states
+    private leftEncoderBias = 1
+    private rightEncoderBias = 1
+    private imuBias = 0
+
     constructor(color: 'blue' | 'yellow', x: number, y: number, orientation: number) {
         super(color)
         this.steps = [
@@ -54,6 +60,9 @@ export class Robot extends GenericRobot {
 
     async reset() {
         this.steps = [this.steps[0]]
+        this.leftEncoderBias = 1
+        this.rightEncoderBias = 1
+        this.imuBias = 0
         await this.resetAiInstance()
     }
 
@@ -228,15 +237,18 @@ export class Robot extends GenericRobot {
         const wheelCircumference = Math.PI * robotWheelDiameter // meters
         const impulseDistance = wheelCircumference / encoderImpulsesPerWheelTurn // meters
 
-        // console.log('step.rightWheelDistance ', step.rightWheelDistance, 'previousStep.rightWheelDistance ', previousStep.rightWheelDistance, 'delta_encoder_left ', (step.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance)
+        // Update biases with random walk (bounded)
+        this.leftEncoderBias = clamp(this.leftEncoderBias + (cryptoRandom() - 0.5) * encoderError * 0.1, 1 - encoderError, 1 + encoderError)
+        this.rightEncoderBias = clamp(this.rightEncoderBias + (cryptoRandom() - 0.5) * encoderError * 0.1, 1 - encoderError, 1 + encoderError)
+        this.imuBias += (cryptoRandom() - 0.5) * imuOrientationError * 0.05
 
         const input: StepInput = {
             jack_removed: 1,
             tof_m: tof,
             delta_yaw: lastStep.orientation - previousStep.orientation,
-            delta_encoder_left: (lastStep.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance,
-            delta_encoder_right: (lastStep.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance,
-            imu_yaw: lastStep.orientation,
+            delta_encoder_left: ((lastStep.leftWheelDistance - previousStep.leftWheelDistance) / impulseDistance) * this.leftEncoderBias * (1 + (cryptoRandom() - 0.5) * encoderError * 0.1),
+            delta_encoder_right: ((lastStep.rightWheelDistance - previousStep.rightWheelDistance) / impulseDistance) * this.rightEncoderBias * (1 + (cryptoRandom() - 0.5) * encoderError * 0.1),
+            imu_yaw: lastStep.orientation + this.imuBias + (cryptoRandom() - 0.5) * imuOrientationError * 0.1,
             imu_accel_x_mss: 0,
             imu_accel_y_mss: 0,
             imu_accel_z_mss: 0,
