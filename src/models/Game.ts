@@ -450,10 +450,14 @@ export class Game {
         pushBits(1, 1)
 
         // 2-18. robot pose
-        // TODO: send the position with a random delay (50-200ms?)
-        pushBits(toCm(myRobot.lastStep.x), 9)
-        pushBits(toCm(myRobot.lastStep.y), 8)
-        pushBits(toDeg(myRobot.lastStep.orientation) & 0x1FF, 9)
+        let positionStep = myRobot.lastStep
+        const gapToLastStep = Math.round(Math.random() * 158)
+        if (myRobot.steps.length >= gapToLastStep) {
+            positionStep = myRobot.steps[myRobot.steps.length - gapToLastStep]
+        }
+        pushBits(toCm(positionStep.x), 9)
+        pushBits(toCm(positionStep.y), 8)
+        pushBits(toDeg(positionStep.orientation) & 0x1FF, 9)
 
         // 28. opponent detected
         const opponentDetected = !!opponentRobot
