@@ -16,7 +16,7 @@ import MainRobotIcon from 'src/assets/main-robot-icon.svg'
 import PamiIcon from 'src/assets/pami-icon.svg'
 import { RightPanel } from 'src/styles/commonStyles'
 import { useLayoutEffect, useRef } from 'react'
-import { radiansToDegrees } from 'src/utils/maths'
+import { normalizeAngle, radiansToDegrees } from 'src/utils/maths'
 
 const SwitchRobotIcon = (
     <svg
@@ -115,7 +115,7 @@ const Visualizer = ({
                         <InfoLabel>Position:</InfoLabel>
                         <InfoValue>
                             {step.x.toFixed(3)}m x {step.y.toFixed(3)}m
-                            x {radiansToDegrees(step.orientation).toFixed(3)}°
+                            x {radiansToDegrees(normalizeAngle(step.orientation)).toFixed(3)}°
                         </InfoValue>
                     </Info>
                 )}
