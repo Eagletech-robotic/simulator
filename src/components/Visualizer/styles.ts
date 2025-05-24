@@ -98,3 +98,23 @@ export const InfoValue = styled.div`
 
 export const SliderInput = styled.input`
 `
+
+export const Logs = styled.div`
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-height: 20rem;
+    overflow-y: auto;
+`
+
+export const Log = styled.div<{ $level: 'info' | 'error' }>`
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background-color: ${props => props.$level === 'info' ? colors.lightGrey : "brown"};
+    font-family: "Courier New", Courier, monospace;
+`
