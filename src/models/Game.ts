@@ -4,7 +4,7 @@ import { Can } from './object/Can'
 import { Bleacher } from './object/Bleacher'
 import { Robot } from './robot/Robot'
 import { Pami } from './robot/Pami'
-import { randAngle, randInRange } from '../utils/maths'
+import { cryptoRandom, randAngle, randInRange } from '../utils/maths'
 import {
     Circle,
     circlesOverlap,
@@ -17,7 +17,7 @@ import {
 import {
     bleacherHeight,
     bleacherLength,
-    bleacherWidth,
+    bleacherWidth, bluetoothMaxStepLatency, bluetoothMinStepLatency,
     canWidth,
     robotLength,
     robotWidth,
@@ -189,8 +189,9 @@ export class Game {
         this.robots.forEach((robot) => {
             let eaglePacket: number[] | null = null
             //             if (this.lastStepNumber <= 1) {
-            if (this.lastStepNumber % SEND_PACKET_EVERY === 0) {
-                eaglePacket = this.eaglePacket(robot.color, this.lastStepNumber)
+            if (this.lastStepNumber % SEND_PACKET_EVERY === 0 && this.lastStepNumber > bluetoothMaxStepLatency) {
+                const latencySteps = (bluetoothMinStepLatency + Math.floor((bluetoothMaxStepLatency - bluetoothMinStepLatency) * cryptoRandom()))
+                eaglePacket = this.eaglePacket(robot.color, this.lastStepNumber - latencySteps)
             }
             robot.nextStep(eaglePacket, this.tof(robot))
         })
@@ -451,14 +452,10 @@ export class Game {
         pushBits(1, 1)
 
         // 2-18. robot pose
-        let positionStep = myRobot.lastStep
-        const gapToLastStep = Math.round(Math.random() * 158)
-        if (myRobot.steps.length >= gapToLastStep) {
-            positionStep = myRobot.steps[myRobot.steps.length - gapToLastStep]
-        }
-        pushBits(toCm(positionStep.x), 9)
-        pushBits(toCm(positionStep.y), 8)
-        pushBits(toDeg(positionStep.orientation) & 0x1FF, 9)
+        // TODO: send the position with a random delay (50-200ms?)
+        pushBits(toCm(myRobot.steps[stepNumber].x), 9)
+        pushBits(toCm(myRobot.steps[stepNumber].y), 8)
+        pushBits(toDeg(myRobot.steps[stepNumber].orientation) & 0x1FF, 9)
 
         // 28. opponent detected
         const opponentDetected = !!opponentRobot
@@ -467,9 +464,9 @@ export class Game {
         // 29-54. opponent pose (or zeros if not detected)
         if (opponentDetected) {
             // TODO: Add a random delay (50-200ms?)
-            pushBits(toCm(opponentRobot.lastStep.x), 9)
-            pushBits(toCm(opponentRobot.lastStep.y), 8)
-            pushBits(toDeg(opponentRobot.lastStep.orientation) & 0x1FF, 9)
+            pushBits(toCm(opponentRobot.steps[stepNumber].x), 9)
+            pushBits(toCm(opponentRobot.steps[stepNumber].y), 8)
+            pushBits(toDeg(opponentRobot.steps[stepNumber].orientation) & 0x1FF, 9)
         } else {
             // fill with zeros for the 9+8+9 bits
             pushBits(0, 9 + 8 + 9)

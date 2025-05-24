@@ -26,3 +26,10 @@ export function randAngle(): number {
 }
 
 export const clamp = (v: number, min: number, max: number): number => Math.min(max, Math.max(min, v))
+
+export const cryptoRandom = () => {
+    const buf = new Uint32Array(1)
+    window.crypto.getRandomValues(buf)
+    return buf[0] / (0xFFFFFFFF + 1) // Between 0 and 1
+}
+
