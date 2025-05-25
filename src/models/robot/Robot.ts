@@ -83,7 +83,7 @@ export class Robot extends GenericRobot {
         const step = this.lastStep
 
         // If both wheels have moved the same distance, the robot has moved forward
-        if (leftWheelDistance === rightWheelDistance) {
+        if (Math.abs(rightWheelDistance - leftWheelDistance) < 0.00001) {
             return {
                 ...this.moveForward(leftWheelDistance),
                 leftWheelDistance: step.leftWheelDistance + leftWheelDistance,

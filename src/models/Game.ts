@@ -255,7 +255,7 @@ export class Game {
 
         if (robotStep.carriedBleacherIndex === null && extended) {
             // Pick up a bleacher if there is any in the shovel area
-            const PICK_RADIUS = 0.15
+            const PICK_RADIUS = 0.08
             const index = bleachers.findIndex(b => Math.hypot(b.x - shovelCenterX, b.y - shovelCenterY) < PICK_RADIUS)
             if (index !== -1) {
                 robot.lastStep.carriedBleacherIndex = index
