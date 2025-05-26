@@ -81,9 +81,10 @@ export class Robot extends GenericRobot {
 
     buildMove(leftWheelDistance: number, rightWheelDistance: number): Move {
         const step = this.lastStep
+        const wheelbase = robotWheelbase // alias that makes formulas easier to read
 
-        // If both wheels have moved the same distance, the robot has moved forward
-        if (Math.abs(rightWheelDistance - leftWheelDistance) < 0.00001) {
+        // 1. Straight‑line motion (both wheels travel the same distance)
+        if (Math.abs(rightWheelDistance - leftWheelDistance) < 1e-5) {
             return {
                 ...this.moveForward(leftWheelDistance),
                 leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
@@ -91,33 +92,54 @@ export class Robot extends GenericRobot {
             }
         }
 
-        const signMultiplier = Math.sign(rightWheelDistance - leftWheelDistance)
-        const smallestDistance =
-            Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
-                ? rightWheelDistance
-                : leftWheelDistance
-        const largestDistance =
-            Math.abs(leftWheelDistance) > Math.abs(rightWheelDistance)
-                ? leftWheelDistance
-                : rightWheelDistance
-        const bigCircleRadius = robotWheelbase / (1 - smallestDistance / largestDistance)
+        // 2. Pure rotation around the robot centre (wheels move in opposite directions with equal magnitude)
+        if (Math.abs(leftWheelDistance + rightWheelDistance) < 1e-5) {
+            const rotationAngle = (rightWheelDistance - leftWheelDistance) / wheelbase
+            return {
+                x: step.x,
+                y: step.y,
+                orientation: step.orientation + rotationAngle,
+                leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
+                rightWheelDistance: step.rightWheelDistance + rightWheelDistance,
+            }
+        }
 
-        const rotationAngle = (rightWheelDistance - leftWheelDistance) / robotWheelbase
-        const middleCircleRadius = bigCircleRadius - robotWheelbase / 2 // the circle described by the middle of the robot
+        // 3. General skid‑steer path on an arc
+        // ------------------------------------------------------------------
+        // Keep the sign of each wheel distance so that we can distinguish
+        // forward and backward travel.  The wheel that moved less (in
+        // absolute value) is the **inner** wheel of the turn.
+        // ------------------------------------------------------------------
+        const [innerDistance, outerDistance] =
+            Math.abs(leftWheelDistance) < Math.abs(rightWheelDistance)
+                ? [leftWheelDistance, rightWheelDistance]
+                : [rightWheelDistance, leftWheelDistance]
 
-        // Update robot position and orientation
-        const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
+        // Average distance tells us whether the robot is driving forward or backward on that arc
+        const meanDistance = (leftWheelDistance + rightWheelDistance) / 2
+        const travelDirection = Math.sign(meanDistance) || 1 // fall back to +1 when meanDistance = 0
+
+        const rotationAngle = (rightWheelDistance - leftWheelDistance) / wheelbase // signed (CCW +, CW –)
+
+        // Radius of the outer wheel path (signed because the distances are signed)
+        const outerRadius = (wheelbase * outerDistance) / (outerDistance - innerDistance)
+
+        // Radius followed by the centre of the robot – multiply by travelDirection so that
+        // negative mean distances make the centre travel *backwards* along the arc.
+        const middleCircleRadius = (outerRadius - wheelbase / 2) * travelDirection
+
+        // Current direction of the wheel‑axis (a line perpendicular to the forward direction)
+        const wheelAxisAngle = step.orientation - (Math.PI / 2) * Math.sign(rotationAngle)
+
+        // New centre position after travelling along the arc
+        const x = step.x +
+            middleCircleRadius * (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle))
+        const y = step.y +
+            middleCircleRadius * (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle))
 
         return {
-            x: clamp(
-                step.x +
-                middleCircleRadius * (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle)),
-                0, fieldWidth),
-
-            y: clamp(
-                step.y +
-                middleCircleRadius * (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle)),
-                0, fieldHeight),
+            x: clamp(x, 0, fieldWidth),
+            y: clamp(y, 0, fieldHeight),
             orientation: step.orientation + rotationAngle,
             leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
             rightWheelDistance: step.rightWheelDistance + rightWheelDistance,
