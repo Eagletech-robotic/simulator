@@ -105,18 +105,22 @@ export class Robot extends GenericRobot {
         const rotationAngle = (rightWheelDistance - leftWheelDistance) / robotWheelbase
         const middleCircleRadius = bigCircleRadius - robotWheelbase / 2 // the circle described by the middle of the robot
 
-        // Update robot position and orientation
         const wheelAxisAngle = step.orientation - (Math.PI / 2) * signMultiplier
+
+        let movementDirectionMultiplier = 1
+        if (leftWheelDistance < 0 && rightWheelDistance < 0) {
+            movementDirectionMultiplier = -1
+        }
 
         return {
             x: clamp(
                 step.x +
-                middleCircleRadius * (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle)),
+                middleCircleRadius * (Math.cos(wheelAxisAngle + rotationAngle) - Math.cos(wheelAxisAngle)) * movementDirectionMultiplier,
                 0, fieldWidth),
 
             y: clamp(
                 step.y +
-                middleCircleRadius * (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle)),
+                middleCircleRadius * (Math.sin(wheelAxisAngle + rotationAngle) - Math.sin(wheelAxisAngle)) * movementDirectionMultiplier,
                 0, fieldHeight),
             orientation: step.orientation + rotationAngle,
             leftWheelDistance: step.leftWheelDistance + leftWheelDistance,
