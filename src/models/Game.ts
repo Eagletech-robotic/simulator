@@ -425,26 +425,6 @@ export class Game {
         }
         const opponentRobot = this.robots.find(r => r.color !== color)
 
-        // Prepare objects
-        const objs: { type: number; x: number; y: number; orientationDeg: number }[] = []
-        const { bleachers, planks, cans } = this.steps[stepNumber]
-
-        const initialBleachersBits: number[] = Array(10).fill(0)
-        bleachers.forEach(bleacher => {
-            const idx = DEFAULT_BLEACHERS.findIndex(d =>
-                Math.abs(bleacher.x - d.x) < 0.01 && Math.abs(bleacher.y - d.y) < 0.01 &&
-                Math.abs(((bleacher.orientation - d.orientation + Math.PI * 2) % (Math.PI * 2))) < 0.01)
-
-            if (idx >= 0) {
-                initialBleachersBits[idx] = 1
-            } else {
-                objs.push({ type: 0, x: bleacher.x, y: bleacher.y, orientationDeg: toDeg(bleacher.orientation) % 180 })
-            }
-        })
-        planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, orientationDeg: toDeg(p.orientation) % 180 }))
-        cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, orientationDeg: 0 }))
-
-        // HEADER
         // 0. robot colour (blue=0, yellow=1)
         pushBits(myRobot.color === 'yellow' ? 1 : 0, 1)
 
@@ -471,31 +451,6 @@ export class Game {
             // fill with zeros for the 9+8+9 bits
             pushBits(0, 9 + 8 + 9)
         }
-
-        // 55-64. initial bleachers
-        initialBleachersBits.forEach(bit => pushBits(bit, 1))
-
-        // 65-70. object count
-        const objectCount = Math.min(objs.length, 40)
-        pushBits(objectCount, 6)
-
-        // 1-bit padding
-        pushBits(0, 1)
-
-        // OBJECTS
-        objs.slice(0, objectCount).forEach(o => {
-            pushBits(o.type, 2)
-
-            // 0 – 300 cm  ⇒  0 – 63  (6 bits)
-            const rawX = Math.round(toCm(o.x) * 255 / 300)
-            pushBits(rawX & 0xFF, 8)
-
-            // 0 – 200 cm  ⇒  0 – 31  (5 bits)
-            const rawY = Math.round(toCm(o.y) * 127 / 200)
-            pushBits(rawY & 0x7F, 7)
-
-            pushBits(Math.round(o.orientationDeg / 30) & 0x7, 3)
-        })
 
         // Encapsulate the payload in a packet
         return buildPacket(bits)

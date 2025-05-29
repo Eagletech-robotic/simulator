@@ -3,10 +3,10 @@
  *
  * @param bits  A list of 0/1 values, **LSB-first**, that make up the payload.
  *              Example: [1,0,1] encodes to byte 0b00000101.
- * @returns     Number array: 0xFF starter, 109-byte payload, 8-bit checksum.
+ * @returns     Number array: 0xFF starter, 7-byte payload, 8-bit checksum.
  */
 export const buildPacket = (bits: number[]): Array<number> => {
-    const PACKET_SIZE = 109
+    const PACKET_SIZE = 7
     const PAYLOAD_BITS = PACKET_SIZE * 8
     const STARTER_BYTE = 0xFF
 
