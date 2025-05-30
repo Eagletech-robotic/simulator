@@ -3,6 +3,7 @@ import PlayButton from './PlayButton'
 import ProgressBar from './ProgressBar'
 import StopButton from './StopButton'
 import { PlaybackBar, SimulationBar, StyledControls } from './styles'
+import { Game } from '../../models/Game'
 
 export interface ControlsProps {
     appState: 'playing' | 'paused' | 'editing'
@@ -11,22 +12,22 @@ export interface ControlsProps {
     nbSimulationSteps: number
     playingStep: number
     setPlayingStep: (playingStep: number) => void
-    game: any
+    game: Game
     onPlayToggle: () => Promise<void>
     onStop: () => Promise<void>
 }
 
 const Controls = ({
-    appState,
-    gameDurationSeconds,
-    setGameDurationSeconds,
-    nbSimulationSteps,
-    playingStep,
-    setPlayingStep,
-    game,
-    onPlayToggle,
-    onStop,
-}: ControlsProps): JSX.Element => {
+                      appState,
+                      gameDurationSeconds,
+                      setGameDurationSeconds,
+                      nbSimulationSteps,
+                      playingStep,
+                      setPlayingStep,
+                      game,
+                      onPlayToggle,
+                      onStop,
+                  }: ControlsProps): JSX.Element => {
     return (
         <StyledControls>
             <PlayButton
@@ -43,7 +44,7 @@ const Controls = ({
             <PlaybackBar>
                 <ProgressBar
                     percentage={(playingStep / nbSimulationSteps) * 100}
-                    setPercentage={(percentage: number) => setPlayingStep(Math.floor(percentage * nbSimulationSteps / 100))}
+                    setPercentage={(percentage: number) => setPlayingStep(Math.min(Math.round(percentage / 100 * nbSimulationSteps), game.lastStepNumber))}
                     labelFunction={() =>
                         `Progress: ${(
                             (playingStep / nbSimulationSteps) *

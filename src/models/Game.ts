@@ -4,7 +4,7 @@ import { Can } from './object/Can'
 import { Bleacher } from './object/Bleacher'
 import { Robot } from './robot/Robot'
 import { Pami } from './robot/Pami'
-import { cryptoRandom, randAngle, randInRange } from '../utils/maths'
+import { cryptoRandom, degreesToRadians, randAngle, randInRange } from '../utils/maths'
 import {
     Circle,
     circlesOverlap,
@@ -406,7 +406,7 @@ export class Game {
      * Build an Eagle Bluetooth packet for the given color.
      * Array content: [ 0xFF, <payload bytes…>, <8‑bit checksum> ].
      */
-    private eaglePacket(color: 'blue' | 'yellow', stepNumber: number): number[] | null {
+    private eaglePacket(color: 'blue' | 'yellow', stepNumber: number, randomise = true): number[] | null {
         // Helpers
         const bits: number[] = []
         const pushBits = (v: number, n: number) => {
@@ -427,26 +427,6 @@ export class Game {
         }
         const opponentRobot = this.robots.find(r => r.color !== color)
 
-        // Prepare objects
-        const objs: { type: number; x: number; y: number; orientationDeg: number }[] = []
-        const { bleachers, planks, cans } = this.steps[stepNumber]
-
-        const initialBleachersBits: number[] = Array(10).fill(0)
-        bleachers.forEach(bleacher => {
-            const idx = DEFAULT_BLEACHERS.findIndex(d =>
-                Math.abs(bleacher.x - d.x) < 0.01 && Math.abs(bleacher.y - d.y) < 0.01 &&
-                Math.abs(((bleacher.orientation - d.orientation + Math.PI * 2) % (Math.PI * 2))) < 0.01)
-
-            if (idx >= 0) {
-                initialBleachersBits[idx] = 1
-            } else {
-                objs.push({ type: 0, x: bleacher.x, y: bleacher.y, orientationDeg: toDeg(bleacher.orientation) % 180 })
-            }
-        })
-        planks.forEach(p => objs.push({ type: 1, x: p.x, y: p.y, orientationDeg: toDeg(p.orientation) % 180 }))
-        cans.forEach(c => objs.push({ type: 2, x: c.x, y: c.y, orientationDeg: 0 }))
-
-        // HEADER
         // 0. robot colour (blue=0, yellow=1)
         pushBits(myRobot.color === 'yellow' ? 1 : 0, 1)
 
@@ -454,10 +434,15 @@ export class Game {
         pushBits(1, 1)
 
         // 2-18. robot pose
-        // TODO: send the position with a random delay (50-200ms?)
-        pushBits(toCm(myRobot.steps[stepNumber].x), 9)
-        pushBits(toCm(myRobot.steps[stepNumber].y), 8)
-        pushBits(toDeg(myRobot.steps[stepNumber].orientation) & 0x1FF, 9)
+        const randomisePose = (pose: { x: number; y: number; orientation: number }) => (randomise ? {
+            x: pose.x + (Math.random() * 0.04 - 0.02), // ±2 cm
+            y: pose.y + (Math.random() * 0.04 - 0.02), // ±2 cm
+            orientation: pose.orientation + degreesToRadians(Math.random() * 4 - 2), // ±2 degrees
+        } : pose)
+        const robotPose = randomisePose(myRobot.steps[stepNumber])
+        pushBits(toCm(robotPose.x), 9)
+        pushBits(toCm(robotPose.y), 8)
+        pushBits(toDeg(robotPose.orientation) & 0x1FF, 9)
 
         // 28. opponent detected
         const opponentDetected = !!opponentRobot
@@ -465,39 +450,14 @@ export class Game {
 
         // 29-54. opponent pose (or zeros if not detected)
         if (opponentDetected) {
-            // TODO: Add a random delay (50-200ms?)
-            pushBits(toCm(opponentRobot.steps[stepNumber].x), 9)
-            pushBits(toCm(opponentRobot.steps[stepNumber].y), 8)
-            pushBits(toDeg(opponentRobot.steps[stepNumber].orientation) & 0x1FF, 9)
+            const opponentPose = randomisePose(opponentRobot.steps[stepNumber])
+            pushBits(toCm(opponentPose.x), 9)
+            pushBits(toCm(opponentPose.y), 8)
+            pushBits(toDeg(opponentPose.orientation) & 0x1FF, 9)
         } else {
             // fill with zeros for the 9+8+9 bits
             pushBits(0, 9 + 8 + 9)
         }
-
-        // 55-64. initial bleachers
-        initialBleachersBits.forEach(bit => pushBits(bit, 1))
-
-        // 65-70. object count
-        const objectCount = Math.min(objs.length, 40)
-        pushBits(objectCount, 6)
-
-        // 1-bit padding
-        pushBits(0, 1)
-
-        // OBJECTS
-        objs.slice(0, objectCount).forEach(o => {
-            pushBits(o.type, 2)
-
-            // 0 – 300 cm  ⇒  0 – 63  (6 bits)
-            const rawX = Math.round(toCm(o.x) * 255 / 300)
-            pushBits(rawX & 0xFF, 8)
-
-            // 0 – 200 cm  ⇒  0 – 31  (5 bits)
-            const rawY = Math.round(toCm(o.y) * 127 / 200)
-            pushBits(rawY & 0x7F, 7)
-
-            pushBits(Math.round(o.orientationDeg / 30) & 0x7, 3)
-        })
 
         // Encapsulate the payload in a packet
         return buildPacket(bits)

@@ -18,7 +18,7 @@ const GameDuration = ({
                 id="game-duration"
                 type="range"
                 min={1}
-                max={200}
+                max={100}
                 value={gameDuration}
                 onChange={(e) => setGameDuration(parseInt(e.target.value))}
                 disabled={!isEditing}
