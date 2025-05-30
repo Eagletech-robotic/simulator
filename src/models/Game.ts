@@ -4,7 +4,7 @@ import { Can } from './object/Can'
 import { Bleacher } from './object/Bleacher'
 import { Robot } from './robot/Robot'
 import { Pami } from './robot/Pami'
-import { cryptoRandom, randAngle, randInRange } from '../utils/maths'
+import { cryptoRandom, degreesToRadians, randAngle, randInRange } from '../utils/maths'
 import {
     Circle,
     circlesOverlap,
@@ -437,7 +437,7 @@ export class Game {
         const randomMinusTwoToTwo = () => (Math.random() * 4 - 2)
         const randomOffsetX = randomMinusTwoToTwo() / 100
         const randomOffsetY = randomMinusTwoToTwo() / 100
-        const randomOffsetTheta = randomMinusTwoToTwo() / 180 * Math.PI
+        const randomOffsetTheta = degreesToRadians(randomMinusTwoToTwo())
 
         pushBits(toCm(myRobot.steps[stepNumber].x + randomOffsetX), 9)
         pushBits(toCm(myRobot.steps[stepNumber].y + randomOffsetY), 8)
