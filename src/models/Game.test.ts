@@ -1,15 +1,32 @@
 import { describe, it, expect } from 'vitest'
-import { DEFAULT_BLEACHERS, Game } from './Game'
+import { Game } from './Game'
 import { Robot } from './robot/Robot'
-import { Plank } from './object/Plank'
-import { Can } from './object/Can'
-import { Bleacher } from './object/Bleacher'
 import { buildPacket } from '../utils/bluetooth'
 
+declare module 'vitest' {
+    interface Assertion<T = any> {
+        toBeWithinRange(middle: number, halfInterval: number): T
+    }
+    interface AsymmetricMatchersContaining {
+        toBeWithinRange(middle: number, halfInterval: number): any
+    }
+}
+
+expect.extend({
+    toBeWithinRange(received, middle, halfInterval) {
+        const [floor, ceiling] = [middle - halfInterval, middle + halfInterval]
+        const pass = received >= floor && received <= ceiling
+        return {
+            pass,
+            message: () => `expected ${received} to be within range ${floor} - ${ceiling}`,
+        }
+    },
+})
+
 describe('Game.eaglePacket', () => {
-    const callEaglePacket = (g: Game, colour: 'blue' | 'yellow' = 'blue') =>
+    const callEaglePacket = (g: Game, colour: 'blue' | 'yellow' = 'blue', randomise = true) =>
         // @ts-ignore private field, test only
-        (g as any).eaglePacket(colour, 0) as number[] | null
+        (g as any).eaglePacket(colour, 0, randomise) as number[] | null
 
     it('returns a framed packet with valid starter byte, size and checksum', () => {
         const game = new Game()
@@ -67,19 +84,19 @@ describe('Game.eaglePacket', () => {
         }
 
         /* ---------- header assertions ---------- */
-        expect(read(1)).toBe(0)                  // robot colour (blue)
-        expect(read(1)).toBe(1)                  // robot detected
+        expect(read(1)).toBe(0)            // robot colour (blue)
+        expect(read(1)).toBe(1)            // robot detected
 
-        expect(read(9)).toBe(150)                // robot x (cm)
-        expect(read(8)).toBe(100)                // robot y
-        expect(read(9)).toBe(45)                 // robot θ
+        expect(read(9)).toBeWithinRange(150, 2)     // robot x (cm)
+        expect(read(8)).toBeWithinRange(100, 2)     // robot y
+        expect(read(9)).toBeWithinRange(45, 2)      // robot θ
 
-        expect(read(1)).toBe(1)                  // opponent detected
-        expect(read(9)).toBe(200)                // opponent x
-        expect(read(8)).toBe(50)                 // opponent y
-        expect(read(9)).toBe(270)                // opponent θ
+        expect(read(1)).toBe(1)            // opponent detected
+        expect(read(9)).toBeWithinRange(200, 2)     // opponent x
+        expect(read(8)).toBeWithinRange(50, 2)      // opponent y
+        expect(read(9)).toBeWithinRange(270, 2)     // opponent θ
 
-        expect(read(1)).toBe(0)                  // padding bit
+        expect(read(1)).toBe(0)            // padding bit
     })
 
     it('encodes the exact same packet as test_eagle_packet.cpp (ManualBitPatternOneObject)', () => {
@@ -93,7 +110,7 @@ describe('Game.eaglePacket', () => {
             new Robot('yellow', 0.05, 0.06, Math.PI / 2), // 5 cm, 6 cm, 90°
         ]
 
-        const packet = callEaglePacket(game, 'blue')!
+        const packet = callEaglePacket(game, 'blue', false)!
 
         /* Expected payload taken from test_eagle_packet.cpp ManualBitPatternOneObject */
         const expectedPayload = [

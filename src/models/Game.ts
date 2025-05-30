@@ -406,7 +406,7 @@ export class Game {
      * Build an Eagle Bluetooth packet for the given color.
      * Array content: [ 0xFF, <payload bytes…>, <8‑bit checksum> ].
      */
-    private eaglePacket(color: 'blue' | 'yellow', stepNumber: number): number[] | null {
+    private eaglePacket(color: 'blue' | 'yellow', stepNumber: number, randomise = true): number[] | null {
         // Helpers
         const bits: number[] = []
         const pushBits = (v: number, n: number) => {
@@ -434,16 +434,15 @@ export class Game {
         pushBits(1, 1)
 
         // 2-18. robot pose
-        // TODO: send the position with a random delay (50-200ms?)
-
-        const randomMinusTwoToTwo = () => (Math.random() * 4 - 2)
-        const randomOffsetX = randomMinusTwoToTwo() / 100
-        const randomOffsetY = randomMinusTwoToTwo() / 100
-        const randomOffsetTheta = degreesToRadians(randomMinusTwoToTwo())
-
-        pushBits(toCm(myRobot.steps[stepNumber].x + randomOffsetX), 9)
-        pushBits(toCm(myRobot.steps[stepNumber].y + randomOffsetY), 8)
-        pushBits(toDeg(myRobot.steps[stepNumber].orientation + randomOffsetTheta) & 0x1FF, 9)
+        const randomisePose = (pose: { x: number; y: number; orientation: number }) => (randomise ? {
+            x: pose.x + (Math.random() * 0.04 - 0.02), // ±2 cm
+            y: pose.y + (Math.random() * 0.04 - 0.02), // ±2 cm
+            orientation: pose.orientation + degreesToRadians(Math.random() * 4 - 2), // ±2 degrees
+        } : pose)
+        const robotPose = randomisePose(myRobot.steps[stepNumber])
+        pushBits(toCm(robotPose.x), 9)
+        pushBits(toCm(robotPose.y), 8)
+        pushBits(toDeg(robotPose.orientation) & 0x1FF, 9)
 
         // 28. opponent detected
         const opponentDetected = !!opponentRobot
@@ -451,10 +450,10 @@ export class Game {
 
         // 29-54. opponent pose (or zeros if not detected)
         if (opponentDetected) {
-            // TODO: Add a random delay (50-200ms?)
-            pushBits(toCm(opponentRobot.steps[stepNumber].x), 9)
-            pushBits(toCm(opponentRobot.steps[stepNumber].y), 8)
-            pushBits(toDeg(opponentRobot.steps[stepNumber].orientation) & 0x1FF, 9)
+            const opponentPose = randomisePose(opponentRobot.steps[stepNumber])
+            pushBits(toCm(opponentPose.x), 9)
+            pushBits(toCm(opponentPose.y), 8)
+            pushBits(toDeg(opponentPose.orientation) & 0x1FF, 9)
         } else {
             // fill with zeros for the 9+8+9 bits
             pushBits(0, 9 + 8 + 9)
