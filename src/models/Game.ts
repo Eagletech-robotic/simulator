@@ -277,11 +277,13 @@ export class Game {
     }
 
     private tof(robot: Robot): number {
+        const stepNumber = Math.max(this._lastStepNumber - (25 + Math.floor(cryptoRandom() * 5)), 0)
+
         const TOF_MAX_DETECTION = 1.0
         const TOF_CARRYING_BLEACHER = 0.40
         const TOF_MIN_FOR_BLEACHER = 0.26
 
-        const robotStep = robot.lastStep
+        const robotStep = robot.steps[stepNumber]
         if (robotStep.carriedBleacherIndex !== null) return TOF_CARRYING_BLEACHER
 
         const { tofX, tofY, tofOrientation } = robot.tofPosition(robotStep)
@@ -303,7 +305,7 @@ export class Game {
         const hx = bleacherLength / 2
         const hy = bleacherWidth / 2
 
-        for (const bleacher of this.lastStep.bleachers) {
+        for (const bleacher of this.steps[stepNumber].bleachers) {
             const cos = Math.cos(bleacher.orientation + Math.PI / 2)
             const sin = Math.sin(bleacher.orientation + Math.PI / 2)
 
@@ -342,7 +344,7 @@ export class Game {
             for (const [endX, endY] of rayEnds) {
                 const distance = distanceSegmentCircle(
                     tofX, tofY, endX, endY,
-                    other.lastStep.x, other.lastStep.y, robotRadius,
+                    other.steps[stepNumber].x, other.steps[stepNumber].y, robotRadius,
                 )
                 if (distance !== null && distance < minDistance) {
                     minDistance = distance
