@@ -182,7 +182,7 @@ export class Game {
     }
 
     nextStep(): void {
-        const SEND_PACKET_EVERY = 100 // number of steps
+        const SEND_PACKET_EVERY = 40 // number of steps between packets
         const lastStep = this.steps[this._lastStepNumber]
 
         // Advance robots
