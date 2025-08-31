@@ -10,4 +10,6 @@ export const StyledGameBoardCanvas = styled.canvas`
     max-height: 100%;
     max-width: 100%;
     min-height: 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 1rem;
 `

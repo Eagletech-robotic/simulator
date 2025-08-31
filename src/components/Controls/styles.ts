@@ -7,7 +7,6 @@ export const StyledControls = styled.div`
     grid-template-areas: 'play gameDuration playbackProgress simulationProgress stop';
 
     gap: 1rem;
-    padding: 1rem;
     align-items: center;
 `
 

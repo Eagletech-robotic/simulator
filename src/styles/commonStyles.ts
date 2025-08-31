@@ -39,7 +39,6 @@ export const RightPanel = styled.div`
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    margin: 2rem;
     border-radius: 1rem;
     background-color: ${colors.lighterGrey};
 `
