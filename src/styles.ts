@@ -8,4 +8,9 @@ export const Page = styled.div`
     overflow: hidden;
 `
 
-export const BoardAndControls = styled.div``
+export const BoardAndControls = styled.div`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+`

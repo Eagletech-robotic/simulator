@@ -1,10 +1,13 @@
 import styled from 'styled-components'
 
 export const StyledGameBoardCanvas = styled.canvas`
-    height: auto;
-    width: 100%;
-    display: block;
-    background-image: url('playmat.png');
-    background-size: cover;
+    align-self: center;
+    background-image: url('/playmat.png');
     background-repeat: no-repeat;
+    background-size: cover;
+    display: block;
+    height: auto;
+    max-height: 100%;
+    max-width: 100%;
+    min-height: 0;
 `
